@@ -13,6 +13,9 @@
 #include "TPad.h"
 #include "TSystem.h"
 
+#include <fcntl.h>
+#include <unistd.h>
+
 namespace pandora_monitoring
 {
 
@@ -47,8 +50,6 @@ void PandoraMonitoring::DrawCanvas()
 
     pCanvas->Draw();
     pHist->Draw();
-    gSystem->ProcessEvents();
-
     this->Pause();
 
     delete pCanvas;
@@ -59,9 +60,20 @@ void PandoraMonitoring::DrawCanvas()
 
 void PandoraMonitoring::Pause()
 {
-    std::cout << "Press return to continue... ";
-    getchar();
-    std::cout << std::endl;
+    std::cout << "Press return to continue ..." << std::endl;
+
+    int key = 0;
+    while(true)
+    {
+        gSystem->ProcessEvents();
+        fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+        key = getchar();
+
+        if((key == '\n') || (key == '\r'))
+            break;
+
+        usleep(1000);
+    }
 }
 
 } // namespace pandora_monitoring
