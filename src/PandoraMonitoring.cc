@@ -14,7 +14,6 @@
 #include "TSystem.h"
 
 #include <fcntl.h>
-#include <unistd.h>
 
 namespace pandora_monitoring
 {
@@ -61,12 +60,13 @@ void PandoraMonitoring::DrawCanvas()
 void PandoraMonitoring::Pause()
 {
     std::cout << "Press return to continue ..." << std::endl;
+    int flag = fcntl(1, F_GETFL, 0);
 
     int key = 0;
     while(true)
     {
         gSystem->ProcessEvents();
-        fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+        fcntl(1, F_SETFL, flag | O_NONBLOCK);
         key = getchar();
 
         if((key == '\n') || (key == '\r'))
@@ -74,6 +74,8 @@ void PandoraMonitoring::Pause()
 
         usleep(1000);
     }
+
+    fcntl(1, F_SETFL, flag);
 }
 
 } // namespace pandora_monitoring
