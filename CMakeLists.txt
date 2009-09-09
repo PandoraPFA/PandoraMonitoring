@@ -37,7 +37,6 @@ OPTION( BUILD_32BIT_COMPATIBLE "Set to ON to build in 32 bit compatibility mode"
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" ON )
 
 # project dependencies
-# e.g. SET( ${PROJECT_NAME}_DEPENDS "Marlin MarlinUtil LCIO GEAR CLHEP GSL RAIDA ROOT" )
 SET( ${PROJECT_NAME}_DEPENDS "LCIO GEAR ROOT" )
 
 IF( APPLE )
