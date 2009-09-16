@@ -67,9 +67,9 @@ void PandoraMonitoring::LookAtClusters(const pandora::ClusterList *const pCluste
     {
         std::cout << "Monitoring, Cluster! " << *clusterIter << std::endl;
 
-        const pandora::OrderedCaloHitList *const pOrderedCaloHitList((*clusterIter)->GetOrderedCaloHitList());
+        const pandora::OrderedCaloHitList orderedCaloHitList((*clusterIter)->GetOrderedCaloHitList());
 
-        for (pandora::OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end(); iter != iterEnd; ++iter)
+        for (pandora::OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
         {
             for (pandora::CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end(); caloHitIter != caloHitIterEnd; ++caloHitIter)
             {
