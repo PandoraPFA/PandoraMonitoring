@@ -8,7 +8,7 @@
 #ifndef PANDORA_MONITORING_API_H
 #define PANDORA_MONITORING_API_H 1
 
-#include "PandoraInternal.h"
+#include "Pandora/PandoraInternal.h"
 
 /**
  *  @brief  PandoraMonitoringApi class
