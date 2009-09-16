@@ -8,6 +8,8 @@
 #ifndef PANDORA_MONITORING_API_H
 #define PANDORA_MONITORING_API_H 1
 
+#include "PandoraInternal.h"
+
 /**
  *  @brief  PandoraMonitoringApi class
  */
@@ -15,6 +17,7 @@ class PandoraMonitoringApi
 {
 public:
     static void Test();
+    static void Test2(const pandora::ClusterList *const pClusterList);
 };
 
 #endif // #ifndef PANDORA_MONITORING_API_H

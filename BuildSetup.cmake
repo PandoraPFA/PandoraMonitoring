@@ -19,6 +19,10 @@
 SET( ILC_HOME "path_to_ilc_home"
     CACHE PATH "Path to ILC Software" FORCE )
 
+# Path to PandoraPFANew
+SET( PandoraPFANew_HOME "${ILC_HOME}/PandoraPFANew"
+    CACHE PATH "Path to PandoraPFANew" FORCE )
+
 # Path to LCIO
 SET( LCIO_HOME "${ILC_HOME}/lcio/v01-11"
     CACHE PATH "Path to LCIO" FORCE )

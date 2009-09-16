@@ -8,6 +8,8 @@
 #ifndef PANDORA_MONITORING_H
 #define PANDORA_MONITORING_H 1
 
+#include "PandoraInternal.h"
+
 #include "TApplication.h"
 
 #include <iostream>
@@ -35,6 +37,11 @@ public:
      *  @brief  Draw a test canvas
      */
     void DrawCanvas();
+
+    /**
+     *  @brief  Loop through clusters, displaying parent addresses of constituent calo hits
+     */
+    void LookAtClusters(const pandora::ClusterList *const pClusterList);
 
     /**
      *  @brief  Pause until user enters 'return'
