@@ -73,7 +73,7 @@ inline PandoraMonitoring::~PandoraMonitoring()
 inline PandoraMonitoring::PandoraMonitoring()
 {
     int argc = 0;
-    char* argv = "";
+    char* argv = (char *)"";
 
     m_pApplication = new TApplication("PandoraMonitoring", &argc, &argv);
     m_pApplication->SetReturnFromRun(kTRUE);
