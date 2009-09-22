@@ -29,9 +29,9 @@ public:
     static PandoraMonitoring *GetInstance();
 
     /**
-     *  @brief  Destructor
+     *  @brief  Reset pandora monitoring, deleting the singleton
      */
-    ~PandoraMonitoring();
+    void Reset();
 
     /**
      *  @brief  Draw a test canvas
@@ -58,15 +58,6 @@ private:
     static PandoraMonitoring    *m_pPandoraMonitoring;  ///< The pandora monitoring instance
     TApplication                *m_pApplication;        ///< The root application
 };
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline PandoraMonitoring::~PandoraMonitoring()
-{
-    m_instanceFlag = false;
-    delete m_pPandoraMonitoring;
-    m_pPandoraMonitoring = NULL;
-}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -41,6 +41,18 @@ PandoraMonitoring *PandoraMonitoring::GetInstance()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoring::Reset()
+{
+    if(m_instanceFlag)
+    {
+        delete m_pPandoraMonitoring;
+        m_pPandoraMonitoring = NULL;
+        m_instanceFlag = false;
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoring::DrawCanvas()
 {
     TCanvas *pCanvas = new TCanvas("MyRecoDisplay", "MyRecoDisplay", 750, 750);
