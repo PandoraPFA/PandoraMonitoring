@@ -10,12 +10,17 @@
 
 #include "Pandora/PandoraInternal.h"
 
+#include "PandoraMonitoringApi.h"
+
 #include "TApplication.h"
 
 #include <iostream>
 #include <map>
 
 class TH1;
+class TPolyLine;
+class TArc;
+class TBox;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -108,8 +113,10 @@ public:
 
     /**
      *  @brief  Temporary function - draw the detector outline
+     * 
+     *  @param  detectorView the detector view
      */ 
-    void DrawDetectorOutline() const;
+    void DrawDetectorOutline(DetectorView detectorView);
 
     /**
      *  @brief  Temporary function - draw a test canvas and histogram
@@ -134,6 +141,24 @@ private:
      */
     PandoraMonitoring();
 
+    /**
+     *  @brief  Construct the detector outline
+     */ 
+    void MakeDetectorOutline();
+
+    /**
+     *  @brief  Construct the outline of a detector layer
+     * 
+     *  @param  detectorView the detector view
+     *  @param  symmetryOrder the order of symmetry
+     *  @param  phi0 the offset angle
+     *  @param  closestDistanceToIp the closest distance to the interaction point
+     *  @param  lineWidth the line width
+     *  @param  lineColor the line color
+     */ 
+    void MakeLayerOutline(DetectorView detectorView, int symmetryOrder, float phi0, float closestDistanceToIp,
+        int lineWidth, int lineColor);
+
     static bool                 m_instanceFlag;         ///< The pandora monitoring instance flag
     static PandoraMonitoring    *m_pPandoraMonitoring;  ///< The pandora monitoring instance
     TApplication                *m_pApplication;        ///< The root application
@@ -141,6 +166,17 @@ private:
     typedef std::map<const std::string, TH1 *> HistogramMap;
 
     HistogramMap                m_histogramMap;         ///< The histogram map
+
+    typedef std::vector<TPolyLine *> TPolyLineVector;
+    typedef std::vector<TArc *> TArcVector;
+    typedef std::vector<TBox *> TBoxVector;
+
+    bool                        m_isOutlineConstructed; ///< Whether the detector outline has been constructed
+
+    TPolyLineVector             m_2DLinesXY;            ///< The 2d xy lines vector
+    TPolyLineVector             m_2DLinesXZ;            ///< The 2d xz lines vector
+    TArcVector                  m_2DCirclesXY;          ///< The 2d xy circles vector
+    TBoxVector                  m_2DBoxesXZ;            ///< The 2d xz boxes vector
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -152,6 +188,7 @@ inline PandoraMonitoring::PandoraMonitoring()
 
     m_pApplication = new TApplication("PandoraMonitoring", &argc, &argv);
     m_pApplication->SetReturnFromRun(kTRUE);
+    m_isOutlineConstructed = false;
 }
 
 } // namespace pandora_monitoring

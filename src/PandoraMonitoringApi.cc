@@ -68,9 +68,9 @@ void PandoraMonitoringApi::DeleteHistogram(const std::string &name)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::DrawDetectorOutline()
+void PandoraMonitoringApi::DrawDetectorOutline(DetectorView detectorView)
 {
-    PandoraMonitoring::GetInstance()->DrawDetectorOutline();
+    PandoraMonitoring::GetInstance()->DrawDetectorOutline(detectorView);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

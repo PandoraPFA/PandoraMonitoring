@@ -11,6 +11,17 @@
 #include "Pandora/PandoraInternal.h"
 
 /**
+ *  @brief  The detector view enum
+ */
+enum DetectorView
+{
+    DETECTOR_VIEW_XY,
+    DETECTOR_VIEW_XZ
+};
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
  *  @brief  PandoraMonitoringApi class
  */
 class PandoraMonitoringApi
@@ -93,8 +104,10 @@ public:
 
     /**
      *  @brief  Temporary function - draw the detector outline
+     * 
+     *  @param  detectorView the detector view
      */ 
-    static void DrawDetectorOutline();
+    static void DrawDetectorOutline(DetectorView detectorView);
 
     /**
      *  @brief  Temporary function - draw a test canvas and histogram

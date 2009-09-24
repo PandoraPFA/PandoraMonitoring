@@ -27,10 +27,6 @@ SET( PandoraPFANew_HOME "${ILC_HOME}/PandoraPFANew"
 SET( LCIO_HOME "${ILC_HOME}/lcio/v01-11"
     CACHE PATH "Path to LCIO" FORCE )
 
-# Path to GEAR
-SET( GEAR_HOME "${ILC_HOME}/gear/v00-11-01"
-    CACHE PATH "Path to GEAR" FORCE )
-
 # Path to ROOT
 SET( ROOT_HOME "${ILC_HOME}/root/5.16.00"
      CACHE PATH "Path to ROOT" FORCE )
