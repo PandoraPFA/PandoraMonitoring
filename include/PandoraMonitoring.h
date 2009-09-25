@@ -143,20 +143,31 @@ private:
 
     /**
      *  @brief  Construct the detector outline
-     */ 
+     */
     void MakeDetectorOutline();
 
     /**
-     *  @brief  Construct the outline of a detector layer
+     *  @brief  Construct the xy outline of a detector layer
      * 
-     *  @param  detectorView the detector view
      *  @param  symmetryOrder the order of symmetry
      *  @param  phi0 the offset angle
      *  @param  closestDistanceToIp the closest distance to the interaction point
      *  @param  lineWidth the line width
      *  @param  lineColor the line color
-     */ 
-    void MakeLayerOutline(DetectorView detectorView, int symmetryOrder, float phi0, float closestDistanceToIp,
+     */
+    void MakeXYLayerOutline(int symmetryOrder, float phi0, float closestDistanceToIp, int lineWidth, int lineColor);
+
+    /**
+     *  @brief  Construct the xz outline of a detector layer
+     * 
+     *  @param  innerRCoordinate the inner r coordinate
+     *  @param  outerRCoordinate the outer r coordinate
+     *  @param  innerZCoordinate the inner z coordinate
+     *  @param  outerZCoordinate the outer z coordinate
+     *  @param  lineWidth the line width
+     *  @param  lineColor the line color
+     */
+    void MakeXZLayerOutline(float innerRCoordinate, float outerRCoordinate, float innerZCoordinate, float outerZCoordinate,
         int lineWidth, int lineColor);
 
     static bool                 m_instanceFlag;         ///< The pandora monitoring instance flag
@@ -176,7 +187,6 @@ private:
     TPolyLineVector             m_2DLinesXY;            ///< The 2d xy lines vector
     TPolyLineVector             m_2DLinesXZ;            ///< The 2d xz lines vector
     TArcVector                  m_2DCirclesXY;          ///< The 2d xy circles vector
-    TBoxVector                  m_2DBoxesXZ;            ///< The 2d xz boxes vector
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

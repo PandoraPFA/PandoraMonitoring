@@ -237,14 +237,6 @@ void PandoraMonitoring::DrawDetectorOutline(DetectorView detectorView)
             m_2DLinesXZ[i]->SetLineWidth(2);
             m_2DLinesXZ[i]->Draw();
         }
-
-        for(unsigned int i = 0; i < m_2DBoxesXZ.size(); ++i)
-        {
-            m_2DBoxesXZ[i]->SetLineWidth(2);
-            m_2DBoxesXZ[i]->SetLineColor(1);
-            m_2DBoxesXZ[i]->SetFillStyle(0);
-            m_2DBoxesXZ[i]->Draw();
-        }
         break;
 
     default:
@@ -335,70 +327,68 @@ void PandoraMonitoring::MakeDetectorOutline()
 {
     pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
 
+    // HCal, ECal (Barrel and EndCap)
     const pandora::GeometryHelper::SubDetectorParameters eCalBarrelParameters = pGeometryHelper->GetECalBarrelParameters();
     const pandora::GeometryHelper::SubDetectorParameters eCalEndCapParameters = pGeometryHelper->GetECalEndCapParameters();
     const pandora::GeometryHelper::SubDetectorParameters hCalBarrelParameters = pGeometryHelper->GetHCalBarrelParameters();
     const pandora::GeometryHelper::SubDetectorParameters hCalEndCapParameters = pGeometryHelper->GetHCalEndCapParameters();
 
-    this->MakeLayerOutline(DETECTOR_VIEW_XY, eCalBarrelParameters.GetInnerSymmetryOrder(), eCalBarrelParameters.GetInnerPhiCoordinate(),
-        eCalBarrelParameters.GetInnerRCoordinate(), 1, 1);
-    this->MakeLayerOutline(DETECTOR_VIEW_XY, eCalBarrelParameters.GetOuterSymmetryOrder(), eCalBarrelParameters.GetOuterPhiCoordinate(),
-        eCalBarrelParameters.GetOuterRCoordinate(), 1, 1);
-    this->MakeLayerOutline(DETECTOR_VIEW_XY, hCalBarrelParameters.GetInnerSymmetryOrder(), hCalBarrelParameters.GetInnerPhiCoordinate(),
-        hCalBarrelParameters.GetInnerRCoordinate(), 1, 1);
-    this->MakeLayerOutline(DETECTOR_VIEW_XY, hCalBarrelParameters.GetOuterSymmetryOrder(), hCalBarrelParameters.GetOuterPhiCoordinate(),
-        hCalBarrelParameters.GetOuterRCoordinate(), 1, 1);
+    this->MakeXYLayerOutline(eCalBarrelParameters.GetInnerSymmetryOrder(), eCalBarrelParameters.GetInnerPhiCoordinate(), eCalBarrelParameters.GetInnerRCoordinate(), 1, 1);
+    this->MakeXYLayerOutline(eCalBarrelParameters.GetOuterSymmetryOrder(), eCalBarrelParameters.GetOuterPhiCoordinate(), eCalBarrelParameters.GetOuterRCoordinate(), 1, 1);
+    this->MakeXYLayerOutline(hCalBarrelParameters.GetInnerSymmetryOrder(), hCalBarrelParameters.GetInnerPhiCoordinate(), hCalBarrelParameters.GetInnerRCoordinate(), 1, 1);
+    this->MakeXYLayerOutline(hCalBarrelParameters.GetOuterSymmetryOrder(), hCalBarrelParameters.GetOuterPhiCoordinate(), hCalBarrelParameters.GetOuterRCoordinate(), 1, 1);
+
+    this->MakeXZLayerOutline(eCalBarrelParameters.GetInnerRCoordinate(), eCalBarrelParameters.GetOuterRCoordinate(), eCalBarrelParameters.GetInnerZCoordinate(), eCalBarrelParameters.GetOuterZCoordinate(), 1, 1);
+    this->MakeXZLayerOutline(hCalBarrelParameters.GetInnerRCoordinate(), hCalBarrelParameters.GetOuterRCoordinate(), hCalBarrelParameters.GetInnerZCoordinate(), hCalBarrelParameters.GetOuterZCoordinate(), 1, 1);
+    this->MakeXZLayerOutline(eCalEndCapParameters.GetInnerRCoordinate(), eCalEndCapParameters.GetOuterRCoordinate(), eCalEndCapParameters.GetInnerZCoordinate(), eCalEndCapParameters.GetOuterZCoordinate(), 1, 1);
+    this->MakeXZLayerOutline(hCalEndCapParameters.GetInnerRCoordinate(), hCalEndCapParameters.GetOuterRCoordinate(), hCalEndCapParameters.GetInnerZCoordinate(), hCalEndCapParameters.GetOuterZCoordinate(), 1, 1);
+
+    // TPC
+    this->MakeXYLayerOutline(0, 0, pGeometryHelper->GetMainTrackerInnerRadius(), 1, 1);
+    this->MakeXYLayerOutline(0, 0, pGeometryHelper->GetMainTrackerOuterRadius(), 1, 1);
+    this->MakeXZLayerOutline(pGeometryHelper->GetMainTrackerInnerRadius(), pGeometryHelper->GetMainTrackerOuterRadius(), 0, pGeometryHelper->GetMainTrackerZExtent(), 1, 1);
+
+    // Additional subdetectors
+    for (pandora::GeometryHelper::SubDetectorParametersList::const_iterator iter = pGeometryHelper->GetAdditionalSubDetectors().begin(),
+        iterEnd = pGeometryHelper->GetAdditionalSubDetectors().end(); iter != iterEnd; ++iter)
+    {
+        this->MakeXYLayerOutline(iter->GetInnerSymmetryOrder(), iter->GetInnerPhiCoordinate(), iter->GetInnerRCoordinate(), 1, 1);
+        this->MakeXYLayerOutline(iter->GetOuterSymmetryOrder(), iter->GetOuterPhiCoordinate(), iter->GetOuterRCoordinate(), 1, 1);
+        this->MakeXZLayerOutline(iter->GetInnerRCoordinate(), iter->GetOuterRCoordinate(), iter->GetInnerZCoordinate(), iter->GetOuterZCoordinate(), 1, 1);
+    }
 
     m_isOutlineConstructed = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::MakeLayerOutline(DetectorView detectorView, int symmetryOrder, float phi0, float closestDistanceToIp,
-    int lineWidth, int lineColor)
+void PandoraMonitoring::MakeXYLayerOutline(int symmetryOrder, float phi0, float closestDistanceToIp, int lineWidth, int lineColor)
 {
     if (symmetryOrder > 2)
     {
-        float *pCoordinate1 = new float[symmetryOrder + 1];
-        float *pCoordinate2 = new float[symmetryOrder + 1];
+        float *pXCoordinate = new float[symmetryOrder + 1];
+        float *pYCoordinate = new float[symmetryOrder + 1];
 
         const float pi(3.1415927);
-        const float magnitude(2 * closestDistanceToIp * tan(pi / float(symmetryOrder)));
+        const float x0(-1. * closestDistanceToIp * tan(pi / float(symmetryOrder)));
+        const float y0(closestDistanceToIp);
 
-        pCoordinate1[0] = (-0.5 * magnitude); // TODO initial phi0
-        pCoordinate2[0] = closestDistanceToIp;
-
-        for (int i = 0; i < symmetryOrder; ++i)
+        for (int i = 0; i <= symmetryOrder; ++i)
         {
-            pCoordinate1[i + 1] = pCoordinate1[i] + (magnitude * cos(phi0 + (2 * pi * float(i) / float(symmetryOrder))));
-            pCoordinate2[i + 1] = pCoordinate2[i] - (magnitude * sin(phi0 + (2 * pi * float(i) / float(symmetryOrder))));
+            const float theta(phi0 + (2 * pi * float(i) / float(symmetryOrder)));
+
+            pXCoordinate[i] = x0 * cos(theta) + y0 * sin(theta);
+            pYCoordinate[i] = y0 * cos(theta) - x0 * sin(theta);
         }
 
-        TPolyLine *pTPolyLine = new TPolyLine(symmetryOrder + 1, pCoordinate1, pCoordinate2);
+        TPolyLine *pTPolyLine = new TPolyLine(symmetryOrder + 1, pXCoordinate, pYCoordinate);
         pTPolyLine->SetLineWidth(lineWidth);
         pTPolyLine->SetLineColor(lineColor);
 
-        if (DETECTOR_VIEW_XY == detectorView)
-        {
-            m_2DLinesXY.push_back(pTPolyLine);
-        }
-        else if (DETECTOR_VIEW_XZ == detectorView)
-        {
-            m_2DLinesXZ.push_back(pTPolyLine);
-        }
-        else
-        {
-            std::cout << "PandoraMonitoring::MakeLayerOutline, error: request for an unsupported detector view." << std::endl;
-            throw std::exception();
-        }
+        m_2DLinesXY.push_back(pTPolyLine);
 
-        for (int i = 0; i < symmetryOrder + 1; ++i)
-        {
-            std::cout << " i " << i << " pCoordinate1[i] " << pCoordinate1[i] << " pCoordinate2[i] " << pCoordinate2[i] << std::endl;
-        }
-
-        delete [] pCoordinate1;
-        delete [] pCoordinate2;
+        delete [] pXCoordinate;
+        delete [] pYCoordinate;
     }
     else if (symmetryOrder == 0)
     {
@@ -406,17 +396,56 @@ void PandoraMonitoring::MakeLayerOutline(DetectorView detectorView, int symmetry
         pTArc->SetLineWidth(lineWidth);
         pTArc->SetLineColor(lineColor);
 
-        if (DETECTOR_VIEW_XY != detectorView)
+        m_2DCirclesXY.push_back(pTArc);
+    }
+     else
+     {
+         std::cout << "PandoraMonitoring::MakeXYLayerOutline, symmetryOrder is " << symmetryOrder << std::endl;
+     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::MakeXZLayerOutline(float innerRCoordinate, float outerRCoordinate, float innerZCoordinate, float outerZCoordinate,
+    int lineWidth, int lineColor)
+{
+
+    for (int i = 0; i< 4; ++i)
+    {
+        float x[5], z[5];
+
+        switch(i)
         {
-            std::cout << "PandoraMonitoring::MakeLayerOutline, error: Unsupported detector structure." << std::endl;
+        case 0:
+            x[0] = innerZCoordinate; x[1] = outerZCoordinate; x[2] = outerZCoordinate; x[3] = innerZCoordinate; x[4] = x[0];
+            z[0] = innerRCoordinate; z[1] = innerRCoordinate; z[2] = outerRCoordinate; z[3] = outerRCoordinate; z[4] = z[0];
+            break;
+        case 1:
+            x[0] =  innerZCoordinate; x[1] =  outerZCoordinate; x[2] =  outerZCoordinate; x[3] =  innerZCoordinate; x[4] = x[0];
+            z[0] = -innerRCoordinate; z[1] = -innerRCoordinate; z[2] = -outerRCoordinate; z[3] = -outerRCoordinate; z[4] = z[0];
+            break;
+        case 2:
+            x[0] = -innerZCoordinate; x[1] = -outerZCoordinate; x[2] = -outerZCoordinate; x[3] = -innerZCoordinate; x[4] = x[0];
+            z[0] =  innerRCoordinate; z[1] =  innerRCoordinate; z[2] =  outerRCoordinate; z[3] =  outerRCoordinate; z[4] = z[0];
+            break;
+        case 3:
+            x[0] = -innerZCoordinate; x[1] = -outerZCoordinate; x[2] = -outerZCoordinate; x[3] = -innerZCoordinate; x[4] = x[0];
+            z[0] = -innerRCoordinate; z[1] = -innerRCoordinate; z[2] = -outerRCoordinate; z[3] = -outerRCoordinate; z[4] = z[0];
+            break;
+        default:
             throw std::exception();
         }
 
-        m_2DCirclesXY.push_back(pTArc);
-    }
-    else
-    {
-        std::cout << "PandoraMonitoring::MakeLayerOutline, symmetryOrder is " << symmetryOrder << std::endl;
+        int linesToDisplay = 5;
+
+        if (0 == innerZCoordinate)
+            linesToDisplay = 4;
+
+        TPolyLine *pTPolyLine = new TPolyLine(linesToDisplay, x, z);
+        pTPolyLine->SetLineWidth(lineWidth);
+        pTPolyLine->SetLineColor(lineColor);
+
+        m_2DLinesXZ.push_back(pTPolyLine);
     }
 }
 
