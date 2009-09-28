@@ -68,9 +68,31 @@ void PandoraMonitoringApi::DeleteHistogram(const std::string &name)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList)
+{
+    PandoraMonitoring::GetInstance()->DrawEvent(detectorView, pTrackList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::ClusterList *const pClusterList)
+{
+    PandoraMonitoring::GetInstance()->DrawEvent(detectorView, pClusterList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList,
+    const pandora::ClusterList *const pClusterList)
+{
+    PandoraMonitoring::GetInstance()->DrawEvent(detectorView, pTrackList, pClusterList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoringApi::DrawDetectorOutline(DetectorView detectorView)
 {
-    PandoraMonitoring::GetInstance()->DrawDetectorOutline(detectorView);
+    PandoraMonitoring::GetInstance()->DetectorOutlineTest(detectorView);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -103,7 +103,32 @@ public:
     static void DeleteHistogram(const std::string &name);
 
     /**
-     *  @brief  Temporary function - draw the detector outline
+     *  @brief  Draw tracks in an event
+     * 
+     *  @param  detectorView the detector view
+     *  @param  pTrackList address of the track list
+     */ 
+    static void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList);
+
+    /**
+     *  @brief  Draw clusters in an event
+     * 
+     *  @param  detectorView the detector view
+     *  @param  pClusterList address of the cluster list
+     */ 
+    static void DrawEvent(DetectorView detectorView, const pandora::ClusterList *const pClusterList);
+
+    /**
+     *  @brief  Draw tracks and clusters in an event
+     * 
+     *  @param  detectorView the detector view
+     *  @param  pTrackList address of the track list
+     *  @param  pClusterList address of the cluster list
+     */ 
+    static void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::ClusterList *const pClusterList);
+
+    /**
+     *  @brief  Draw the detector outline
      * 
      *  @param  detectorView the detector view
      */ 

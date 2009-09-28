@@ -18,9 +18,9 @@
 #include <map>
 
 class TH1;
-class TPolyLine;
-class TArc;
-class TBox;
+class TH2F;
+class TObject;
+class TPolyMarker;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -112,11 +112,36 @@ public:
     void DeleteHistogram(const std::string &name);
 
     /**
-     *  @brief  Temporary function - draw the detector outline
+     *  @brief  Draw tracks in an event
+     * 
+     *  @param  detectorView the detector view
+     *  @param  pTrackList address of the track list
+     */ 
+    void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList);
+
+    /**
+     *  @brief  Draw clusters in an event
+     * 
+     *  @param  detectorView the detector view
+     *  @param  pClusterList address of the cluster list
+     */ 
+    void DrawEvent(DetectorView detectorView, const pandora::ClusterList *const pClusterList);
+
+    /**
+     *  @brief  Draw tracks and clusters in an event
+     * 
+     *  @param  detectorView the detector view
+     *  @param  pTrackList address of the track list
+     *  @param  pClusterList address of the cluster list
+     */ 
+    void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::ClusterList *const pClusterList);
+
+    /**
+     *  @brief  Temporary function - just draw the detector outline
      * 
      *  @param  detectorView the detector view
      */ 
-    void DrawDetectorOutline(DetectorView detectorView);
+    void DetectorOutlineTest(DetectorView detectorView);
 
     /**
      *  @brief  Temporary function - draw a test canvas and histogram
@@ -137,9 +162,86 @@ public:
 
 private:
     /**
+     *  @brief  The x-y outline parameters class
+     */
+    class XYOutlineParameters
+    {
+    public:
+        /**
+         *  @brief  Constructor
+         * 
+         *  @param  symmetryOrder the order of symmetry of the detector outline
+         *  @param  phi0 the angle through which the detector outline polygon has been rotated wrt the cartesian y axis
+         *  @param  closestDistanceToIp the closest distance of the detector outline to the interaction point
+         */
+        XYOutlineParameters(int symmetryOrder, float phi0, float closestDistanceToIp) :
+            m_symmetryOrder(symmetryOrder),
+            m_phi0(phi0),
+            m_closestDistanceToIp(closestDistanceToIp)
+        {
+        }
+
+        /**
+         *  @brief  Sort a list of x-y outline parameters, by decreasing radial distance from the interaction point
+         */
+        static bool Sort(const XYOutlineParameters &lhs, const XYOutlineParameters &rhs);
+
+        /**
+         *  @brief  Get the order of symmetry of the detector outline
+         * 
+         *  @return The order of symmetry of the detector outline
+         */
+        int GetSymmetryOrder() const;
+
+        /**
+         *  @brief  Get the angle through which the detector outline polygon has been rotated wrt the cartesian y axis
+         * 
+         *  @return The angle through which the detector outline polygon has been rotated wrt the cartesian y axis
+         */
+        float GetPhi0() const;
+
+        /**
+         *  @brief  Get the closest distance of the detector outline to the interaction point
+         * 
+         *  @return The closest distance of the detector outline to the interaction point
+         */
+        float GetClosestDistanceToIp() const;
+
+    private:
+        int     m_symmetryOrder;        ///< the order of symmetry of the detector outline
+        float   m_phi0;                 ///< The angle through which the detector outline polygon has been rotated wrt the cartesian y axis
+        float   m_closestDistanceToIp;  ///< The closest distance of the detector outline to the interaction point
+    };
+
+    typedef std::vector<XYOutlineParameters> XYOutlineParametersList;
+
+    /**
      *  @brief  Default constructor
      */
     PandoraMonitoring();
+
+    /**
+     *  @brief  Draw the detector outline
+     * 
+     *  @param  detectorView the detector view
+     */ 
+    void DrawDetectorOutline(DetectorView detectorView);
+
+    /**
+     *  @brief  Draw tracks in an event
+     * 
+     *  @param  detectorView the detector view
+     *  @param  pTrackList address of the track list
+     */ 
+    void DrawTracks(DetectorView detectorView, const pandora::TrackList *const pTrackList);
+
+    /**
+     *  @brief  Draw clusters in an event
+     *
+     *  @param  detectorView the detector view
+     *  @param  pClusterList address of the cluster list
+     */ 
+    void DrawClusters(DetectorView detectorView, const pandora::ClusterList *const pClusterList);
 
     /**
      *  @brief  Construct the detector outline
@@ -149,13 +251,9 @@ private:
     /**
      *  @brief  Construct the xy outline of a detector layer
      * 
-     *  @param  symmetryOrder the order of symmetry
-     *  @param  phi0 the offset angle
-     *  @param  closestDistanceToIp the closest distance to the interaction point
-     *  @param  lineWidth the line width
-     *  @param  lineColor the line color
+     *  @param  xyOutlineParameters x-y outline parameters
      */
-    void MakeXYLayerOutline(int symmetryOrder, float phi0, float closestDistanceToIp, int lineWidth, int lineColor);
+    void MakeXYLayerOutline(const XYOutlineParameters &xyOutlineParameters);
 
     /**
      *  @brief  Construct the xz outline of a detector layer
@@ -164,11 +262,8 @@ private:
      *  @param  outerRCoordinate the outer r coordinate
      *  @param  innerZCoordinate the inner z coordinate
      *  @param  outerZCoordinate the outer z coordinate
-     *  @param  lineWidth the line width
-     *  @param  lineColor the line color
      */
-    void MakeXZLayerOutline(float innerRCoordinate, float outerRCoordinate, float innerZCoordinate, float outerZCoordinate,
-        int lineWidth, int lineColor);
+    void MakeXZLayerOutline(float innerRCoordinate, float outerRCoordinate, float innerZCoordinate, float outerZCoordinate);
 
     static bool                 m_instanceFlag;         ///< The pandora monitoring instance flag
     static PandoraMonitoring    *m_pPandoraMonitoring;  ///< The pandora monitoring instance
@@ -178,15 +273,16 @@ private:
 
     HistogramMap                m_histogramMap;         ///< The histogram map
 
-    typedef std::vector<TPolyLine *> TPolyLineVector;
-    typedef std::vector<TArc *> TArcVector;
-    typedef std::vector<TBox *> TBoxVector;
+    typedef std::vector<TObject *> TObjectVector;
+    typedef std::vector<TPolyMarker *> TPolyMarkerVector;
 
     bool                        m_isOutlineConstructed; ///< Whether the detector outline has been constructed
+    TH2F                        *m_pXYAxes;             ///< The xy axes
+    TH2F                        *m_pXZAxes;             ///< The xz axes
 
-    TPolyLineVector             m_2DLinesXY;            ///< The 2d xy lines vector
-    TPolyLineVector             m_2DLinesXZ;            ///< The 2d xz lines vector
-    TArcVector                  m_2DCirclesXY;          ///< The 2d xy circles vector
+    TObjectVector               m_2DObjectsXY;          ///< The 2d xy graphs vector
+    TObjectVector               m_2DObjectsXZ;          ///< The 2d xz graphs vector
+    TPolyMarkerVector           m_eventMarkers;         ///< The event markers vector
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -199,6 +295,28 @@ inline PandoraMonitoring::PandoraMonitoring()
     m_pApplication = new TApplication("PandoraMonitoring", &argc, &argv);
     m_pApplication->SetReturnFromRun(kTRUE);
     m_isOutlineConstructed = false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline int PandoraMonitoring::XYOutlineParameters::GetSymmetryOrder() const
+{
+    return m_symmetryOrder;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraMonitoring::XYOutlineParameters::GetPhi0() const
+{
+    return m_phi0;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraMonitoring::XYOutlineParameters::GetClosestDistanceToIp() const
+{
+    return m_closestDistanceToIp;
 }
 
 } // namespace pandora_monitoring

@@ -10,23 +10,28 @@
 #include "Helpers/GeometryHelper.h"
 
 #include "Objects/CaloHit.h"
+#include "Objects/CartesianVector.h"
 #include "Objects/Cluster.h"
 #include "Objects/OrderedCaloHitList.h"
+#include "Objects/Track.h"
+
+// LCIO includes
+#include "EVENT/Track.h"
 
 // ROOT include files
 #include "TArc.h"
-#include "TBox.h"
 #include "TCanvas.h"
 #include "TFile.h"
+#include "TGraph.h"
 #include "TH1F.h"
 #include "TH2F.h"
-#include "TPad.h"
-#include "TPolyLine.h"
+#include "TPolyMarker.h"
 #include "TSystem.h"
 #include "TStyle.h"
 
 #include "PandoraMonitoring.h"
 
+#include <algorithm>
 #include <cmath>
 #include <fcntl.h>
 
@@ -193,62 +198,77 @@ void PandoraMonitoring::DeleteHistogram(const std::string &name)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::DrawDetectorOutline(DetectorView detectorView)
+void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList)
 {
-    if (!m_isOutlineConstructed)
-        this->MakeDetectorOutline();
-
     TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
     pCanvas->SetFillColor(kWhite);
     pCanvas->SetHighLightColor(kWhite);
     pCanvas->Draw();
 
-    TH2F *pAxesHist = NULL;
+    this->DrawDetectorOutline(detectorView);
+    this->DrawTracks(detectorView, pTrackList);
+    this->Pause();
 
-    switch(detectorView)
-    {
-    case DETECTOR_VIEW_XY:
-        pAxesHist = new TH2F("xyview", "x-y view", 100, -4200, 4200, 100, -4200, 4200);
-        pAxesHist->SetFillColor(kWhite);
-        pAxesHist->SetStats(kFALSE);
-        pAxesHist->Draw();
+    for(unsigned int i = 0; i < m_eventMarkers.size(); ++i)
+        delete m_eventMarkers[i];
 
-        for(unsigned int i = 0; i <m_2DLinesXY.size(); ++i)
-        {
-            m_2DLinesXY[i]->SetLineWidth(2);
-            m_2DLinesXY[i]->Draw();
-        }
+    m_eventMarkers.clear();
+    delete pCanvas;
+}
 
-        for(unsigned int i = 0; i < m_2DCirclesXY.size(); ++i)
-        {
-            m_2DCirclesXY[i]->SetLineWidth(2);
-            m_2DCirclesXY[i]->Draw();
-        }
-        break;
+//------------------------------------------------------------------------------------------------------------------------------------------
 
-    case DETECTOR_VIEW_XZ:
-        pAxesHist = new TH2F("xzview", "x-z view", 100, -4200, 4200, 100, -4200, 4200);
-        pAxesHist->SetFillColor(kWhite);
-        pAxesHist->SetStats(kFALSE);
-        pAxesHist->Draw();
+void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::ClusterList *const pClusterList)
+{
+    TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
+    pCanvas->SetFillColor(kWhite);
+    pCanvas->SetHighLightColor(kWhite);
+    pCanvas->Draw();
 
-        for(unsigned int i = 0; i < m_2DLinesXZ.size(); ++i)
-        {
-            m_2DLinesXZ[i]->SetLineWidth(2);
-            m_2DLinesXZ[i]->Draw();
-        }
-        break;
+    this->DrawDetectorOutline(detectorView);
+    this->DrawClusters(detectorView, pClusterList);
+    this->Pause();
 
-    default:
-        std::cout << "PandoraMonitoring::DrawDetectorOutline, error: request for an unsupported detector view." << std::endl;
-        throw std::exception();
-    }
+    for(unsigned int i = 0; i < m_eventMarkers.size(); ++i)
+        delete m_eventMarkers[i];
 
+    m_eventMarkers.clear();
+    delete pCanvas;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::ClusterList *const pClusterList)
+{
+    TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
+    pCanvas->SetFillColor(kWhite);
+    pCanvas->SetHighLightColor(kWhite);
+    pCanvas->Draw();
+
+    this->DrawDetectorOutline(detectorView);
+    this->DrawTracks(detectorView, pTrackList);
+    this->DrawClusters(detectorView, pClusterList);
+    this->Pause();
+
+    for(unsigned int i = 0; i < m_eventMarkers.size(); ++i)
+        delete m_eventMarkers[i];
+
+    m_eventMarkers.clear();
+    delete pCanvas;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::DetectorOutlineTest(DetectorView detectorView)
+{
+    TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
+    pCanvas->SetFillColor(kWhite);
+    pCanvas->SetHighLightColor(kWhite);
+    pCanvas->Draw();
+
+    this->DrawDetectorOutline(detectorView);
     this->Pause();
     delete pCanvas;
-
-    if (NULL != pAxesHist)
-        delete pAxesHist;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -323,38 +343,186 @@ void PandoraMonitoring::Pause() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoring::DrawDetectorOutline(DetectorView detectorView)
+{
+    if (!m_isOutlineConstructed)
+        this->MakeDetectorOutline();
+
+    switch(detectorView)
+    {
+    case DETECTOR_VIEW_XY:
+        m_pXYAxes->Draw();
+        for(unsigned int i = 0; i < m_2DObjectsXY.size(); ++i)
+        {
+            m_2DObjectsXY[i]->Draw("f");
+            m_2DObjectsXY[i]->Draw("l");
+        }
+        break;
+
+    case DETECTOR_VIEW_XZ:
+        m_pXZAxes->Draw();
+        for(unsigned int i = 0; i < m_2DObjectsXZ.size(); ++i)
+        {
+            m_2DObjectsXZ[i]->Draw();
+        }
+        break;
+
+    default:
+        std::cout << "PandoraMonitoring::DrawDetectorOutline, error: request for an unsupported detector view." << std::endl;
+        throw std::exception();
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::DrawTracks(DetectorView detectorView, const pandora::TrackList *const pTrackList)
+{
+    for (pandora::TrackList::const_iterator iter = pTrackList->begin(), iterEnd = pTrackList->end(); iter != iterEnd; ++iter)
+    {
+        EVENT::Track* pTrack = static_cast<EVENT::Track*>(const_cast<void *>((*iter)->GetParentTrackAddress()));
+        EVENT::TrackerHitVec trackHitVector = pTrack->getTrackerHits();
+        const unsigned int nTrackHits(trackHitVector.size());
+
+        float *pX = new float[nTrackHits];
+        float *pY = new float[nTrackHits];
+        float *pZ = new float[nTrackHits];
+
+        for(unsigned int i = 0; i < nTrackHits; ++i)
+        {
+            EVENT::TrackerHit* pTrackHit = trackHitVector[i];
+            pX[i] = (float)pTrackHit->getPosition()[0];
+            pY[i] = (float)pTrackHit->getPosition()[1];
+            pZ[i] = (float)pTrackHit->getPosition()[2];
+        }
+
+        TPolyMarker *pTPolyMarker = NULL;
+
+        if(DETECTOR_VIEW_XY == detectorView)
+        {
+            pTPolyMarker = new TPolyMarker(nTrackHits, pX, pY);
+        }
+        else if(DETECTOR_VIEW_XZ == detectorView)
+        {
+            pTPolyMarker = new TPolyMarker(nTrackHits, pZ, pX);
+        }
+
+        pTPolyMarker->SetMarkerStyle(20);
+        pTPolyMarker->SetMarkerColor(2);
+        pTPolyMarker->SetMarkerSize(0.3);
+        pTPolyMarker->Draw();
+
+        m_eventMarkers.push_back(pTPolyMarker);
+
+        delete [] pX;
+        delete [] pY;
+        delete [] pZ;
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::DrawClusters(DetectorView detectorView, const pandora::ClusterList *const pClusterList)
+{
+    for (pandora::ClusterList::const_iterator clusterIter = pClusterList->begin(), clusterIterEnd = pClusterList->end();
+        clusterIter != clusterIterEnd; ++clusterIter)
+    {
+        const pandora::OrderedCaloHitList orderedCaloHitList((*clusterIter)->GetOrderedCaloHitList());
+
+        unsigned int hitIndex = 0;
+        const unsigned int nHits((*clusterIter)->GetNCaloHits());
+
+        float *pX = new float[nHits];
+        float *pY = new float[nHits];
+        float *pZ = new float[nHits];
+
+        for (pandora::OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end();
+            iter != iterEnd; ++iter)
+        {
+            for (pandora::CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end();
+                caloHitIter != caloHitIterEnd; ++caloHitIter)
+            {
+                const pandora::CartesianVector position = (*caloHitIter)->GetPositionVector();
+
+                pX[hitIndex] = position.GetX();
+                pY[hitIndex] = position.GetY();
+                pZ[hitIndex] = position.GetZ();
+
+                ++hitIndex;
+            }
+        }
+
+        TPolyMarker *pTPolyMarker = NULL;
+
+        if(DETECTOR_VIEW_XY == detectorView)
+        {
+            pTPolyMarker = new TPolyMarker(nHits, pX, pY);
+        }
+        else if(DETECTOR_VIEW_XZ == detectorView)
+        {
+            pTPolyMarker = new TPolyMarker(nHits, pZ, pX);
+        }
+
+        pTPolyMarker->SetMarkerStyle(20);
+        pTPolyMarker->SetMarkerColor(3);
+        pTPolyMarker->SetMarkerSize(0.3);
+        pTPolyMarker->Draw();
+
+        m_eventMarkers.push_back(pTPolyMarker);
+
+        delete [] pX;
+        delete [] pY;
+        delete [] pZ;
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoring::MakeDetectorOutline()
 {
+    m_pXYAxes = new TH2F("xyview", "x-y view", 100, -5000, 5000, 100, -5000, 5000);
+    m_pXYAxes->SetFillColor(kWhite);
+    m_pXYAxes->SetStats(kFALSE);
+
+    m_pXZAxes = new TH2F("xzview", "x-z view", 100, -5000, 5000, 100, -5000, 5000);
+    m_pXZAxes->SetFillColor(kWhite);
+    m_pXZAxes->SetStats(kFALSE);
+
     pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
 
-    // HCal, ECal (Barrel and EndCap)
-    const pandora::GeometryHelper::SubDetectorParameters eCalBarrelParameters = pGeometryHelper->GetECalBarrelParameters();
-    const pandora::GeometryHelper::SubDetectorParameters eCalEndCapParameters = pGeometryHelper->GetECalEndCapParameters();
-    const pandora::GeometryHelper::SubDetectorParameters hCalBarrelParameters = pGeometryHelper->GetHCalBarrelParameters();
-    const pandora::GeometryHelper::SubDetectorParameters hCalEndCapParameters = pGeometryHelper->GetHCalEndCapParameters();
+    pandora::GeometryHelper::SubDetectorParametersList subDetectorParametersList(pGeometryHelper->GetAdditionalSubDetectors());
+    subDetectorParametersList.push_back(pGeometryHelper->GetECalBarrelParameters());
+    subDetectorParametersList.push_back(pGeometryHelper->GetECalEndCapParameters());
+    subDetectorParametersList.push_back(pGeometryHelper->GetHCalBarrelParameters());
+    subDetectorParametersList.push_back(pGeometryHelper->GetHCalEndCapParameters());
 
-    this->MakeXYLayerOutline(eCalBarrelParameters.GetInnerSymmetryOrder(), eCalBarrelParameters.GetInnerPhiCoordinate(), eCalBarrelParameters.GetInnerRCoordinate(), 1, 1);
-    this->MakeXYLayerOutline(eCalBarrelParameters.GetOuterSymmetryOrder(), eCalBarrelParameters.GetOuterPhiCoordinate(), eCalBarrelParameters.GetOuterRCoordinate(), 1, 1);
-    this->MakeXYLayerOutline(hCalBarrelParameters.GetInnerSymmetryOrder(), hCalBarrelParameters.GetInnerPhiCoordinate(), hCalBarrelParameters.GetInnerRCoordinate(), 1, 1);
-    this->MakeXYLayerOutline(hCalBarrelParameters.GetOuterSymmetryOrder(), hCalBarrelParameters.GetOuterPhiCoordinate(), hCalBarrelParameters.GetOuterRCoordinate(), 1, 1);
+    XYOutlineParametersList xyOutlineParametersList;
+    xyOutlineParametersList.push_back(XYOutlineParameters(0, 0, pGeometryHelper->GetMainTrackerInnerRadius()));
+    xyOutlineParametersList.push_back(XYOutlineParameters(0, 0, pGeometryHelper->GetMainTrackerOuterRadius()));
+    this->MakeXZLayerOutline(pGeometryHelper->GetMainTrackerInnerRadius(), pGeometryHelper->GetMainTrackerOuterRadius(), 0,
+        pGeometryHelper->GetMainTrackerZExtent());
 
-    this->MakeXZLayerOutline(eCalBarrelParameters.GetInnerRCoordinate(), eCalBarrelParameters.GetOuterRCoordinate(), eCalBarrelParameters.GetInnerZCoordinate(), eCalBarrelParameters.GetOuterZCoordinate(), 1, 1);
-    this->MakeXZLayerOutline(hCalBarrelParameters.GetInnerRCoordinate(), hCalBarrelParameters.GetOuterRCoordinate(), hCalBarrelParameters.GetInnerZCoordinate(), hCalBarrelParameters.GetOuterZCoordinate(), 1, 1);
-    this->MakeXZLayerOutline(eCalEndCapParameters.GetInnerRCoordinate(), eCalEndCapParameters.GetOuterRCoordinate(), eCalEndCapParameters.GetInnerZCoordinate(), eCalEndCapParameters.GetOuterZCoordinate(), 1, 1);
-    this->MakeXZLayerOutline(hCalEndCapParameters.GetInnerRCoordinate(), hCalEndCapParameters.GetOuterRCoordinate(), hCalEndCapParameters.GetInnerZCoordinate(), hCalEndCapParameters.GetOuterZCoordinate(), 1, 1);
+    xyOutlineParametersList.push_back(XYOutlineParameters(0, 0, pGeometryHelper->GetCoilInnerRadius()));
+    xyOutlineParametersList.push_back(XYOutlineParameters(0, 0, pGeometryHelper->GetCoilOuterRadius()));
+    this->MakeXZLayerOutline(pGeometryHelper->GetCoilInnerRadius(), pGeometryHelper->GetCoilOuterRadius(), 0,
+        pGeometryHelper->GetCoilZExtent());
 
-    // TPC
-    this->MakeXYLayerOutline(0, 0, pGeometryHelper->GetMainTrackerInnerRadius(), 1, 1);
-    this->MakeXYLayerOutline(0, 0, pGeometryHelper->GetMainTrackerOuterRadius(), 1, 1);
-    this->MakeXZLayerOutline(pGeometryHelper->GetMainTrackerInnerRadius(), pGeometryHelper->GetMainTrackerOuterRadius(), 0, pGeometryHelper->GetMainTrackerZExtent(), 1, 1);
-
-    // Additional subdetectors
-    for (pandora::GeometryHelper::SubDetectorParametersList::const_iterator iter = pGeometryHelper->GetAdditionalSubDetectors().begin(),
-        iterEnd = pGeometryHelper->GetAdditionalSubDetectors().end(); iter != iterEnd; ++iter)
+    for (pandora::GeometryHelper::SubDetectorParametersList::const_iterator iter = subDetectorParametersList.begin(),
+        iterEnd = subDetectorParametersList.end(); iter != iterEnd; ++iter)
     {
-        this->MakeXYLayerOutline(iter->GetInnerSymmetryOrder(), iter->GetInnerPhiCoordinate(), iter->GetInnerRCoordinate(), 1, 1);
-        this->MakeXYLayerOutline(iter->GetOuterSymmetryOrder(), iter->GetOuterPhiCoordinate(), iter->GetOuterRCoordinate(), 1, 1);
-        this->MakeXZLayerOutline(iter->GetInnerRCoordinate(), iter->GetOuterRCoordinate(), iter->GetInnerZCoordinate(), iter->GetOuterZCoordinate(), 1, 1);
+        XYOutlineParameters xyInnerOutlineParameters(iter->GetInnerSymmetryOrder(), iter->GetInnerPhiCoordinate(), iter->GetInnerRCoordinate());
+        XYOutlineParameters xyOuterOutlineParameters(iter->GetOuterSymmetryOrder(), iter->GetOuterPhiCoordinate(), iter->GetOuterRCoordinate());
+        xyOutlineParametersList.push_back(xyInnerOutlineParameters);
+        xyOutlineParametersList.push_back(xyOuterOutlineParameters);
+        this->MakeXZLayerOutline(iter->GetInnerRCoordinate(), iter->GetOuterRCoordinate(), iter->GetInnerZCoordinate(),
+            iter->GetOuterZCoordinate());
+    }
+
+    std::sort(xyOutlineParametersList.begin(), xyOutlineParametersList.end(), XYOutlineParameters::Sort);
+
+    for (XYOutlineParametersList::const_iterator iter = xyOutlineParametersList.begin(), iterEnd = xyOutlineParametersList.end();
+        iter != iterEnd; ++iter)
+    {
+        this->MakeXYLayerOutline(*iter);
     }
 
     m_isOutlineConstructed = true;
@@ -362,8 +530,11 @@ void PandoraMonitoring::MakeDetectorOutline()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::MakeXYLayerOutline(int symmetryOrder, float phi0, float closestDistanceToIp, int lineWidth, int lineColor)
+void PandoraMonitoring::MakeXYLayerOutline(const XYOutlineParameters &xyOutlineParameters)
 {
+    const int symmetryOrder(xyOutlineParameters.GetSymmetryOrder());
+    const float closestDistanceToIp(xyOutlineParameters.GetClosestDistanceToIp());
+
     if (symmetryOrder > 2)
     {
         float *pXCoordinate = new float[symmetryOrder + 1];
@@ -375,39 +546,34 @@ void PandoraMonitoring::MakeXYLayerOutline(int symmetryOrder, float phi0, float 
 
         for (int i = 0; i <= symmetryOrder; ++i)
         {
-            const float theta(phi0 + (2 * pi * float(i) / float(symmetryOrder)));
+            const float theta(xyOutlineParameters.GetPhi0() + (2 * pi * float(i) / float(symmetryOrder)));
 
             pXCoordinate[i] = x0 * cos(theta) + y0 * sin(theta);
             pYCoordinate[i] = y0 * cos(theta) - x0 * sin(theta);
         }
 
-        TPolyLine *pTPolyLine = new TPolyLine(symmetryOrder + 1, pXCoordinate, pYCoordinate);
-        pTPolyLine->SetLineWidth(lineWidth);
-        pTPolyLine->SetLineColor(lineColor);
+        TGraph *pTGraph = new TGraph(symmetryOrder + 1, pXCoordinate, pYCoordinate);
+        pTGraph->SetFillStyle(1001);
+        pTGraph->SetFillColor(kWhite);
 
-        m_2DLinesXY.push_back(pTPolyLine);
+        m_2DObjectsXY.push_back(pTGraph);
 
         delete [] pXCoordinate;
         delete [] pYCoordinate;
     }
-    else if (symmetryOrder == 0)
+    else
     {
         TArc* pTArc = new TArc(0., 0., closestDistanceToIp);
-        pTArc->SetLineWidth(lineWidth);
-        pTArc->SetLineColor(lineColor);
+        pTArc->SetFillStyle(1001);
+        pTArc->SetFillColor(kWhite);
 
-        m_2DCirclesXY.push_back(pTArc);
+        m_2DObjectsXY.push_back(pTArc);
     }
-     else
-     {
-         std::cout << "PandoraMonitoring::MakeXYLayerOutline, symmetryOrder is " << symmetryOrder << std::endl;
-     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::MakeXZLayerOutline(float innerRCoordinate, float outerRCoordinate, float innerZCoordinate, float outerZCoordinate,
-    int lineWidth, int lineColor)
+void PandoraMonitoring::MakeXZLayerOutline(float innerRCoordinate, float outerRCoordinate, float innerZCoordinate, float outerZCoordinate)
 {
 
     for (int i = 0; i< 4; ++i)
@@ -420,18 +586,22 @@ void PandoraMonitoring::MakeXZLayerOutline(float innerRCoordinate, float outerRC
             x[0] = innerZCoordinate; x[1] = outerZCoordinate; x[2] = outerZCoordinate; x[3] = innerZCoordinate; x[4] = x[0];
             z[0] = innerRCoordinate; z[1] = innerRCoordinate; z[2] = outerRCoordinate; z[3] = outerRCoordinate; z[4] = z[0];
             break;
+
         case 1:
             x[0] =  innerZCoordinate; x[1] =  outerZCoordinate; x[2] =  outerZCoordinate; x[3] =  innerZCoordinate; x[4] = x[0];
             z[0] = -innerRCoordinate; z[1] = -innerRCoordinate; z[2] = -outerRCoordinate; z[3] = -outerRCoordinate; z[4] = z[0];
             break;
+
         case 2:
             x[0] = -innerZCoordinate; x[1] = -outerZCoordinate; x[2] = -outerZCoordinate; x[3] = -innerZCoordinate; x[4] = x[0];
             z[0] =  innerRCoordinate; z[1] =  innerRCoordinate; z[2] =  outerRCoordinate; z[3] =  outerRCoordinate; z[4] = z[0];
             break;
+
         case 3:
             x[0] = -innerZCoordinate; x[1] = -outerZCoordinate; x[2] = -outerZCoordinate; x[3] = -innerZCoordinate; x[4] = x[0];
             z[0] = -innerRCoordinate; z[1] = -innerRCoordinate; z[2] = -outerRCoordinate; z[3] = -outerRCoordinate; z[4] = z[0];
             break;
+
         default:
             throw std::exception();
         }
@@ -441,12 +611,19 @@ void PandoraMonitoring::MakeXZLayerOutline(float innerRCoordinate, float outerRC
         if (0 == innerZCoordinate)
             linesToDisplay = 4;
 
-        TPolyLine *pTPolyLine = new TPolyLine(linesToDisplay, x, z);
-        pTPolyLine->SetLineWidth(lineWidth);
-        pTPolyLine->SetLineColor(lineColor);
+        TGraph *pTGraph = new TGraph(linesToDisplay, x, z);
+        pTGraph->SetFillStyle(0);
 
-        m_2DLinesXZ.push_back(pTPolyLine);
+        m_2DObjectsXZ.push_back(pTGraph);
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PandoraMonitoring::XYOutlineParameters::Sort(const XYOutlineParameters &lhs, const XYOutlineParameters &rhs)
+{
+    return (lhs.m_closestDistanceToIp > rhs.m_closestDistanceToIp);
 }
 
 } // namespace pandora_monitoring
