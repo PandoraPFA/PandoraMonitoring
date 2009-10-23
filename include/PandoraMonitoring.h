@@ -97,13 +97,13 @@ public:
     void DrawHistogram(const std::string &name, const std::string &options) const;
 
     /**
-     *  @brief  Save a histogram to a file
+     *  @brief  Save a histogram to a file and tidy up
      * 
      *  @param  name the name associated with the histogram
      *  @param  fileName the file name under which to save the histogram
      *  @param  fileOptions the options associated with opening/recreating a file
      */
-    void SaveHistogram(const std::string &name, const std::string &fileName, const std::string &fileOptions);
+    void SaveAndCloseHistogram(const std::string &name, const std::string &fileName, const std::string &fileOptions);
 
     /**
      *  @brief  Delete a histogram

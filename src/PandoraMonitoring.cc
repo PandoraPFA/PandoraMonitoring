@@ -162,7 +162,7 @@ void PandoraMonitoring::DrawHistogram(const std::string &name, const std::string
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::SaveHistogram(const std::string &name, const std::string &fileName, const std::string &fileOptions)
+void PandoraMonitoring::SaveAndCloseHistogram(const std::string &name, const std::string &fileName, const std::string &fileOptions)
 {
     HistogramMap::iterator iter = m_histogramMap.find(name);
 
@@ -176,10 +176,12 @@ void PandoraMonitoring::SaveHistogram(const std::string &name, const std::string
 
     iter->second->SetDirectory(pTFile);
     iter->second->Write(name.c_str(), TObject::kOverwrite);
+    delete iter->second;
 
     pTFile->Write();
     pTFile->Close();
     m_histogramMap.erase(iter);
+
     delete pTFile;
 }
 
