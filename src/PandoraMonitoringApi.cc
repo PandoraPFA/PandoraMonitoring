@@ -54,9 +54,9 @@ void PandoraMonitoringApi::DrawHistogram(const std::string &name, const std::str
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::SaveHistogram(const std::string &name, const std::string &fileName)
+void PandoraMonitoringApi::SaveHistogram(const std::string &name, const std::string &fileName, const std::string &fileOptions)
 {
-    PandoraMonitoring::GetInstance()->SaveHistogram(name, fileName);
+    PandoraMonitoring::GetInstance()->SaveHistogram(name, fileName, fileOptions);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

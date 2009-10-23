@@ -129,7 +129,10 @@ void PandoraMonitoring::Fill2DHistogram(const std::string &name, float xValue, f
         throw std::exception();
     }
 
-    TH2F *pTH2F = static_cast<TH2F *>(iter->second);
+    TH2F *pTH2F = dynamic_cast<TH2F *>(iter->second);
+
+    if (NULL == pTH2F)
+        throw std::exception();
 
     pTH2F->Fill(xValue, yValue, weight);
 }
@@ -159,7 +162,7 @@ void PandoraMonitoring::DrawHistogram(const std::string &name, const std::string
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::SaveHistogram(const std::string &name, const std::string &fileName)
+void PandoraMonitoring::SaveHistogram(const std::string &name, const std::string &fileName, const std::string &fileOptions)
 {
     HistogramMap::iterator iter = m_histogramMap.find(name);
 
@@ -169,7 +172,7 @@ void PandoraMonitoring::SaveHistogram(const std::string &name, const std::string
         throw std::exception();
     }
 
-    TFile* pTFile = new TFile(fileName.c_str(), "recreate");
+    TFile* pTFile = new TFile(fileName.c_str(), fileOptions.c_str());
 
     iter->second->SetDirectory(pTFile);
     iter->second->Write(name.c_str(), TObject::kOverwrite);
@@ -379,7 +382,8 @@ void PandoraMonitoring::DrawTracks(DetectorView detectorView, const pandora::Tra
 {
     for (pandora::TrackList::const_iterator iter = pTrackList->begin(), iterEnd = pTrackList->end(); iter != iterEnd; ++iter)
     {
-        EVENT::Track* pTrack = static_cast<EVENT::Track*>(const_cast<void *>((*iter)->GetParentTrackAddress()));
+        const EVENT::Track* pTrack = static_cast<const EVENT::Track*>((*iter)->GetParentTrackAddress());
+
         EVENT::TrackerHitVec trackHitVector = pTrack->getTrackerHits();
         const unsigned int nTrackHits(trackHitVector.size());
 
