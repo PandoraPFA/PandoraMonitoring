@@ -79,7 +79,7 @@ void PandoraMonitoring::Create1DHistogram(const std::string &name, const std::st
 {
     if (m_histogramMap.end() != m_histogramMap.find(name))
     {
-        std::cout << "PandoraMonitoring::Create1DHistogram, error: Histogram with this name already exists." << std::endl;
+        std::cout << "PandoraMonitoring::Create1DHistogram, error: Histogram with name '"<< name <<"' already exists." << std::endl;
         throw std::exception();
     }
 
@@ -94,7 +94,7 @@ void PandoraMonitoring::Create2DHistogram(const std::string &name, const std::st
 {
     if (m_histogramMap.end() != m_histogramMap.find(name))
     {
-        std::cout << "PandoraMonitoring::Create2DHistogram, error: Histogram with this name already exists." << std::endl;
+        std::cout << "PandoraMonitoring::Create2DHistogram, error: Histogram with name '"<< name <<"' already exists." << std::endl;
         throw std::exception();
     }
 
@@ -110,7 +110,7 @@ void PandoraMonitoring::Fill1DHistogram(const std::string &name, float xValue, f
 
     if (m_histogramMap.end() == iter)
     {
-        std::cout << "PandoraMonitoring::Fill1DHistogram, error: No histogram with this name exists." << std::endl;
+        std::cout << "PandoraMonitoring::Fill1DHistogram, error: No histogram with name '"<< name <<"' exists." << std::endl;
         throw std::exception();
     }
 
@@ -125,7 +125,7 @@ void PandoraMonitoring::Fill2DHistogram(const std::string &name, float xValue, f
 
     if (m_histogramMap.end() == iter)
     {
-        std::cout << "PandoraMonitoring::Fill2DHistogram, error: No histogram with this name exists." << std::endl;
+        std::cout << "PandoraMonitoring::Fill2DHistogram, error: No histogram with name '"<< name <<"' exists." << std::endl;
         throw std::exception();
     }
 
@@ -145,7 +145,7 @@ void PandoraMonitoring::DrawHistogram(const std::string &name, const std::string
 
     if (m_histogramMap.end() == iter)
     {
-        std::cout << "PandoraMonitoring::DrawHistogram, error: No histogram with this name exists." << std::endl;
+        std::cout << "PandoraMonitoring::DrawHistogram, error: No histogram with name '"<< name <<"' exists." << std::endl;
         throw std::exception();
     }
 
@@ -168,7 +168,7 @@ void PandoraMonitoring::SaveAndCloseHistogram(const std::string &name, const std
 
     if (m_histogramMap.end() == iter)
     {
-        std::cout << "PandoraMonitoring::SaveHistogram, error: No histogram with this name exists." << std::endl;
+        std::cout << "PandoraMonitoring::SaveHistogram, error: No histogram with name '" << name << "' exists." << std::endl;
         throw std::exception();
     }
 
@@ -193,7 +193,7 @@ void PandoraMonitoring::DeleteHistogram(const std::string &name)
 
     if (m_histogramMap.end() == iter)
     {
-        std::cout << "PandoraMonitoring::DeleteHistogram, error: No histogram with this name exists." << std::endl;
+        std::cout << "PandoraMonitoring::DeleteHistogram, error: No histogram with name '"<< name <<"' exists." << std::endl;
         throw std::exception();
     }
 
