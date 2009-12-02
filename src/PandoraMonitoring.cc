@@ -20,6 +20,7 @@
 
 // ROOT include files
 #include "TArc.h"
+#include "TArrow.h"
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TGraph.h"
@@ -214,6 +215,30 @@ void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::Trac
     this->DrawTracks(detectorView, pTrackList);
     this->Pause();
 
+    for(unsigned int i = 0; i < m_eventArrows.size(); ++i)
+        delete m_eventArrows[i];
+
+    for(unsigned int i = 0; i < m_eventMarkers.size(); ++i)
+        delete m_eventMarkers[i];
+
+    m_eventArrows.clear();
+    m_eventMarkers.clear();
+    delete pCanvas;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList)
+{
+    TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
+    pCanvas->SetFillColor(kWhite);
+    pCanvas->SetHighLightColor(kWhite);
+    pCanvas->Draw();
+
+    this->DrawDetectorOutline(detectorView);
+    this->DrawCaloHits(detectorView, pOrderedCaloHitList);
+    this->Pause();
+
     for(unsigned int i = 0; i < m_eventMarkers.size(); ++i)
         delete m_eventMarkers[i];
 
@@ -243,6 +268,31 @@ void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::Clus
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::OrderedCaloHitList *const pOrderedCaloHitList)
+{
+    TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
+    pCanvas->SetFillColor(kWhite);
+    pCanvas->SetHighLightColor(kWhite);
+    pCanvas->Draw();
+
+    this->DrawDetectorOutline(detectorView);
+    this->DrawTracks(detectorView, pTrackList);
+    this->DrawCaloHits(detectorView, pOrderedCaloHitList);
+    this->Pause();
+
+    for(unsigned int i = 0; i < m_eventArrows.size(); ++i)
+        delete m_eventArrows[i];
+
+    for(unsigned int i = 0; i < m_eventMarkers.size(); ++i)
+        delete m_eventMarkers[i];
+
+    m_eventArrows.clear();
+    m_eventMarkers.clear();
+    delete pCanvas;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::ClusterList *const pClusterList)
 {
     TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
@@ -255,9 +305,13 @@ void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::Trac
     this->DrawClusters(detectorView, pClusterList);
     this->Pause();
 
+    for(unsigned int i = 0; i < m_eventArrows.size(); ++i)
+        delete m_eventArrows[i];
+
     for(unsigned int i = 0; i < m_eventMarkers.size(); ++i)
         delete m_eventMarkers[i];
 
+    m_eventArrows.clear();
     m_eventMarkers.clear();
     delete pCanvas;
 }
@@ -401,22 +455,105 @@ void PandoraMonitoring::DrawTracks(DetectorView detectorView, const pandora::Tra
             pZ[i] = (float)pTrackHit->getPosition()[2];
         }
 
+        TArrow *pTArrow = NULL;
         TPolyMarker *pTPolyMarker = NULL;
+
+        const pandora::CartesianVector &trackSeedPosition((*iter)->GetTrackStateAtECal().GetPosition());
+        const pandora::CartesianVector trackSeedDirection((*iter)->GetTrackStateAtECal().GetMomentum().GetUnitVector());
 
         if(DETECTOR_VIEW_XY == detectorView)
         {
+            pTArrow = new TArrow(trackSeedPosition.GetX(), trackSeedPosition.GetY(), trackSeedPosition.GetX() + trackSeedDirection.GetX(),
+                trackSeedPosition.GetY() + trackSeedDirection.GetY(), 0.01);
             pTPolyMarker = new TPolyMarker(nTrackHits, pX, pY);
         }
         else if(DETECTOR_VIEW_XZ == detectorView)
         {
+            pTArrow = new TArrow(trackSeedPosition.GetZ(), trackSeedPosition.GetX(), trackSeedPosition.GetZ() + trackSeedDirection.GetZ(),
+                trackSeedPosition.GetX() + trackSeedDirection.GetX(), 0.01);
             pTPolyMarker = new TPolyMarker(nTrackHits, pZ, pX);
         }
 
         pTPolyMarker->SetMarkerStyle(20);
-        pTPolyMarker->SetMarkerColor(2);
-        pTPolyMarker->SetMarkerSize(0.3);
+        pTPolyMarker->SetMarkerColor(1);
+        pTPolyMarker->SetMarkerSize(0.1);
         pTPolyMarker->Draw();
 
+        pTArrow->Draw();
+
+        m_eventArrows.push_back(pTArrow);
+        m_eventMarkers.push_back(pTPolyMarker);
+
+        delete [] pX;
+        delete [] pY;
+        delete [] pZ;
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::DrawCaloHits(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList)
+{
+    for (pandora::OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end(); iter != iterEnd; ++iter)
+    {
+        const pandora::PseudoLayer pseudoLayer(iter->first);
+        const pandora::CaloHitList *const pCaloHitList(iter->second);
+
+        const unsigned int nCaloHits(pCaloHitList->size());
+
+        if (0 == nCaloHits)
+            continue;
+
+        int i = 0;
+        float *pX = new float[nCaloHits];
+        float *pY = new float[nCaloHits];
+        float *pZ = new float[nCaloHits];
+
+        for (pandora::CaloHitList::const_iterator hitIter = pCaloHitList->begin(), hitIterEnd = pCaloHitList->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+//            if ((DETECTOR_VIEW_XY == detectorView) && (pandora::ENDCAP == (*hitIter)->GetDetectorRegion()))
+//                continue;
+
+//            if ((DETECTOR_VIEW_XZ == detectorView) && (pandora::BARREL == (*hitIter)->GetDetectorRegion()))
+//                continue;
+
+            const pandora::CartesianVector &positionVector((*hitIter)->GetPositionVector());
+            pX[i] = positionVector.GetX();
+            pY[i] = positionVector.GetY();
+            pZ[i] = positionVector.GetZ();
+            i++;
+        }
+
+        TPolyMarker *pTPolyMarker = NULL;
+
+        if(DETECTOR_VIEW_XY == detectorView)
+        {
+            pTPolyMarker = new TPolyMarker(i, pX, pY);
+        }
+        else if(DETECTOR_VIEW_XZ == detectorView)
+        {
+            pTPolyMarker = new TPolyMarker(i, pZ, pX);
+        }
+
+        pTPolyMarker->SetMarkerStyle(20);
+        pTPolyMarker->SetMarkerSize(0.5);
+
+        unsigned int layerModN(pseudoLayer % 7);
+        unsigned int color = kBlack;
+
+        switch (layerModN)
+        {
+            case 0: color = kRed;       break;
+            case 1: color = kMagenta;   break;
+            case 2: color = kBlue;      break;
+            case 3: color = kCyan;      break;
+            case 4: color = kGreen;     break;
+            case 5: color = kYellow;    break;
+            default:color = kBlack;     break;
+        }
+
+        pTPolyMarker->SetMarkerColor(color);
+        pTPolyMarker->Draw();
         m_eventMarkers.push_back(pTPolyMarker);
 
         delete [] pX;
@@ -469,8 +606,19 @@ void PandoraMonitoring::DrawClusters(DetectorView detectorView, const pandora::C
         }
 
         pTPolyMarker->SetMarkerStyle(20);
-        pTPolyMarker->SetMarkerColor(3);
-        pTPolyMarker->SetMarkerSize(0.3);
+
+        if (1 == nHits)
+        {
+            pTPolyMarker->SetMarkerSize(0.2);
+            pTPolyMarker->SetMarkerColor(3);
+        }
+        else
+        {
+            int colour(kBlue + static_cast<int>((*clusterIter)->GetElectromagneticEnergy()));
+            pTPolyMarker->SetMarkerSize(0.4);
+            pTPolyMarker->SetMarkerColor(colour);
+        }
+
         pTPolyMarker->Draw();
 
         m_eventMarkers.push_back(pTPolyMarker);
@@ -495,7 +643,16 @@ void PandoraMonitoring::MakeDetectorOutline()
 
     pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
 
-    pandora::GeometryHelper::SubDetectorParametersList subDetectorParametersList(pGeometryHelper->GetAdditionalSubDetectors());
+    typedef std::vector<pandora::GeometryHelper::SubDetectorParameters> SubDetectorParametersList;
+    SubDetectorParametersList subDetectorParametersList;
+
+    // Additional sub detectors are stored in a map from name to parameters. We don't care about the names here - just copy into a vector for sorting.
+    const pandora::GeometryHelper::SubDetectorParametersMap &subDetectorParametersMap(pGeometryHelper->GetAdditionalSubDetectors());
+    for (pandora::GeometryHelper::SubDetectorParametersMap::const_iterator iter = subDetectorParametersMap.begin(); iter != subDetectorParametersMap.end(); ++iter)
+    {
+        subDetectorParametersList.push_back(iter->second);
+    }
+
     subDetectorParametersList.push_back(pGeometryHelper->GetECalBarrelParameters());
     subDetectorParametersList.push_back(pGeometryHelper->GetECalEndCapParameters());
     subDetectorParametersList.push_back(pGeometryHelper->GetHCalBarrelParameters());
@@ -512,8 +669,7 @@ void PandoraMonitoring::MakeDetectorOutline()
     this->MakeXZLayerOutline(pGeometryHelper->GetCoilInnerRadius(), pGeometryHelper->GetCoilOuterRadius(), 0,
         pGeometryHelper->GetCoilZExtent());
 
-    for (pandora::GeometryHelper::SubDetectorParametersList::const_iterator iter = subDetectorParametersList.begin(),
-        iterEnd = subDetectorParametersList.end(); iter != iterEnd; ++iter)
+    for (SubDetectorParametersList::const_iterator iter = subDetectorParametersList.begin(); iter != subDetectorParametersList.end(); ++iter)
     {
         XYOutlineParameters xyInnerOutlineParameters(iter->GetInnerSymmetryOrder(), iter->GetInnerPhiCoordinate(), iter->GetInnerRCoordinate());
         XYOutlineParameters xyOuterOutlineParameters(iter->GetOuterSymmetryOrder(), iter->GetOuterPhiCoordinate(), iter->GetOuterRCoordinate());

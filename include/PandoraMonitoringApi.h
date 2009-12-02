@@ -112,12 +112,29 @@ public:
     static void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList);
 
     /**
+     *  @brief  Draw calo hits in an event
+     * 
+     *  @param  detectorView the detector view
+     *  @param  pOrderedCaloHitList address of the ordered calo hit list
+     */ 
+    static void DrawEvent(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList);
+
+    /**
      *  @brief  Draw clusters in an event
      * 
      *  @param  detectorView the detector view
      *  @param  pClusterList address of the cluster list
      */ 
     static void DrawEvent(DetectorView detectorView, const pandora::ClusterList *const pClusterList);
+
+    /**
+     *  @brief  Draw tracks and calo hits in an event
+     * 
+     *  @param  detectorView the detector view
+     *  @param  pTrackList address of the track list
+     *  @param  pOrderedCaloHitList address of the ordered calo hit list
+     */ 
+    static void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::OrderedCaloHitList *const pOrderedCaloHitList);
 
     /**
      *  @brief  Draw tracks and clusters in an event

@@ -75,9 +75,24 @@ void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::T
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList)
+{
+    PandoraMonitoring::GetInstance()->DrawEvent(detectorView, pOrderedCaloHitList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::ClusterList *const pClusterList)
 {
     PandoraMonitoring::GetInstance()->DrawEvent(detectorView, pClusterList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList,
+    const pandora::OrderedCaloHitList *const pOrderedCaloHitList)
+{
+    PandoraMonitoring::GetInstance()->DrawEvent(detectorView, pTrackList, pOrderedCaloHitList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

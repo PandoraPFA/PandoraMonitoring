@@ -19,6 +19,7 @@
 
 class TH1;
 class TH2F;
+class TArrow;
 class TObject;
 class TPolyMarker;
 
@@ -121,12 +122,29 @@ public:
     void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList);
 
     /**
+     *  @brief  Draw calo hits in an event
+     * 
+     *  @param  detectorView the detector view
+     *  @param  pOrderedCaloHitList address of the ordered calo hit list
+     */ 
+    void DrawEvent(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList);
+
+    /**
      *  @brief  Draw clusters in an event
      * 
      *  @param  detectorView the detector view
      *  @param  pClusterList address of the cluster list
      */ 
     void DrawEvent(DetectorView detectorView, const pandora::ClusterList *const pClusterList);
+
+    /**
+     *  @brief  Draw tracks and calo hits in an event
+     * 
+     *  @param  detectorView the detector view
+     *  @param  pTrackList address of the track list
+     *  @param  pOrderedCaloHitList address of the ordered calo hit list
+     */ 
+    void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::OrderedCaloHitList *const pOrderedCaloHitList);
 
     /**
      *  @brief  Draw tracks and clusters in an event
@@ -237,6 +255,14 @@ private:
     void DrawTracks(DetectorView detectorView, const pandora::TrackList *const pTrackList);
 
     /**
+     *  @brief  Draw calo hits in an event
+     *
+     *  @param  detectorView the detector view
+     *  @param  pOrderedCaloHitList address of the ordered calo hit list
+     */ 
+    void DrawCaloHits(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList);
+
+    /**
      *  @brief  Draw clusters in an event
      *
      *  @param  detectorView the detector view
@@ -275,6 +301,7 @@ private:
     HistogramMap                m_histogramMap;         ///< The histogram map
 
     typedef std::vector<TObject *> TObjectVector;
+    typedef std::vector<TArrow *> TArrowVector;
     typedef std::vector<TPolyMarker *> TPolyMarkerVector;
 
     bool                        m_isOutlineConstructed; ///< Whether the detector outline has been constructed
@@ -283,6 +310,7 @@ private:
 
     TObjectVector               m_2DObjectsXY;          ///< The 2d xy graphs vector
     TObjectVector               m_2DObjectsXZ;          ///< The 2d xz graphs vector
+    TArrowVector                m_eventArrows;          ///< The event arrows vector
     TPolyMarkerVector           m_eventMarkers;         ///< The event markers vector
 };
 
