@@ -14,6 +14,8 @@
 
 #include "TApplication.h"
 
+#include "TTreeWrapper.h"
+
 #include <iostream>
 #include <map>
 
@@ -22,11 +24,15 @@ class TH2F;
 class TArrow;
 class TObject;
 class TPolyMarker;
+class TTree;
+class TBranch;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 namespace pandora_monitoring
 {
+
+
 
 /**
  *  @brief  PandoraMonitoring singleton class
@@ -88,6 +94,39 @@ public:
      *  @param  weight the weight to apply to the entry
      */
     void Fill2DHistogram(const std::string &name, float xValue, float yValue, float weight);
+
+    /**
+     *  @brief  Set a variable in a tree (create the tree and the branch if not yet existing)
+     * 
+     *  @param  treeName name of the tree (is created if it does not exist yet)
+     *  @param  variableName name of the branch in the tree (the branch is created if it does not exist yet)
+     *  @param  variable sets value of the variable (permitted types are float/double/int and std::vector<float>*,std::vector<double>*,std::vector<int>*
+     */
+    template <typename VariableType>
+    void SetTreeVariable(const std::string &treeName, const std::string &variableName, VariableType  variable);
+
+    /**
+     *  @brief  Fill the tree with the variables which have been set before with SetTreeVariable
+     * 
+     *  @param  treeName name of the tree to be filled
+     */
+    void FillTree(const std::string &treeName);
+
+    /**
+     *  @brief  Print the tree
+     * 
+     *  @param  treeName name of the tree to be printed
+     */
+    void PrintTree(const std::string &treeName);
+
+    /**
+     *  @brief  Save the tree to a file
+     *  @param  fileName the file name under which to save the histogram
+     *  @param  fileOptions the options associated with opening/recreating a file
+     * 
+     *  @param  treeName name of the tree to be written to a file
+     */
+    void SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions );
 
     /**
      *  @brief  Draw a histogram
@@ -234,6 +273,8 @@ private:
 
     typedef std::vector<XYOutlineParameters> XYOutlineParametersList;
 
+
+
     /**
      *  @brief  Default constructor
      */
@@ -299,6 +340,9 @@ private:
     typedef std::map<const std::string, TH1 *> HistogramMap;
 
     HistogramMap                m_histogramMap;         ///< The histogram map
+
+    TTreeWrapper                m_treeWrapper;          ///< wrapper around TTree functionality
+
 
     typedef std::vector<TObject *> TObjectVector;
     typedef std::vector<TArrow *> TArrowVector;

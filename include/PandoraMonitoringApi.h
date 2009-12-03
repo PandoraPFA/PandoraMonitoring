@@ -73,6 +73,39 @@ public:
     static void Fill2DHistogram(const std::string &name, float xValue, float yValue, float weight = 1);
 
     /**
+     *  @brief  Set a variable in a tree (create the tree and the branch if not yet existing)
+     * 
+     *  @param  treeName name of the tree (is created if it does not exist yet)
+     *  @param  variableName name of the branch in the tree (the branch is created if it does not exist yet)
+     *  @param  variable sets value of the variable (permitted types are float/double/int and std::vector<float>*,std::vector<double>*,std::vector<int>*
+     */
+    template <typename VariableType>
+    static void SetTreeVariable(const std::string &treeName, const std::string &variableName, VariableType  variable);
+
+    /**
+     *  @brief  Fill the tree with the variables which have been set before with SetTreeVariable
+     * 
+     *  @param  treeName name of the tree to be filled
+     */
+    static void FillTree(const std::string &treeName);
+
+    /**
+     *  @brief  Print the tree
+     * 
+     *  @param  treeName name of the tree to be printed
+     */
+    static void PrintTree(const std::string &treeName);
+
+    /**
+     *  @brief  Save the tree to a file
+     *  @param  fileName the file name under which to save the histogram
+     *  @param  fileOptions the options associated with opening/recreating a file
+     * 
+     *  @param  treeName name of the tree to be written to a file
+     */
+    static void SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions );
+
+    /**
      *  @brief  Draw a histogram
      * 
      *  @param  name the name associated with the histogram

@@ -29,10 +29,10 @@
 #include "TPolyMarker.h"
 #include "TSystem.h"
 #include "TStyle.h"
+#include "TTree.h"
 
 #include "PandoraMonitoring.h"
 
-#include <algorithm>
 #include <cmath>
 #include <fcntl.h>
 
@@ -204,6 +204,93 @@ void PandoraMonitoring::DeleteHistogram(const std::string &name)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+template <typename VariableType>
+void PandoraMonitoring::SetTreeVariable(const std::string &treeName, const std::string &variableName, VariableType variable )
+{
+    m_treeWrapper.Set( treeName, variableName, variable );
+}
+
+// instantiations of this template member function for the permitted types
+template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::string&, float  variable );
+template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::string&, int    variable );
+template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::string&, double variable );
+
+template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::string&, std::vector<float>*  variable );
+template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::string&, std::vector<int>*    variable );
+template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::string&, std::vector<double>* variable );
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::FillTree(const std::string &treeName)
+{
+    try {
+        m_treeWrapper.Fill( treeName );
+    }
+    catch( TTreeWrapper::TreeNotFoundError& excpt )
+    {
+        std::cout << "PandoraMonitoring::FillTree, error: No tree with name '" << treeName <<"' exists." << std::endl;
+        throw;
+    }
+    catch(...)
+    {
+        std::cout << "PandoraMonitoring::FillTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
+        throw;
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::PrintTree(const std::string &treeName)
+{
+    try {
+        m_treeWrapper.Print( treeName );
+    }
+    catch( TTreeWrapper::TreeNotFoundError& excpt )
+    {
+        std::cout << "PandoraMonitoring::PrintTree, error: No tree with name '" << treeName <<"' exists." << std::endl;
+        throw;
+    }
+    catch(...)
+    {
+        std::cout << "PandoraMonitoring::PrintTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
+        throw;
+    }
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions)
+{
+    TTree* tree = NULL;
+    try {
+        tree = m_treeWrapper.GetTree( treeName );
+    }
+    catch( TTreeWrapper::TreeNotFoundError& excpt )
+    {
+        std::cout << "PandoraMonitoring::SaveTree, error: No tree with name '" << treeName <<"' exists." << std::endl;
+        throw;
+    }
+    catch(...)
+    {
+        std::cout << "PandoraMonitoring::SaveTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
+        throw;
+    }
+
+    TFile* pTFile = new TFile(fileName.c_str(), fileOptions.c_str());
+
+    tree->SetDirectory(pTFile);
+    tree->Write(treeName.c_str(), TObject::kOverwrite);
+
+//    pTFile->Write();
+    pTFile->Close();
+
+    delete pTFile;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList)
 {
     TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
@@ -329,6 +416,7 @@ void PandoraMonitoring::DetectorOutlineTest(DetectorView detectorView)
     this->Pause();
     delete pCanvas;
 }
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -787,5 +875,7 @@ bool PandoraMonitoring::XYOutlineParameters::Sort(const XYOutlineParameters &lhs
 {
     return (lhs.m_closestDistanceToIp > rhs.m_closestDistanceToIp);
 }
+
+
 
 } // namespace pandora_monitoring

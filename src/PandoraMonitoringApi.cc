@@ -68,6 +68,46 @@ void PandoraMonitoringApi::DeleteHistogram(const std::string &name)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+template <typename VariableType>
+void PandoraMonitoringApi::SetTreeVariable(const std::string &treeName, const std::string &variableName, VariableType variable )
+{
+    PandoraMonitoring::GetInstance()->SetTreeVariable(treeName, variableName, variable);
+}
+
+// instantiations of this template member function for the permitted types
+template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, float  variable );
+template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, int    variable );
+template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, double variable );
+
+template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<float>*  variable );
+template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<int>*    variable );
+template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<double>* variable );
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::PrintTree(const std::string &treeName)
+{
+    PandoraMonitoring::GetInstance()->PrintTree(treeName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::FillTree(const std::string &treeName)
+{
+    PandoraMonitoring::GetInstance()->FillTree(treeName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions)
+{
+    PandoraMonitoring::GetInstance()->SaveTree(treeName, fileName, fileOptions);
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList)
 {
     PandoraMonitoring::GetInstance()->DrawEvent(detectorView, pTrackList);
