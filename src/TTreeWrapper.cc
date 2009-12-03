@@ -200,8 +200,10 @@ TTreeWrapper::Branch<T>::Branch(TTree* tree, std::string branchName)
     {
         isVector = true;
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
+        std::cout << "BRANCH ================================ " << std::endl;
         m_pBranch = tree->Branch( name, &(m_variable)  );
 #else
+        std::cout << "OLD BRONCH ================================ " << std::endl;
 //         m_pBranch = tree->Bronch( name, "float", &(m_variable)  );
 #endif
     }
@@ -327,11 +329,15 @@ bool TTreeWrapper::BranchHandler::Set( VectorFloat* ptr )
 
     if( m_branchVectorFloat == NULL ) 
     {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
         m_branchVectorFloat = new Branch<VectorFloat*>( m_tree, m_branchName ); ///< create a branch of type float
+#endif
         m_branchType = BRANCH_VECTOR_FLOAT;
     }
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
     m_branchVectorFloat->Set( ptr );
+#endif
     return true;
 }
 
@@ -344,11 +350,15 @@ bool TTreeWrapper::BranchHandler::Set( VectorDouble* ptr )
 
     if( m_branchVectorDouble == NULL ) 
     {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
         m_branchVectorDouble = new Branch<VectorDouble*>( m_tree, m_branchName ); ///< create a branch of type Double
+#endif
         m_branchType = BRANCH_VECTOR_DOUBLE;
     }
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
     m_branchVectorDouble->Set( ptr );
+#endif
     return true;
 }
 
@@ -361,11 +371,15 @@ bool TTreeWrapper::BranchHandler::Set( VectorInt* ptr )
 
     if( m_branchVectorInt == NULL ) 
     {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
         m_branchVectorInt = new Branch<VectorInt*>( m_tree, m_branchName ); ///< create a branch of type int
+#endif
         m_branchType = BRANCH_VECTOR_INT;
     }
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
     m_branchVectorInt->Set( ptr );
+#endif
     return true;
 }
 
@@ -378,13 +392,14 @@ template bool TTreeWrapper::Set<int>( std::string, std::string, int );
 template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<double>( std::string, std::string );
 template bool TTreeWrapper::Set<double>( std::string, std::string, double );
 
+//#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
 template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<VectorFloat*>( std::string, std::string );
 template bool TTreeWrapper::Set<VectorFloat*>( std::string, std::string, VectorFloat* );
 template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<VectorInt*>( std::string, std::string );
 template bool TTreeWrapper::Set<VectorInt*>( std::string, std::string, VectorInt* );
 template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<VectorDouble*>( std::string, std::string );
 template bool TTreeWrapper::Set<VectorDouble*>( std::string, std::string, VectorDouble* );
-
+//#endif
 
 
 
