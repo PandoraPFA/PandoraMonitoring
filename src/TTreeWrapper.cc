@@ -199,7 +199,11 @@ TTreeWrapper::Branch<T>::Branch(TTree* tree, std::string branchName)
     if( typeIdName.find("vector") != std::string::npos ) // if it is a standard-vector
     {
         isVector = true;
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
         m_pBranch = tree->Branch( name, &(m_variable)  );
+#else
+//         m_pBranch = tree->Bronch( name, "float", &(m_variable)  );
+#endif
     }
     else
     {
@@ -228,7 +232,9 @@ void TTreeWrapper::Branch<T>::Set( T variable )
     m_variable = variable;
     if( isVector )
     {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
         m_pBranch->SetAddress( &m_variable );
+#endif
     }
 }
 

@@ -207,7 +207,9 @@ void PandoraMonitoring::DeleteHistogram(const std::string &name)
 template <typename VariableType>
 void PandoraMonitoring::SetTreeVariable(const std::string &treeName, const std::string &variableName, VariableType variable )
 {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
     m_treeWrapper.Set( treeName, variableName, variable );
+#endif
 }
 
 // instantiations of this template member function for the permitted types
@@ -224,6 +226,7 @@ template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::
 
 void PandoraMonitoring::FillTree(const std::string &treeName)
 {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
     try {
         m_treeWrapper.Fill( treeName );
     }
@@ -237,12 +240,14 @@ void PandoraMonitoring::FillTree(const std::string &treeName)
         std::cout << "PandoraMonitoring::FillTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
         throw;
     }
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PandoraMonitoring::PrintTree(const std::string &treeName)
 {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
     try {
         m_treeWrapper.Print( treeName );
     }
@@ -256,6 +261,7 @@ void PandoraMonitoring::PrintTree(const std::string &treeName)
         std::cout << "PandoraMonitoring::PrintTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
         throw;
     }
+#endif
 }
 
 
@@ -263,6 +269,7 @@ void PandoraMonitoring::PrintTree(const std::string &treeName)
 
 void PandoraMonitoring::SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions)
 {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
     TTree* tree = NULL;
     try {
         tree = m_treeWrapper.GetTree( treeName );
@@ -287,6 +294,7 @@ void PandoraMonitoring::SaveTree(const std::string &treeName, const std::string 
     pTFile->Close();
 
     delete pTFile;
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
