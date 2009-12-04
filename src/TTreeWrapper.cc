@@ -179,7 +179,7 @@ TTreeWrapper::Branch<T>::Branch(TTree *pTree, const std::string &branchName) :
     {
         m_isVector = true;
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
-        m_pBranch = tree->Branch(name, &(m_variable) );
+        m_pBranch = pTree->Branch(name, &(m_variable) );
 #endif
     }
     else
