@@ -32,8 +32,6 @@ class TBranch;
 namespace pandora_monitoring
 {
 
-
-
 /**
  *  @brief  PandoraMonitoring singleton class
  */
@@ -126,7 +124,7 @@ public:
      * 
      *  @param  treeName name of the tree to be written to a file
      */
-    void SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions );
+    void SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions);
 
     /**
      *  @brief  Draw a histogram
@@ -232,12 +230,7 @@ private:
          *  @param  phi0 the angle through which the detector outline polygon has been rotated wrt the cartesian y axis
          *  @param  closestDistanceToIp the closest distance of the detector outline to the interaction point
          */
-        XYOutlineParameters(int symmetryOrder, float phi0, float closestDistanceToIp) :
-            m_symmetryOrder(symmetryOrder),
-            m_phi0(phi0),
-            m_closestDistanceToIp(closestDistanceToIp)
-        {
-        }
+        XYOutlineParameters(int symmetryOrder, float phi0, float closestDistanceToIp);
 
         /**
          *  @brief  Sort a list of x-y outline parameters, by decreasing radial distance from the interaction point
@@ -272,8 +265,6 @@ private:
     };
 
     typedef std::vector<XYOutlineParameters> XYOutlineParametersList;
-
-
 
     /**
      *  @brief  Default constructor
@@ -371,6 +362,15 @@ inline PandoraMonitoring::PandoraMonitoring()
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline PandoraMonitoring::XYOutlineParameters::XYOutlineParameters(int symmetryOrder, float phi0, float closestDistanceToIp) :
+    m_symmetryOrder(symmetryOrder),
+    m_phi0(phi0),
+    m_closestDistanceToIp(closestDistanceToIp)
+{
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline int PandoraMonitoring::XYOutlineParameters::GetSymmetryOrder() const

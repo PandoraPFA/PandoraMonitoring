@@ -79,8 +79,8 @@ public:
      *  @param  variableName name of the branch in the tree (the branch is created if it does not exist yet)
      *  @param  variable sets value of the variable (permitted types are float/double/int and std::vector<float>*,std::vector<double>*,std::vector<int>*
      */
-    template <typename VariableType>
-    static void SetTreeVariable(const std::string &treeName, const std::string &variableName, VariableType  variable);
+    template <typename T>
+    static void SetTreeVariable(const std::string &treeName, const std::string &variableName, T t);
 
     /**
      *  @brief  Fill the tree with the variables which have been set before with SetTreeVariable
@@ -103,7 +103,7 @@ public:
      * 
      *  @param  treeName name of the tree to be written to a file
      */
-    static void SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions );
+    static void SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions);
 
     /**
      *  @brief  Draw a histogram

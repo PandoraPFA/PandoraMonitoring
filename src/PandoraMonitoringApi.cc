@@ -68,21 +68,21 @@ void PandoraMonitoringApi::DeleteHistogram(const std::string &name)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-template <typename VariableType>
-void PandoraMonitoringApi::SetTreeVariable(const std::string &treeName, const std::string &variableName, VariableType variable )
+template <typename T>
+void PandoraMonitoringApi::SetTreeVariable(const std::string &treeName, const std::string &variableName, T t)
 {
-    PandoraMonitoring::GetInstance()->SetTreeVariable(treeName, variableName, variable);
+    PandoraMonitoring::GetInstance()->SetTreeVariable(treeName, variableName, t);
 }
 
 // instantiations of this template member function for the permitted types
-template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, float  variable );
-template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, int    variable );
-template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, double variable );
+template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, float  t);
+template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, int    t);
+template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, double t);
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
-template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<float>*  variable );
-template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<int>*    variable );
-template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<double>* variable );
+template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<float>*  t);
+template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<int>*    t);
+template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<double>* t);
 #endif
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -105,7 +105,6 @@ void PandoraMonitoringApi::SaveTree(const std::string &treeName, const std::stri
 {
     PandoraMonitoring::GetInstance()->SaveTree(treeName, fileName, fileOptions);
 }
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
