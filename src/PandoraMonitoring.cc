@@ -261,6 +261,26 @@ void PandoraMonitoring::PrintTree(const std::string &treeName)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoring::ScanTree(const std::string &treeName)
+{
+    try
+    {
+        m_treeWrapper.Scan(treeName);
+    }
+    catch(TTreeWrapper::TreeNotFoundError& excpt)
+    {
+        std::cout << "PandoraMonitoring::ScanTree, error: No tree with name '" << treeName <<"' exists." << std::endl;
+        throw;
+    }
+    catch(...)
+    {
+        std::cout << "PandoraMonitoring::ScanTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
+        throw;
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoring::SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions)
 {
     TTree* tree = NULL;

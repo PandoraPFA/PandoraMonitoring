@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
 
 class TTree;
 class TBranch;
@@ -30,6 +31,7 @@ public:
     class TreeInsertError {};
     class BranchInsertError {};
     class TreeNotFoundError {};
+    class BranchNotFoundError {};
 
     TTreeWrapper();
 
@@ -39,8 +41,8 @@ public:
     bool Set(const std::string &treeName, const std::string &branchName, VarType value);
 
     void Fill(const std::string &treeName);
-
     void Print(const std::string &treeName) const ;
+    void Scan(const std::string &treeName) const ;
 
     TTree* GetTree(const std::string &treeName) const;
 

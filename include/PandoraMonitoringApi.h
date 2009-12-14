@@ -97,6 +97,13 @@ public:
     static void PrintTree(const std::string &treeName);
 
     /**
+     *  @brief  Scan the tree (print a list of all values of all branches)
+     * 
+     *  @param  treeName name of the tree to be scanned
+     */
+    static void ScanTree(const std::string &treeName);
+
+    /**
      *  @brief  Save the tree to a file
      *  @param  fileName the file name under which to save the histogram
      *  @param  fileOptions the options associated with opening/recreating a file

@@ -79,17 +79,22 @@ template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const st
 template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, int    t);
 template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, double t);
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
 template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<float>*  t);
 template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<int>*    t);
 template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<double>* t);
-#endif
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PandoraMonitoringApi::PrintTree(const std::string &treeName)
 {
     PandoraMonitoring::GetInstance()->PrintTree(treeName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::ScanTree(const std::string &treeName)
+{
+    PandoraMonitoring::GetInstance()->ScanTree(treeName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

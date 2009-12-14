@@ -14,7 +14,6 @@
 
 #include "TTreeWrapper.h"
 
-#include <map>
 #include <algorithm>
 #include <cctype> // for toupper
 #include <cmath>
@@ -25,7 +24,7 @@ namespace pandora_monitoring
 
 TTreeWrapper::TTreeWrapper() 
 {
-    gROOT->ProcessLine("#include <vector>");
+ //   gROOT->ProcessLine("#include <vector>");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -88,6 +87,32 @@ void TTreeWrapper::Print(const std::string &treeName) const
         throw TreeNotFoundError();
 
     treeIt->second.first->Print();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void TTreeWrapper::Scan(const std::string &treeName) const
+{
+    TreeMap::const_iterator treeIt = m_treeMap.find(treeName);
+    if(treeIt == m_treeMap.end())
+        throw TreeNotFoundError();
+
+    if(treeIt->second.first == NULL)
+        throw TreeNotFoundError();
+
+
+     std::string branchNames;
+     bool isFirst = true;
+     for( BranchMap::iterator itBranchMap = treeIt->second.second->begin(), itBranchMapEnd = treeIt->second.second->begin(); itBranchMap != itBranchMapEnd; ++itBranchMap )
+     {
+         if( !isFirst )
+         {
+             branchNames += ":";
+         }
+         branchNames += itBranchMap->first;
+         isFirst = false;
+     }
+     treeIt->second.first->Scan(branchNames.c_str());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -179,7 +204,7 @@ TTreeWrapper::Branch<T>::Branch(TTree *pTree, const std::string &branchName) :
     {
         m_isVector = true;
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
-        m_pBranch = pTree->Branch(name, &(m_variable) );
+        m_pBranch = pTree->Branch(name, &m_variable);
 #endif
     }
     else
@@ -212,6 +237,8 @@ void TTreeWrapper::Branch<T>::Set(T variable)
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
     if(m_isVector)
     {
+        if( !m_pBranch )
+            throw BranchNotFoundError();
         m_pBranch->SetAddress(&m_variable);
     }
 #endif
