@@ -1,5 +1,5 @@
 /**
- *  @file   TTreeWrapper/include/TTreeWrapper.h
+ *  @file   include/TTreeWrapper.h
  *
  *  @brief  Header file for the pandora monitoring class.
  *

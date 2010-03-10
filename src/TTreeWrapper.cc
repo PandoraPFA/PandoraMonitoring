@@ -1,5 +1,5 @@
 /**
- *  @file   TTreeWrapper/src/TTreeWrapper.cc
+ *  @file   src/TTreeWrapper.cc
  * 
  *  @brief  Implementation of the pandora monitoring class.
  * 
@@ -24,7 +24,7 @@ namespace pandora_monitoring
 
 TTreeWrapper::TTreeWrapper() 
 {
- //   gROOT->ProcessLine("#include <vector>");
+    gROOT->ProcessLine("#include <vector>"); // should not be necessary for newer versions of ROOT
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -204,7 +204,19 @@ TTreeWrapper::Branch<T>::Branch(TTree *pTree, const std::string &branchName) :
     {
         m_isVector = true;
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0)
-        m_pBranch = pTree->Branch(name, &m_variable);
+    
+        m_pBranch = pTree->Branch(name, &m_variable );
+//        m_pBranch->Fill(); // produce a segfault for debugging
+
+        if( !m_pBranch )
+        {
+            std::cout << "TTreeWrapper::Branch<T>::Branch(...) with [ T = " << typeid( T ).name() << " ], m_pBranch = " << m_pBranch
+                      << " : branch has not been created." << std::endl;
+            throw BranchInsertError();
+        }
+#else
+        // load the ROOT dictionary for "vector"
+        gROOT->ProcessLine("#include <vector>"); // should not be necessary for newer versions of ROOT
 #endif
     }
     else
@@ -217,6 +229,12 @@ TTreeWrapper::Branch<T>::Branch(TTree *pTree, const std::string &branchName) :
 
         const char firstLetterOfType = typeIdName.at(0);
         m_pBranch = pTree->Branch(name, &m_variable, TString(m_name.c_str()) + TString("/") + TString(firstLetterOfType));
+        if( !m_pBranch )
+        {
+            std::cout << "TTreeWrapper::Branch<T>::Branch(...) with [ T = " << typeid( T ).name() << " ], m_pBranch = " << m_pBranch
+                      << " : branch has not been created." << std::endl;
+            throw BranchInsertError();
+        }
     }
 }
 
@@ -238,7 +256,10 @@ void TTreeWrapper::Branch<T>::Set(T variable)
     if(m_isVector)
     {
         if( !m_pBranch )
+        {
+            std::cout << "TTreeWrapper::Branch<T>::Set( T variable ) with [ T = " << typeid( T ).name() << " ], m_pBranch = " << m_pBranch << std::endl;
             throw BranchNotFoundError();
+        }
         m_pBranch->SetAddress(&m_variable);
     }
 #endif
@@ -385,6 +406,7 @@ bool TTreeWrapper::BranchHandler::Set(VectorInt *ptr)
 #endif
     return true;
 }
+
 
 // member function template initializations
 template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<float>(const std::string &, const std::string &);
