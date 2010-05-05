@@ -19,6 +19,47 @@ enum DetectorView
     DETECTOR_VIEW_XZ
 };
 
+/**
+ *  @brief  The color enum
+ */
+enum Color
+{
+    WHITE,
+    BLACK,
+    RED,
+    GREEN,
+    BLUE,
+    MAGENTA,
+    CYAN,
+    VIOLET,
+    PINK,
+    ORANGE,
+    YELLOW,
+    SPRING,
+    TEAL,
+    AZURE,
+    GRAY,
+    DARKRED,
+    DARKGREEN,
+    DARKBLUE,
+    DARKMAGENTA,
+    DARKCYAN,
+    DARKVIOLET,
+    DARKPINK,
+    DARKORANGE,
+    DARKYELLOW,
+    LIGHTRED,
+    LIGHTGREEN,
+    LIGHTBLUE,
+    LIGHTMAGENTA,
+    LIGHTCYAN,
+    LIGHTVIOLET,
+    LIGHTPINK,
+    LIGHTORANGE,
+    LIGHTYELLOW,
+    AUTO // automatic choice of colors
+};
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
@@ -144,46 +185,37 @@ public:
     static void DeleteHistogram(const std::string &name);
 
     /**
-     *  @brief  Draw tracks in an event
+     *  @brief  Pauses the monitoring, such that the user can see the output. Clear the canvases and other data. Waits for key-press
      * 
-     *  @param  detectorView the detector view
-     *  @param  pTrackList address of the track list
      */ 
-    static void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList);
+    static void ViewEvent();
 
     /**
-     *  @brief  Draw calo hits in an event
-     * 
-     *  @param  detectorView the detector view
-     *  @param  pOrderedCaloHitList address of the ordered calo hit list
-     */ 
-    static void DrawEvent(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList);
-
-    /**
-     *  @brief  Draw clusters in an event
+     *  @brief  Add ClusterList to the output. The canvas is automatically created if not existing. Pause the output with ViewEvent()
      * 
      *  @param  detectorView the detector view
      *  @param  pClusterList address of the cluster list
+     *  @param  color in which the clusters should be drawn
      */ 
-    static void DrawEvent(DetectorView detectorView, const pandora::ClusterList *const pClusterList);
+    static void AddClusterList(DetectorView detectorView, const pandora::ClusterList *const pClusterList, Color color = AUTO);
 
     /**
-     *  @brief  Draw tracks and calo hits in an event
+     *  @brief  Add TrackList to the output. The canvas is automatically created if not existing. Pause the output with ViewEvent()
      * 
      *  @param  detectorView the detector view
      *  @param  pTrackList address of the track list
-     *  @param  pOrderedCaloHitList address of the ordered calo hit list
+     *  @param  color in which the tracks should be drawn
      */ 
-    static void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::OrderedCaloHitList *const pOrderedCaloHitList);
+    static void AddTrackList(DetectorView detectorView, const pandora::TrackList *const pTrackList, Color color = AUTO);
 
     /**
-     *  @brief  Draw tracks and clusters in an event
+     *  @brief  Add OrderedCaloHitList to the output. The canvas is automatically created if not existing. Pause the output with ViewEvent()
      * 
      *  @param  detectorView the detector view
-     *  @param  pTrackList address of the track list
-     *  @param  pClusterList address of the cluster list
+     *  @param  pOrderedCaloHitList address of the orderedCaloHit list
+     *  @param  color in which the orderedCaloHits should be drawn
      */ 
-    static void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::ClusterList *const pClusterList);
+    static void AddOrderedCaloHitList(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color = AUTO);
 
     /**
      *  @brief  Draw the detector outline

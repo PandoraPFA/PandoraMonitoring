@@ -30,6 +30,7 @@
 #include "TSystem.h"
 #include "TStyle.h"
 #include "TTree.h"
+#include "TColor.h"
 
 #include "PandoraMonitoring.h"
 
@@ -51,7 +52,9 @@ PandoraMonitoring *PandoraMonitoring::GetInstance()
     {
         m_pPandoraMonitoring = new PandoraMonitoring();
         m_instanceFlag = true;
+        TColor::CreateColorWheel(); // create the ROOT color wheel
         gStyle->SetPalette(1);
+        gStyle->SetNumberContours(99);
     }
 
     return m_pPandoraMonitoring;
@@ -311,15 +314,62 @@ void PandoraMonitoring::SaveTree(const std::string &treeName, const std::string 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList)
+void PandoraMonitoring::AddClusterList(DetectorView detectorView, const pandora::ClusterList *const pClusterList, Color color)
 {
-    TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
+    GetCanvas(detectorView);
+    this->DrawClusters(detectorView, pClusterList, color);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::AddTrackList(DetectorView detectorView, const pandora::TrackList *const pTrackList, Color color)
+{
+    GetCanvas(detectorView);
+    this->DrawTracks(detectorView, pTrackList, color);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::AddOrderedCaloHitList(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color)
+{
+    GetCanvas(detectorView);
+    this->DrawCaloHits(detectorView, pOrderedCaloHitList, color);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+TCanvas* PandoraMonitoring::GetCanvas(DetectorView detectorView)
+{
+    CanvasMap::iterator itCanvas = m_canvasMap.find(detectorView);
+    if( itCanvas != m_canvasMap.end() ) // if canvas is already existing in the canvas-map
+    {
+        TCanvas* pCanvas = itCanvas->second;
+        pCanvas->cd();
+        return pCanvas;        // return the canvas
+    }
+
+    // create the canvas
+    std::stringstream sstr;
+    sstr << "PandoraMonitoring_";
+    sstr << (detectorView==DETECTOR_VIEW_XY?"XY":"XZ");
+    
+    TCanvas *pCanvas = new TCanvas(sstr.str().c_str(), sstr.str().c_str(), 750, 750);
     pCanvas->SetFillColor(kWhite);
     pCanvas->SetHighLightColor(kWhite);
     pCanvas->Draw();
 
+    m_canvasMap.insert( std::make_pair(detectorView,pCanvas) );
+
     this->DrawDetectorOutline(detectorView);
-    this->DrawTracks(detectorView, pTrackList);
+
+    pCanvas->cd();
+    return pCanvas;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::ViewEvent()
+{
     this->Pause();
 
     for(unsigned int i = 0; i < m_eventArrows.size(); ++i)
@@ -330,98 +380,15 @@ void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::Trac
 
     m_eventArrows.clear();
     m_eventMarkers.clear();
-    delete pCanvas;
+
+    for( CanvasMap::iterator itCanvas = m_canvasMap.begin(), itCanvasEnd = m_canvasMap.end(); itCanvas != itCanvasEnd; ++itCanvas )
+    {
+        TCanvas* pCanvas = itCanvas->second;
+        delete pCanvas;
+    }
+    m_canvasMap.clear();
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList)
-{
-    TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
-    pCanvas->SetFillColor(kWhite);
-    pCanvas->SetHighLightColor(kWhite);
-    pCanvas->Draw();
-
-    this->DrawDetectorOutline(detectorView);
-    this->DrawCaloHits(detectorView, pOrderedCaloHitList);
-    this->Pause();
-
-    for(unsigned int i = 0; i < m_eventMarkers.size(); ++i)
-        delete m_eventMarkers[i];
-
-    m_eventMarkers.clear();
-    delete pCanvas;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::ClusterList *const pClusterList)
-{
-    TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
-    pCanvas->SetFillColor(kWhite);
-    pCanvas->SetHighLightColor(kWhite);
-    pCanvas->Draw();
-
-    this->DrawDetectorOutline(detectorView);
-    this->DrawClusters(detectorView, pClusterList);
-    this->Pause();
-
-    for(unsigned int i = 0; i < m_eventMarkers.size(); ++i)
-        delete m_eventMarkers[i];
-
-    m_eventMarkers.clear();
-    delete pCanvas;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::OrderedCaloHitList *const pOrderedCaloHitList)
-{
-    TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
-    pCanvas->SetFillColor(kWhite);
-    pCanvas->SetHighLightColor(kWhite);
-    pCanvas->Draw();
-
-    this->DrawDetectorOutline(detectorView);
-    this->DrawTracks(detectorView, pTrackList);
-    this->DrawCaloHits(detectorView, pOrderedCaloHitList);
-    this->Pause();
-
-    for(unsigned int i = 0; i < m_eventArrows.size(); ++i)
-        delete m_eventArrows[i];
-
-    for(unsigned int i = 0; i < m_eventMarkers.size(); ++i)
-        delete m_eventMarkers[i];
-
-    m_eventArrows.clear();
-    m_eventMarkers.clear();
-    delete pCanvas;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoring::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::ClusterList *const pClusterList)
-{
-    TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
-    pCanvas->SetFillColor(kWhite);
-    pCanvas->SetHighLightColor(kWhite);
-    pCanvas->Draw();
-
-    this->DrawDetectorOutline(detectorView);
-    this->DrawTracks(detectorView, pTrackList);
-    this->DrawClusters(detectorView, pClusterList);
-    this->Pause();
-
-    for(unsigned int i = 0; i < m_eventArrows.size(); ++i)
-        delete m_eventArrows[i];
-
-    for(unsigned int i = 0; i < m_eventMarkers.size(); ++i)
-        delete m_eventMarkers[i];
-
-    m_eventArrows.clear();
-    m_eventMarkers.clear();
-    delete pCanvas;
-}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -542,7 +509,7 @@ void PandoraMonitoring::DrawDetectorOutline(DetectorView detectorView)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::DrawTracks(DetectorView detectorView, const pandora::TrackList *const pTrackList)
+void PandoraMonitoring::DrawTracks(DetectorView detectorView, const pandora::TrackList *const pTrackList, Color color)
 {
     for (pandora::TrackList::const_iterator iter = pTrackList->begin(), iterEnd = pTrackList->end(); iter != iterEnd; ++iter)
     {
@@ -583,7 +550,7 @@ void PandoraMonitoring::DrawTracks(DetectorView detectorView, const pandora::Tra
         }
 
         pTPolyMarker->SetMarkerStyle(20);
-        pTPolyMarker->SetMarkerColor(1);
+        pTPolyMarker->SetMarkerColor(GetColor(color));
         pTPolyMarker->SetMarkerSize(0.1);
         pTPolyMarker->Draw();
 
@@ -600,7 +567,7 @@ void PandoraMonitoring::DrawTracks(DetectorView detectorView, const pandora::Tra
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::DrawCaloHits(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList)
+void PandoraMonitoring::DrawCaloHits(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color)
 {
     for (pandora::OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end(); iter != iterEnd; ++iter)
     {
@@ -646,21 +613,23 @@ void PandoraMonitoring::DrawCaloHits(DetectorView detectorView, const pandora::O
         pTPolyMarker->SetMarkerStyle(20);
         pTPolyMarker->SetMarkerSize(0.5);
 
-        unsigned int layerModN(pseudoLayer % 7);
-        unsigned int color = kBlack;
-
-        switch (layerModN)
+        int col = GetColor(color);
+        if( color == AUTO )
         {
-            case 0: color = kRed;       break;
-            case 1: color = kMagenta;   break;
-            case 2: color = kBlue;      break;
-            case 3: color = kCyan;      break;
-            case 4: color = kGreen;     break;
-            case 5: color = kYellow;    break;
-            default:color = kBlack;     break;
-        }
+            unsigned int layerModN(pseudoLayer % 7);
 
-        pTPolyMarker->SetMarkerColor(color);
+            switch (layerModN)
+            {
+                case 0: col = kRed;       break;
+                case 1: col = kMagenta;   break;
+                case 2: col = kBlue;      break;
+                case 3: col = kCyan;      break;
+                case 4: col = kGreen;     break;
+                case 5: col = kYellow;    break;
+                default:col = kBlack;     break;
+            }
+        }
+        pTPolyMarker->SetMarkerColor(col);
         pTPolyMarker->Draw();
         m_eventMarkers.push_back(pTPolyMarker);
 
@@ -672,7 +641,7 @@ void PandoraMonitoring::DrawCaloHits(DetectorView detectorView, const pandora::O
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::DrawClusters(DetectorView detectorView, const pandora::ClusterList *const pClusterList)
+void PandoraMonitoring::DrawClusters(DetectorView detectorView, const pandora::ClusterList *const pClusterList, Color color )
 {
     for (pandora::ClusterList::const_iterator clusterIter = pClusterList->begin(), clusterIterEnd = pClusterList->end();
         clusterIter != clusterIterEnd; ++clusterIter)
@@ -718,13 +687,18 @@ void PandoraMonitoring::DrawClusters(DetectorView detectorView, const pandora::C
         if (1 == nHits)
         {
             pTPolyMarker->SetMarkerSize(0.2);
-            pTPolyMarker->SetMarkerColor(3);
+            pTPolyMarker->SetMarkerColor(GetColor(color));
         }
         else
         {
-            int colour(kBlue + static_cast<int>((*clusterIter)->GetElectromagneticEnergy()));
             pTPolyMarker->SetMarkerSize(0.4);
-            pTPolyMarker->SetMarkerColor(colour);
+            if( color == AUTO )
+            {
+                int autoColor = kBlue + static_cast<int>((*clusterIter)->GetElectromagneticEnergy());
+                pTPolyMarker->SetMarkerColor(autoColor);
+            }
+            else
+                pTPolyMarker->SetMarkerColor(GetColor(color));
         }
 
         pTPolyMarker->Draw();
@@ -887,6 +861,84 @@ void PandoraMonitoring::MakeXZLayerOutline(float innerRCoordinate, float outerRC
         m_2DObjectsXZ.push_back(pTGraph);
     }
 }
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+EColor PandoraMonitoring::GetColor(Color color)
+{
+    switch(color)
+    {
+    case WHITE:
+        return kWhite;
+    case BLACK:
+        return kBlack;
+    case RED:
+        return kRed;
+    case GREEN:
+        return kGreen;
+    case BLUE:
+        return kBlue;
+    case MAGENTA:
+        return kMagenta;
+    case CYAN:
+        return kCyan;
+    case VIOLET:
+        return kViolet;
+    case PINK:
+        return kPink;
+    case ORANGE:
+        return kOrange;
+    case YELLOW:
+        return kYellow;
+    case SPRING:
+        return kSpring;
+    case TEAL:
+        return kTeal;
+    case AZURE:
+        return kAzure;
+    case GRAY:
+        return kGray;
+    case DARKRED:
+        return EColor(TColor::GetColorDark(kRed));
+    case DARKGREEN:
+        return EColor(TColor::GetColorDark(kGreen));
+    case DARKBLUE:
+        return EColor(TColor::GetColorDark(kBlue));
+    case DARKMAGENTA:
+        return EColor(TColor::GetColorDark(kMagenta));
+    case DARKCYAN:
+        return EColor(TColor::GetColorDark(kCyan));
+    case DARKVIOLET:
+        return EColor(TColor::GetColorDark(kViolet));
+    case DARKPINK:
+        return EColor(TColor::GetColorDark(kPink));
+    case DARKORANGE:
+        return EColor(TColor::GetColorDark(kOrange));
+    case DARKYELLOW:
+        return EColor(TColor::GetColorDark(kYellow));
+    case LIGHTGREEN:
+        return EColor(TColor::GetColorBright(kGreen));
+    case LIGHTBLUE:
+        return EColor(TColor::GetColorBright(kBlue));
+    case LIGHTMAGENTA:
+        return EColor(TColor::GetColorBright(kMagenta));
+    case LIGHTCYAN:
+        return EColor(TColor::GetColorBright(kCyan));
+    case LIGHTVIOLET:
+        return EColor(TColor::GetColorBright(kViolet));
+    case LIGHTPINK:
+        return EColor(TColor::GetColorBright(kPink));
+    case LIGHTORANGE:
+        return EColor(TColor::GetColorBright(kOrange));
+    case LIGHTYELLOW:
+        return EColor(TColor::GetColorBright(kYellow));
+    default:
+        return kBlack;
+    }
+    return kBlack;
+}
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------

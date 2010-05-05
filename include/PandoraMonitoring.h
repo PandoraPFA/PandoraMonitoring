@@ -26,6 +26,7 @@ class TObject;
 class TPolyMarker;
 class TTree;
 class TBranch;
+class TCanvas;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -158,46 +159,37 @@ public:
     void DeleteHistogram(const std::string &name);
 
     /**
-     *  @brief  Draw tracks in an event
-     * 
-     *  @param  detectorView the detector view
-     *  @param  pTrackList address of the track list
-     */ 
-    void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList);
-
-    /**
-     *  @brief  Draw calo hits in an event
-     * 
-     *  @param  detectorView the detector view
-     *  @param  pOrderedCaloHitList address of the ordered calo hit list
-     */ 
-    void DrawEvent(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList);
-
-    /**
-     *  @brief  Draw clusters in an event
+     *  @brief  Add ClusterList to the output. The canvas is automatically created if not existing. Pause the output with ViewEvent()
      * 
      *  @param  detectorView the detector view
      *  @param  pClusterList address of the cluster list
+     *  @param  color in which the clusters should be drawn
      */ 
-    void DrawEvent(DetectorView detectorView, const pandora::ClusterList *const pClusterList);
+    void AddClusterList(DetectorView detectorView, const pandora::ClusterList *const pClusterList, Color color = AUTO );
 
     /**
-     *  @brief  Draw tracks and calo hits in an event
+     *  @brief  Add TrackList to the output. The canvas is automatically created if not existing. Pause the output with ViewEvent()
      * 
      *  @param  detectorView the detector view
      *  @param  pTrackList address of the track list
-     *  @param  pOrderedCaloHitList address of the ordered calo hit list
+     *  @param  color in which the tracks should be drawn
      */ 
-    void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::OrderedCaloHitList *const pOrderedCaloHitList);
+    void AddTrackList(DetectorView detectorView, const pandora::TrackList *const pTrackList, Color color = AUTO );
 
     /**
-     *  @brief  Draw tracks and clusters in an event
+     *  @brief  Add OrderedCaloHitList to the output. The canvas is automatically created if not existing. Pause the output with ViewEvent()
      * 
      *  @param  detectorView the detector view
-     *  @param  pTrackList address of the track list
-     *  @param  pClusterList address of the cluster list
+     *  @param  pOrderedCaloHitList address of the OrderedCaloHit list
+     *  @param  color in which the OrderedCaloHits should be drawn
      */ 
-    void DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList, const pandora::ClusterList *const pClusterList);
+    void AddOrderedCaloHitList(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color = AUTO );
+
+    /**
+     *  @brief  Pauses the monitoring, such that the user can see the output. Clears and deletes the canvases.
+     * 
+     */ 
+    void ViewEvent();
 
     /**
      *  @brief  Temporary function - just draw the detector outline
@@ -286,12 +278,21 @@ private:
     void DrawDetectorOutline(DetectorView detectorView);
 
     /**
+     *  @brief  Draw clusters in an event
+     *
+     *  @param  detectorView the detector view
+     *  @param  pClusterList address of the cluster list
+     *  @param  color of the cluster
+     */ 
+    void DrawClusters(DetectorView detectorView, const pandora::ClusterList *const pClusterList, Color color = AUTO);
+
+    /**
      *  @brief  Draw tracks in an event
      * 
      *  @param  detectorView the detector view
      *  @param  pTrackList address of the track list
      */ 
-    void DrawTracks(DetectorView detectorView, const pandora::TrackList *const pTrackList);
+    void DrawTracks(DetectorView detectorView, const pandora::TrackList *const pTrackList, Color color = AUTO);
 
     /**
      *  @brief  Draw calo hits in an event
@@ -299,15 +300,12 @@ private:
      *  @param  detectorView the detector view
      *  @param  pOrderedCaloHitList address of the ordered calo hit list
      */ 
-    void DrawCaloHits(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList);
+    void DrawCaloHits(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color = AUTO);
 
     /**
-     *  @brief  Draw clusters in an event
-     *
-     *  @param  detectorView the detector view
-     *  @param  pClusterList address of the cluster list
-     */ 
-    void DrawClusters(DetectorView detectorView, const pandora::ClusterList *const pClusterList);
+     *  @brief  Get a canvas with a particular detectorView, create and initialize it if not existing
+     */
+    TCanvas* GetCanvas(DetectorView detectorView);
 
     /**
      *  @brief  Construct the detector outline
@@ -331,6 +329,15 @@ private:
      */
     void MakeXZLayerOutline(float innerRCoordinate, float outerRCoordinate, float innerZCoordinate, float outerZCoordinate);
 
+    /**
+     *  @brief  Transform a Pandora monitoring API color enum into a ROOT color enum
+     * 
+     *  @param  color in Pandora monitoring API enum
+     */
+    EColor GetColor( Color color );
+
+    
+
     static bool                 m_instanceFlag;         ///< The pandora monitoring instance flag
     static PandoraMonitoring    *m_pPandoraMonitoring;  ///< The pandora monitoring instance
     TApplication                *m_pApplication;        ///< The root application
@@ -346,6 +353,8 @@ private:
     typedef std::vector<TArrow *> TArrowVector;
     typedef std::vector<TPolyMarker *> TPolyMarkerVector;
 
+    typedef std::map<DetectorView,TCanvas*> CanvasMap;
+
     bool                        m_isOutlineConstructed; ///< Whether the detector outline has been constructed
     TH2F                        *m_pXYAxes;             ///< The xy axes
     TH2F                        *m_pXZAxes;             ///< The xz axes
@@ -354,6 +363,8 @@ private:
     TObjectVector               m_2DObjectsXZ;          ///< The 2d xz graphs vector
     TArrowVector                m_eventArrows;          ///< The event arrows vector
     TPolyMarkerVector           m_eventMarkers;         ///< The event markers vector
+
+    CanvasMap                   m_canvasMap;            ///< The canvases for each of the detector-views the user has requested
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

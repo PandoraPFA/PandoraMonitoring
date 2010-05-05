@@ -113,43 +113,6 @@ void PandoraMonitoringApi::SaveTree(const std::string &treeName, const std::stri
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList)
-{
-    PandoraMonitoring::GetInstance()->DrawEvent(detectorView, pTrackList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList)
-{
-    PandoraMonitoring::GetInstance()->DrawEvent(detectorView, pOrderedCaloHitList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::ClusterList *const pClusterList)
-{
-    PandoraMonitoring::GetInstance()->DrawEvent(detectorView, pClusterList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList,
-    const pandora::OrderedCaloHitList *const pOrderedCaloHitList)
-{
-    PandoraMonitoring::GetInstance()->DrawEvent(detectorView, pTrackList, pOrderedCaloHitList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoringApi::DrawEvent(DetectorView detectorView, const pandora::TrackList *const pTrackList,
-    const pandora::ClusterList *const pClusterList)
-{
-    PandoraMonitoring::GetInstance()->DrawEvent(detectorView, pTrackList, pClusterList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 void PandoraMonitoringApi::DrawDetectorOutline(DetectorView detectorView)
 {
     PandoraMonitoring::GetInstance()->DetectorOutlineTest(detectorView);
@@ -167,4 +130,32 @@ void PandoraMonitoringApi::Test()
 void PandoraMonitoringApi::Test2(const pandora::ClusterList *const pClusterList)
 {
     PandoraMonitoring::GetInstance()->LookAtClusters(pClusterList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::AddClusterList(DetectorView detectorView, const pandora::ClusterList *const pClusterList, Color color)
+{
+    PandoraMonitoring::GetInstance()->AddClusterList(detectorView, pClusterList, color);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::AddTrackList(DetectorView detectorView, const pandora::TrackList *const pTrackList, Color color)
+{
+    PandoraMonitoring::GetInstance()->AddTrackList(detectorView, pTrackList, color);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::AddOrderedCaloHitList(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color)
+{
+    PandoraMonitoring::GetInstance()->AddOrderedCaloHitList(detectorView, pOrderedCaloHitList, color);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::ViewEvent()
+{
+    PandoraMonitoring::GetInstance()->ViewEvent();
 }
