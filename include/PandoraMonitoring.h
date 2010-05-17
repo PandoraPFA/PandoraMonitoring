@@ -16,6 +16,7 @@
 
 #include "TTreeWrapper.h"
 
+
 #include <iostream>
 #include <map>
 
@@ -27,6 +28,17 @@ class TPolyMarker;
 class TTree;
 class TBranch;
 class TCanvas;
+
+class TEveElement;
+class TGeoShape;
+class TGeoVolume;
+class TGeoMedium;
+
+namespace pandora
+{
+    class CartesianVector;
+} // namespace pandora
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -183,13 +195,49 @@ public:
      *  @param  pOrderedCaloHitList address of the OrderedCaloHit list
      *  @param  color in which the OrderedCaloHits should be drawn
      */ 
-    void AddOrderedCaloHitList(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color = AUTO );
+    void AddCaloHitList(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color = AUTO );
 
     /**
      *  @brief  Pauses the monitoring, such that the user can see the output. Clears and deletes the canvases.
      * 
      */ 
     void ViewEvent();
+
+    /**
+     *  @brief Show the Eve Event-display and pause.
+     * 
+     */  
+    void View();
+
+    /**
+     *  @brief Add Clusters to the Eve event-display
+     * 
+     *  @param pClusterList list of clusters to be added to the event display
+     *  @param name of the cluster list
+     *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
+     *  @param color The color the cluster elements are drawn with
+     */  
+    void VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string& name, TEveElement* parent, Color color );
+
+    /**
+     *  @brief Add Tracks to the Eve event-display
+     * 
+     *  @param pTrackList list of tracks to be added to the event display
+     *  @param name of the track list
+     *  @param parent pointer to the parent TEveElement. If NULL, the track will be parent element
+     *  @param color The color the track elements are drawn with
+     */  
+    void VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, TEveElement* parent, Color color );
+
+    /**
+     *  @brief Add CaloHits to the Eve event-display
+     * 
+     *  @param pOrderedCaloHitList list of calohits to be added to the event display
+     *  @param parent name of the calohitlist
+     *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
+     *  @param color The color the cluster elements are drawn with
+     */  
+    void VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, TEveElement* parent, Color color );
 
     /**
      *  @brief  Temporary function - just draw the detector outline
@@ -330,12 +378,70 @@ private:
     void MakeXZLayerOutline(float innerRCoordinate, float outerRCoordinate, float innerZCoordinate, float outerZCoordinate);
 
     /**
+     *  @brief compute the polygon corners for the detector outline
+     * 
+     *  @param symmetryOrder is the number of polygon corners
+     *  @param closestDistanceToIp is the distance to the closest points on the polygon
+     *  @param phi0 reference angle where to start the polygon
+     *  @param coordinates vector of double,double pairs which is filled with the x and y coordinates of the polygon corners
+     */  
+    void ComputePolygonCorners( int symmetryOrder, double closestDistanceToIp, double phi0, std::vector<std::pair<Double_t,Double_t> > &coordinates );
+
+
+    /**
+     *  @brief Creates a "tube" volume with the given symmetry inside and outside. If a symmetryOrder <= 2 is chosen, a circle is used instead of a polygon
+     * 
+     *  @param name of the volume
+     *  @param innerSymmetryOrder symmetry order of the inner polygon (circle)
+     *  @param outerSymmetryOrder symmetry order of the outer polygon (circle)
+     *  @param innerClosestDistanceToIp closest distance between IP and polygon for the inner part of the tube
+     *  @param outerClosestDistanceToIp closest distance between IP and polygon for the outer part of the tube
+     *  @param innerPhi0 starting angle of the inner polygon
+     *  @param outerPhi0 starting angle of the outer polygon
+     *  @param halfLength half length (z) of the tube
+     *  @param medium TGeoMedium of the volume
+     */  
+    TGeoVolume* MakePolygoneTube( std::string name, int innerSymmetryOrder, int outerSymmetryOrder, 
+				  double innerClosestDistanceToIp, double outerClosestDistanceToIp, double innerPhi0, 
+				  double outerPhi0, double halfLength, TGeoMedium* medium = 0 );
+
+    /**
+     *  @brief Creates a extruded polygonal (or cylindrical) shape with the given symmetry. If a symmetryOrder <= 2 is chosen, a circle is used instead of a polygon
+     * 
+     *  @param symmetryOrder symmetry order of the polygon (circle if <=2)
+     *  @param closestDistanceToIp closest distance between IP and polygon (circle radius)
+     *  @param phi starting angle of the polygon
+     *  @param halfLength half length (z) of the tube
+     */  
+    TGeoShape* MakePolygoneTube( int symmetryOrder, double closestDistanceToIp, double phi, double halfLength );
+
+
+    /**
+     *  @brief Computes the corners of a box in 3D
+     * 
+     *  @param position center of the box
+     *  @param normal normal vector of the box (thickness is drawn along this direction)
+     *  @param directionU second direction to define the orientation of the box (corresponds to cellSizeU)
+     *  @param cellSizeU size of box in direction U
+     *  @param cellSizeV size of box in direction V (direction V is computet automatically from normal and directionU)
+     *  @param cellSizeThickness thickness of the box
+     *  @param corners will be filled with the x,y and z-coordinates of all 8 corners of the box
+     */  
+    void MakeCaloHitCell( const pandora::CartesianVector& position, 
+			  const pandora::CartesianVector& normal, 
+			  const pandora::CartesianVector& directionU, 
+			  const float cellSizeU, const float cellSizeV, const float cellSizeThickness,
+			  Float_t corners[24] );
+
+    /**
      *  @brief  Transform a Pandora monitoring API color enum into a ROOT color enum
      * 
      *  @param  color in Pandora monitoring API enum
      */
     EColor GetColor( Color color );
 
+
+    void InitializeEve(Char_t transparency = 70);
     
 
     static bool                 m_instanceFlag;         ///< The pandora monitoring instance flag
@@ -354,6 +460,7 @@ private:
     typedef std::vector<TPolyMarker *> TPolyMarkerVector;
 
     typedef std::map<DetectorView,TCanvas*> CanvasMap;
+    typedef std::vector<TEveElement*> EveElementVector;
 
     bool                        m_isOutlineConstructed; ///< Whether the detector outline has been constructed
     TH2F                        *m_pXYAxes;             ///< The xy axes
@@ -365,6 +472,9 @@ private:
     TPolyMarkerVector           m_eventMarkers;         ///< The event markers vector
 
     CanvasMap                   m_canvasMap;            ///< The canvases for each of the detector-views the user has requested
+    static bool                 m_eveInitialized;       ///< is set if ROOT Eve is initialized
+
+    EveElementVector            m_eveElementVector;     ///< Stores all elements drawn in Eve, allows for easy deletion after viewing
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

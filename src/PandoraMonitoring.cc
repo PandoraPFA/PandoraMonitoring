@@ -32,6 +32,56 @@
 #include "TTree.h"
 #include "TColor.h"
 
+
+#define MINIMUM_ROOT_VERSION "5.20"
+#if (( ROOT_VERSION_CODE < ROOT_VERSION(5,20,0) ) || !ROOT_EVE)
+#define USE_ROOT_EVE 1
+#else
+#endif
+
+
+
+
+#ifdef USE_ROOT_EVE
+#include <TEveManager.h>
+//#include <TEveProjectionManager.h>
+#include <TEveViewer.h>
+#include <TEvePointSet.h>
+#include <TEveArrow.h>
+#include <TEveRGBAPalette.h>
+
+#include <TGeoXtru.h>
+#include <TEveGeoShapeExtract.h>
+#include <TEveGeoShape.h>
+
+#include <TGeometry.h>
+#include <TGeoMaterial.h>
+#include <TGeoManager.h>
+#include <TEveGeoNode.h>
+
+#include "TEveTrackPropagator.h"
+#include "TEveTrack.h"
+#include "TEveVSDStructs.h" // for TEveRecTrack
+
+
+#include <TSystem.h>
+#include <TGeoManager.h>
+#include <TGeoXtru.h>
+#include <TGeoMatrix.h>
+#include <TEveManager.h>
+#include <TEveGeoNode.h>
+#include <TGeoTube.h>
+#include <TEveBoxSet.h>
+#include <TGeoCompositeShape.h>
+#endif
+
+#include <vector>
+#include <map>
+#include <assert.h>
+#include <math.h>
+#include <iostream>
+
+
 #include "PandoraMonitoring.h"
 
 #include <cmath>
@@ -40,7 +90,8 @@
 namespace pandora_monitoring
 {
 
-bool PandoraMonitoring::m_instanceFlag = false;
+bool PandoraMonitoring::m_instanceFlag   = false;
+bool PandoraMonitoring::m_eveInitialized = false;
 
 PandoraMonitoring* PandoraMonitoring::m_pPandoraMonitoring = NULL;
 
@@ -330,7 +381,7 @@ void PandoraMonitoring::AddTrackList(DetectorView detectorView, const pandora::T
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::AddOrderedCaloHitList(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color)
+void PandoraMonitoring::AddCaloHitList(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color)
 {
     GetCanvas(detectorView);
     this->DrawCaloHits(detectorView, pOrderedCaloHitList, color);
@@ -938,6 +989,681 @@ EColor PandoraMonitoring::GetColor(Color color)
     }
     return kBlack;
 }
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::InitializeEve( Char_t transparency )
+{
+#ifndef USE_ROOT_EVE
+    std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
+#else
+    if( PandoraMonitoring::m_eveInitialized )
+        return;
+
+    std::cout << "geometry manager init" << std::endl;
+
+    gSystem->Load("libGeom");
+    TGeoManager *geom = new TGeoManager("DetectorGeometry", "detector geometry");
+
+
+    //--- define some materials
+    TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0,0,0);
+    TGeoMaterial *matAl = new TGeoMaterial("Al", 26.98,13,2.7);
+
+    //--- define some media
+    TGeoMedium *Vacuum = new TGeoMedium("Vacuum",1, matVacuum);
+    TGeoMedium *Al = new TGeoMedium("Aluminium",2, matAl);
+
+
+    //--- make the top container volume
+    TGeoVolume *top = geom->MakeBox("Detector", Vacuum, 1000., 1000., 100.);
+
+    geom->SetTopVolume(top);
+
+
+
+    pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
+
+    typedef std::vector<std::pair<pandora::GeometryHelper::SubDetectorParameters, std::string> > SubDetectorParametersList;
+    SubDetectorParametersList subDetectorParametersList;
+
+    // Additional sub detectors are stored in a map from name to parameters. We don't care about the names here - just copy into a vector for sorting.
+    const pandora::GeometryHelper::SubDetectorParametersMap &subDetectorParametersMap(pGeometryHelper->GetAdditionalSubDetectors());
+    int i = 0;
+    for (pandora::GeometryHelper::SubDetectorParametersMap::const_iterator iter = subDetectorParametersMap.begin(); iter != subDetectorParametersMap.end(); ++iter)
+    { 
+        std::stringstream sstr;
+        sstr << "subDet_" << i;
+
+        subDetectorParametersList.push_back(std::make_pair(iter->second, sstr.str()) );
+        ++i;
+    }
+
+    subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalBarrelParameters(), "ECalBarrel") );
+    subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalEndCapParameters(), "ECalEndCap") );
+    subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalBarrelParameters(), "HCalBarrel") );
+    subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalEndCapParameters(), "HCalEndCap") );
+
+    TGeoVolume* mainTracker = NULL;
+    mainTracker = MakePolygoneTube( "Tracker", 
+                                    0, 0,
+                                    pGeometryHelper->GetMainTrackerInnerRadius(), 
+                                    pGeometryHelper->GetMainTrackerOuterRadius(), 
+                                    0.0,0.0,
+                                    pGeometryHelper->GetMainTrackerZExtent(),
+                                    Al );
+
+    mainTracker->SetLineColor(kGreen);
+    mainTracker->SetTransparency(transparency);
+    mainTracker->SetVisibility(kFALSE);
+    top->AddNode( mainTracker, 0, new TGeoTranslation(0,0,0));
+
+    TGeoVolume* coil = NULL;
+    coil = MakePolygoneTube( "Coil", 
+                             0, 0,
+                             pGeometryHelper->GetCoilInnerRadius(), 
+                             pGeometryHelper->GetCoilOuterRadius(), 
+                             0.0,0.0,
+                             pGeometryHelper->GetCoilZExtent(),
+                             Al );
+
+    coil->SetLineColor(kBlue);
+    coil->SetTransparency(transparency);
+    coil->SetVisibility(kFALSE);
+    top->AddNode( coil, 0, new TGeoTranslation(0,0,0));
+    
+
+
+    Int_t col = 2;
+    for (SubDetectorParametersList::const_iterator iter = subDetectorParametersList.begin(); iter != subDetectorParametersList.end(); ++iter)
+    {
+        bool left = true;
+        for( int lr = 0; lr <= 1; ++lr )
+        {
+            const pandora::GeometryHelper::SubDetectorParameters& detPar = (*iter).first;
+            std::string name = (*iter).second;
+
+
+            std::stringstream sstr;
+            sstr << name;
+            sstr << (left? "_left" : "_right" );
+
+            TGeoVolume* subDetVol = NULL;
+
+            int sign = (left? -1 : 1 );
+            double zMin = detPar.GetInnerZCoordinate();
+            double zMax = detPar.GetOuterZCoordinate();
+            double zThick = zMax-zMin;
+            zMin *= sign;
+            zMax *= sign;
+            double zPosition = zMin+sign*(zThick/2.0);
+
+            subDetVol = MakePolygoneTube( sstr.str().c_str(), 
+                                          detPar.GetInnerSymmetryOrder(),
+                                          detPar.GetOuterSymmetryOrder(),
+                                          detPar.GetInnerRCoordinate(),
+                                          detPar.GetOuterRCoordinate(),
+                                          detPar.GetInnerPhiCoordinate(),
+                                          detPar.GetOuterPhiCoordinate(),
+                                          (zThick/2.0), 
+                                          Al );
+
+            subDetVol->SetLineColor(GetColor(Color(col)));
+            subDetVol->SetFillColor(GetColor(Color(col)));
+            subDetVol->SetTransparency(transparency);
+
+            size_t found=name.find("subDet_");
+            if (found!=std::string::npos)
+                subDetVol->SetVisibility(kFALSE);
+
+            top->AddNode( subDetVol, 0, new TGeoTranslation(0,0, zPosition) );
+            left = false;
+        }
+
+        ++col;
+    }
+
+
+
+
+    //--- close the geometry
+    geom->CloseGeometry();
+
+
+    TEveManager::Create();
+
+    TGeoNode* node = gGeoManager->GetTopNode();
+    TEveGeoTopNode* en = new TEveGeoTopNode(gGeoManager, node);
+    en->SetVisLevel(1);
+    en->GetNode()->GetVolume()->SetVisibility(kFALSE);
+
+    gEve->AddGlobalElement(en);
+
+    gEve->GetDefaultViewer()->SetMainColor( kWhite );
+    //    gEve->SetMainColor( kWhite );
+    gEve->Redraw3D(kTRUE);
+
+    //    this->Pause();
+
+    m_eveInitialized = true;
+#endif
+}
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::ComputePolygonCorners( int symmetryOrder, double closestDistanceToIp, double phi0, std::vector<std::pair<Double_t,Double_t> > &coordinates )
+{
+    if (symmetryOrder > 2)
+    {
+        const Double_t pi(3.1415927);
+        const Double_t x0(-1. * closestDistanceToIp * tan(pi / Double_t(symmetryOrder)));
+        const Double_t y0(closestDistanceToIp);
+
+        for (int i = 0; i < symmetryOrder; ++i)
+        {
+            Double_t theta = 0.f; 
+            theta = phi0 + (2 * pi * Double_t(i) / Double_t(symmetryOrder));
+
+            Double_t x = x0 * cos(theta) + y0 * sin(theta);
+            Double_t y = y0 * cos(theta) - x0 * sin(theta);
+            coordinates.push_back( std::pair<double,double>( x, y ) );
+        }
+    }
+}
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+TGeoVolume* PandoraMonitoring::MakePolygoneTube( std::string name, 
+                                                 int innerSymmetryOrder, int outerSymmetryOrder, 
+                                                 double innerClosestDistanceToIp, double outerClosestDistanceToIp, 
+                                                 double innerPhi0, double outerPhi0, 
+                                                 double halfLength, 
+                                                 TGeoMedium* medium )
+{
+#ifndef USE_ROOT_EVE
+    std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
+    return NULL;
+#else
+    TGeoShape* inner = MakePolygoneTube( innerSymmetryOrder, innerClosestDistanceToIp, innerPhi0, halfLength+2 );
+    TGeoShape* outer = MakePolygoneTube( outerSymmetryOrder, outerClosestDistanceToIp, outerPhi0, halfLength );
+
+    std::string nameInner = (name+"_I");
+    std::string nameOuter = (name+"_O");
+
+    inner->SetName( nameInner.c_str() );
+    outer->SetName( nameOuter.c_str() );
+
+    std::string formula = nameOuter+"-"+nameInner;
+
+    TGeoCompositeShape* cs = new TGeoCompositeShape( (name+"_shape").c_str(), formula.c_str() );
+    TGeoVolume* csVol = new TGeoVolume( name.c_str(), cs, medium );
+
+    return csVol;
+#endif
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+TGeoShape* PandoraMonitoring::MakePolygoneTube( int symmetryOrder, double closestDistanceToIp, double phi, double halfLength )
+{
+#ifndef USE_ROOT_EVE
+    std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
+    return NULL;
+#else
+    if( symmetryOrder <= 2 )
+    {
+        TGeoShape* tube     = new TGeoTube(0, closestDistanceToIp, halfLength );
+        return tube;
+    }
+
+    std::vector<std::pair<Double_t,Double_t> > vertices;
+
+    ComputePolygonCorners( symmetryOrder, closestDistanceToIp, phi, vertices );
+   
+    const Int_t nvertices = vertices.size();
+   
+    Double_t* x = new Double_t[nvertices];
+    Double_t* y = new Double_t[nvertices];
+
+    int index = 0;
+    for( std::vector< std::pair<Double_t,Double_t> >::iterator itCoord = vertices.begin(), itCoordEnd = vertices.end(); itCoord != itCoordEnd; ++itCoord )
+    {
+        x[index] = (*itCoord).first;
+        y[index] = (*itCoord).second;
+
+        ++index;
+    }
+
+    TGeoXtru *xtru = new TGeoXtru(2);
+
+    xtru->DefinePolygon(nvertices,x,y);
+    Double_t z0 = -halfLength, x0 = 0, y0 = 0;
+    Double_t z1 = halfLength,   x1 = 0, y1 = 0;
+
+    Double_t scale0 = 1.0;
+    xtru->DefineSection(0, z0, x0, y0, scale0); // Z position, offset and scale for first section
+    xtru->DefineSection(1, z1, x1, y1, scale0); // -''- go forward
+
+    delete[] x;
+    delete[] y;
+    
+    return xtru;
+#endif
+}
+
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::View()
+{
+#ifndef USE_ROOT_EVE
+    std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
+#else
+    if( !PandoraMonitoring::m_eveInitialized )
+        InitializeEve();
+
+    std::cout << "View Eve" << std::endl;
+
+    TEveManager::Create();
+    gEve->Redraw3D();
+    
+    this->Pause();
+
+    for( EveElementVector::iterator itEl = m_eveElementVector.begin(), itElEnd = m_eveElementVector.end(); itEl != itElEnd; ++itEl )
+    {
+        delete (*itEl);
+    }
+    m_eveElementVector.clear();
+
+#endif
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string& nameInput, TEveElement* parent, Color color )
+{
+#ifndef USE_ROOT_EVE
+    std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
+#else
+
+    if( !PandoraMonitoring::m_eveInitialized )
+        InitializeEve();
+
+    TEveManager::Create();
+
+    std::string name = nameInput;
+    if( name.empty() )
+    {
+        std::stringstream sstr;
+        sstr << "clusters, #" << pClusterList->size();
+        name = sstr.str();
+    }
+    
+    TEveElement* clusterListElement = new TEveElementList();
+    clusterListElement->SetElementNameTitle( name.c_str(), name.c_str() );
+
+    if( parent == NULL )
+        m_eveElementVector.push_back( clusterListElement );
+
+
+    for (pandora::ClusterList::const_iterator clusterIter = pClusterList->begin(), clusterIterEnd = pClusterList->end();
+        clusterIter != clusterIterEnd; ++clusterIter)
+    { 
+        pandora::Cluster* pCluster = (*clusterIter);
+        if( pCluster->GetNCaloHits() == 0 )
+            continue;
+
+        Color clusterColor = color;
+        if( color == AUTO )
+        {
+            const pandora::TrackList& pTrackList = pCluster->GetAssociatedTrackList();
+            bool clusterHasTracks = !(pTrackList.empty());
+            bool clusterIsPhoton  = pCluster->IsPhoton();
+            
+            if( clusterIsPhoton )
+                clusterColor = DARKYELLOW;
+            else if( clusterHasTracks )
+                clusterColor = MAGENTA;
+            else
+                clusterColor = LIGHTBLUE;
+        }
+
+        std::stringstream sstr;
+        sstr << "Eem=" << pCluster->GetElectromagneticEnergy() << " Ehad=" << pCluster->GetHadronicEnergy() << " NHits=" << pCluster->GetNCaloHits();
+
+        TEveElement* clusterElement = new TEveElementList();
+        clusterElement->SetElementNameTitle( sstr.str().c_str(), sstr.str().c_str() );
+
+        try
+        {
+            const pandora::ClusterHelper::ClusterFitResult& fit = pCluster->GetFitToAllHitsResult();
+            const pandora::CartesianVector& intercept = fit.GetIntercept();
+            pandora::CartesianVector direction = fit.GetDirection();
+            
+            const double length = 100;
+            const pandora::CartesianVector displacedStart = intercept- (direction*(length/2));
+            direction *= length;
+
+            TEveArrow* clusterArrow = new TEveArrow(direction.GetX(), direction.GetY(), direction.GetZ(), displacedStart.GetX(),displacedStart.GetY(), displacedStart.GetZ());
+            clusterArrow->SetConeR( 0.03 );
+            clusterArrow->SetConeL( 0.2 );
+            clusterArrow->SetMainColor( GetColor(clusterColor) );
+            clusterArrow->SetPickable( kTRUE );
+            clusterArrow->SetElementNameTitle( sstr.str().c_str(), sstr.str().c_str() );
+            
+            clusterElement->AddElement( clusterArrow );
+        }
+        catch(...)
+        {
+        }
+
+        // show hits
+        const pandora::OrderedCaloHitList orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+        VisualizeCaloHits(&orderedCaloHitList, "", clusterElement, clusterColor );
+
+
+        // show tracks
+        const pandora::TrackList& pTrackList = pCluster->GetAssociatedTrackList();
+        if( !pTrackList.empty() )
+        {
+            VisualizeTracks(&pTrackList, "", clusterElement, color );
+        }
+
+        clusterListElement->AddElement( clusterElement );
+    }
+
+    if( parent )
+        parent->AddElement(clusterListElement);
+    else
+    {
+        gEve->AddElement(clusterListElement);
+        gEve->Redraw3D();
+    }
+
+    //    this->Pause();
+#endif
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, TEveElement* parent, Color color )
+{
+#ifndef USE_ROOT_EVE
+    std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
+#else
+    if( !PandoraMonitoring::m_eveInitialized )
+        InitializeEve();
+
+    TEveManager::Create();
+
+    if( name.empty() )
+        name = "Hits";
+
+    TEvePointSet* hitsMarkers = new TEvePointSet((name+"_markers").c_str());
+    TEveBoxSet* hits = new TEveBoxSet(name.c_str());
+    hits->Reset(TEveBoxSet::kBT_FreeBox, kTRUE, 64);
+    hits->SetMainColor( GetColor( color ) );
+    //    hits->UseSingleColor();
+
+    if( parent == NULL )
+        m_eveElementVector.push_back( hits );
+
+    hits->SetOwnIds(kTRUE);
+
+    Float_t corners[24]; // 8 corners x 3 dimensions
+
+    for (pandora::OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end();
+         iter != iterEnd; ++iter)
+    {
+        //        uint layer = iter->first;
+        pandora::CaloHitList* pCaloHitList = iter->second;
+
+        uint hitIndex = 0;
+        for (pandora::CaloHitList::const_iterator caloHitIter = pCaloHitList->begin(), caloHitIterEnd = pCaloHitList->end();
+             caloHitIter != caloHitIterEnd; ++caloHitIter)
+        {
+            const pandora::CaloHit* caloHit = (*caloHitIter);
+
+            const pandora::CartesianVector position = caloHit->GetPositionVector();
+            const pandora::CartesianVector normal   = caloHit->GetNormalVector();
+            const float sizeU = caloHit->GetCellSizeU();
+            const float sizeV = caloHit->GetCellSizeV();
+            const float thickness = caloHit->GetCellThickness();
+
+            //            float hitEnergy = caloHit->GetElectromagneticEnergy();
+
+            const pandora::DetectorRegion& detReg = caloHit->GetDetectorRegion();
+
+            pandora::CartesianVector dirU( 0, 0, 1 );
+            if( detReg == pandora::ENDCAP )
+                dirU.SetValues( 0, 1, 0 );
+
+            MakeCaloHitCell( position, normal, dirU, sizeU, sizeV, thickness, corners );
+
+
+            hitsMarkers->SetNextPoint( position.GetX(), position.GetY(), position.GetZ() );
+            //            hitMarkers->SetPointId(new TNamed(Form("Point %d", i), ""));
+            hitsMarkers->SetMarkerColor(GetColor(color));
+            hitsMarkers->SetMarkerSize(5);
+            hitsMarkers->SetMarkerStyle(4);
+
+            hits->AddBox( corners );
+            hits->SetPickable( kTRUE );
+            hits->DigitColor(GetColor(color));
+//             float userData[1];
+//             userData[0] = hitEnergy;
+//             hits->DigitUserData( userData );
+            ++hitIndex;
+        }
+    }
+    
+    if( parent )
+    {
+        parent->AddElement(hits);
+        parent->AddElement(hitsMarkers);
+    }
+    else
+    {
+        gEve->AddElement(hits);
+        gEve->Redraw3D();
+    }
+
+#endif
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::MakeCaloHitCell( const pandora::CartesianVector& position, 
+                                         const pandora::CartesianVector& normal, 
+                                         const pandora::CartesianVector& directionU, 
+                                         const float cellSizeU, const float cellSizeV, const float cellSizeThickness,
+                                         Float_t corners[24] )
+{
+    pandora::CartesianVector norm   = normal.GetUnitVector();
+    pandora::CartesianVector dirU   = directionU.GetUnitVector();
+    const float u2 = cellSizeU/2.0 ;
+    const float v2 = cellSizeV/2.0 ;
+    const float t2 = cellSizeThickness/2.0 ;
+
+    pandora::CartesianVector dirV( normal.GetCrossProduct( dirU ));
+    const float magnitudeV = dirV.GetMagnitude();
+    if( magnitudeV<0.00001 )
+    {
+        std::cout << "ERROR/MakeCaloHitCell: vector of direction U is equal to normal vector!" << std::endl;
+        throw std::exception();
+    }
+    else
+    {
+        dirV *= 1/magnitudeV;
+    }
+        
+    pandora::CartesianVector cornerVector[8];
+
+    dirU *= u2;
+    dirV *= v2;
+    norm *= t2;
+
+    // compute all 8 corners for the box
+    cornerVector[0] = position - dirU - dirV -normal;
+    cornerVector[1] = position + dirU - dirV -normal;
+    cornerVector[2] = position + dirU + dirV -normal;
+    cornerVector[3] = position - dirU + dirV -normal;
+
+    cornerVector[4] = position - dirU - dirV +normal;
+    cornerVector[5] = position + dirU - dirV +normal;
+    cornerVector[6] = position + dirU + dirV +normal;
+    cornerVector[7] = position - dirU + dirV +normal;
+
+
+    //    corners = new Float_t[24];
+    corners[0] = cornerVector[0].GetX();
+    corners[1] = cornerVector[0].GetY();
+    corners[2] = cornerVector[0].GetZ();
+
+    corners[3] = cornerVector[1].GetX();
+    corners[4] = cornerVector[1].GetY();
+    corners[5] = cornerVector[1].GetZ();
+
+    corners[6] = cornerVector[2].GetX();
+    corners[7] = cornerVector[2].GetY();
+    corners[8] = cornerVector[2].GetZ();
+
+    corners[9] = cornerVector[3].GetX();
+    corners[10] = cornerVector[3].GetY();
+    corners[11] = cornerVector[3].GetZ();
+
+    corners[12] = cornerVector[4].GetX();
+    corners[13] = cornerVector[4].GetY();
+    corners[14] = cornerVector[4].GetZ();
+
+    corners[15] = cornerVector[5].GetX();
+    corners[16] = cornerVector[5].GetY();
+    corners[17] = cornerVector[5].GetZ();
+
+    corners[18] = cornerVector[6].GetX();
+    corners[19] = cornerVector[6].GetY();
+    corners[20] = cornerVector[6].GetZ();
+
+    corners[21] = cornerVector[7].GetX();
+    corners[22] = cornerVector[7].GetY();
+    corners[23] = cornerVector[7].GetZ();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, TEveElement* parent, Color color )
+{
+#ifndef USE_ROOT_EVE
+    std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
+#else
+
+    if( !PandoraMonitoring::m_eveInitialized )
+        InitializeEve();
+
+    TEveManager::Create();
+
+    TEveTrackList *trackList = new TEveTrackList();
+    trackList->SetMainColor( GetColor( TEAL ) );
+    if( parent == NULL )
+        m_eveElementVector.push_back( trackList );
+
+    if( name.empty() )
+        name = "Tracks";
+    TEveTrackPropagator* propagator = trackList->GetPropagator();
+
+    bool isRungeKutta = false;
+    if (isRungeKutta)
+        propagator->SetStepper(TEveTrackPropagator::kRungeKutta);
+
+    trackList->SetElementNameTitle( name.c_str(), name.c_str() );
+
+
+    pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
+
+    float magneticField = pGeometryHelper->GetBField();
+    propagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., magneticField));
+//     propagator->SetMaxR( pGeometryHelper->GetMainTrackerOuterRadius() );
+//     propagator->SetMaxZ( pGeometryHelper->GetMainTrackerZExtent() );
+    propagator->SetMaxR( pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate() );
+    propagator->SetMaxZ( pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate() );
+    propagator->SetMaxOrbs( 5 );
+
+    for (pandora::TrackList::const_iterator trackIter = pTrackList->begin(), trackIterEnd = pTrackList->end();
+        trackIter != trackIterEnd; ++trackIter)
+    { 
+        pandora::Track* pandoraTrack = (*trackIter);
+
+        const pandora::TrackState& trackState = pandoraTrack->GetTrackStateAtStart();
+        const pandora::CartesianVector& position = trackState.GetPosition();
+        const pandora::CartesianVector& momentum = trackState.GetMomentum();
+
+        const pandora::TrackState& trackStateAtEnd = pandoraTrack->GetTrackStateAtEnd();
+        const pandora::CartesianVector& positionAtEnd = trackStateAtEnd.GetPosition();
+        //        const pandora::CartesianVector& momentumAtEnd = trackStateAtEnd.GetMomentum();
+
+        int chargeSign = pandoraTrack->GetChargeSign();
+
+        Color trackColor = color;
+        if( color == AUTO )
+        {
+            if( chargeSign > 0 )
+                trackColor = RED;
+            else if( chargeSign < 0 )
+                trackColor = GREEN;
+            else // should not happen
+                trackColor = AZURE;
+            
+        }
+
+        
+
+        TEveRecTrack *rc = new TEveRecTrack();
+        rc->fV.Set(position.GetX(),position.GetY(),position.GetZ());
+        rc->fP.Set(momentum.GetX(),momentum.GetY(),momentum.GetZ());
+        rc->fSign = -chargeSign; // "-" because of strange convention in ALICE : see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
+
+        TEveTrack* track = new TEveTrack(rc, propagator);
+        track->SetName(Form("Charge %d, PID %d", chargeSign, pandoraTrack->GetParticleId()));
+        
+        TEvePathMark* pm1 = new TEvePathMark(TEvePathMark::kDecay);
+        pm1->fV.Set(positionAtEnd.GetX(),positionAtEnd.GetY(),positionAtEnd.GetZ());
+        track->AddPathMark(*pm1);
+
+        track->SetLineColor( trackColor );
+        track->SetLineWidth( 1 );
+
+        track->SetPickable( kTRUE );
+
+        trackList->AddElement( track );
+        track->MakeTrack();
+    }
+
+    if( parent == trackList )
+        return;
+
+    if( parent )
+        parent->AddElement(trackList);
+    else
+    {
+        gEve->AddElement(trackList);
+        gEve->Redraw3D();
+    }
+
+    //    this->Pause();
+#endif
+}
+
+
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------

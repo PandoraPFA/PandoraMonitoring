@@ -185,6 +185,39 @@ public:
     static void DeleteHistogram(const std::string &name);
 
     /**
+     *  @brief Show the Eve Event-display and pause.
+     * 
+     */  
+    static void View();
+
+    /**
+     *  @brief Add Clusters to the Eve event-display
+     * 
+     *  @param pClusterList list of clusters to be added to the event display
+     *  @param name of the cluster list
+     *  @param color The color the cluster elements are drawn with
+     */  
+    static void VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color );
+
+    /**
+     *  @brief Add Tracks to the Eve event-display
+     * 
+     *  @param pTrackList list of tracks to be added to the event display
+     *  @param name of the track list
+     *  @param color The color the track elements are drawn with
+     */  
+    static void VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, Color color );
+
+    /**
+     *  @brief Add CaloHits to the Eve event-display
+     * 
+     *  @param pOrderedCaloHitList list of calohits to be added to the event display
+     *  @param name of the calohit list
+     *  @param color The color the cluster elements are drawn with
+     */  
+    static void VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, Color color );
+
+    /**
      *  @brief  Pauses the monitoring, such that the user can see the output. Clear the canvases and other data. Waits for key-press
      * 
      */ 
@@ -215,7 +248,7 @@ public:
      *  @param  pOrderedCaloHitList address of the orderedCaloHit list
      *  @param  color in which the orderedCaloHits should be drawn
      */ 
-    static void AddOrderedCaloHitList(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color = AUTO);
+    static void AddCaloHitList(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color = AUTO);
 
     /**
      *  @brief  Draw the detector outline

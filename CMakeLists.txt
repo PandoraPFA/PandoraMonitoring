@@ -136,6 +136,22 @@ IF( INSTALL_DOC )
 ENDIF()
 
 
+
+### ADDITIONAL LIBRARIES ############################################################
+
+MESSAGE( STATUS "ROOT_HOME : ${ROOT_HOME}" )
+FIND_FILE( LIB_EVE lib/libEve.so PATHS ${ROOT_HOME} )
+IF( LIB_EVE )
+    MESSAGE( STATUS "ROOT Eve library found : ${LIB_EVE}" )
+    LINK_LIBRARIES( ${LIB_EVE} )
+    SET( ROOT_EVE 1 )
+ELSE()
+    MESSAGE( STATUS "ROOT Eve library not found" )
+#    SET( ROOT_EVE 0 )
+ENDIF()
+
+
+
 ##########################################################################################
 # End of User section: please try not to modify below this line
 ##########################################################################################
@@ -252,4 +268,9 @@ INSTALL( FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}BuildSettings.cmake" DESTIN
 # export library dependencies (keep this as the last line in the file)
 EXPORT_LIBRARY_DEPENDENCIES( "${PROJECT_NAME}LibDeps.cmake" )
 INSTALL( FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}LibDeps.cmake" DESTINATION lib/cmake )
+
+
+
+
+
 
