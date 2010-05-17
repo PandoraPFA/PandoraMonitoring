@@ -1294,10 +1294,11 @@ void PandoraMonitoring::View()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string& nameInput, TEveElement* parent, Color color )
+TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string& nameInput, TEveElement* parent, Color color )
 {
 #ifndef USE_ROOT_EVE
     std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
+    return NULL;
 #else
 
     if( !PandoraMonitoring::m_eveInitialized )
@@ -1315,6 +1316,8 @@ void PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClu
     
     TEveElement* clusterListElement = new TEveElementList();
     clusterListElement->SetElementNameTitle( name.c_str(), name.c_str() );
+
+
 
     if( parent == NULL )
         m_eveElementVector.push_back( clusterListElement );
@@ -1345,8 +1348,14 @@ void PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClu
         std::stringstream sstr;
         sstr << "Eem=" << pCluster->GetElectromagneticEnergy() << " Ehad=" << pCluster->GetHadronicEnergy() << " NHits=" << pCluster->GetNCaloHits();
 
-        TEveElement* clusterElement = new TEveElementList();
-        clusterElement->SetElementNameTitle( sstr.str().c_str(), sstr.str().c_str() );
+//         TEveElement* clusterElement = new TEveElementList();
+//         clusterElement->SetElementNameTitle( sstr.str().c_str(), sstr.str().c_str() );
+
+        // show hits
+        const pandora::OrderedCaloHitList orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+        TEveElement* caloHitsElement = VisualizeCaloHits(&orderedCaloHitList, sstr.str().c_str(), clusterListElement, clusterColor );
+
+
 
         try
         {
@@ -1365,46 +1374,41 @@ void PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClu
             clusterArrow->SetPickable( kTRUE );
             clusterArrow->SetElementNameTitle( sstr.str().c_str(), sstr.str().c_str() );
             
-            clusterElement->AddElement( clusterArrow );
+            caloHitsElement->AddElement( clusterArrow );
         }
         catch(...)
         {
         }
-
-        // show hits
-        const pandora::OrderedCaloHitList orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-        VisualizeCaloHits(&orderedCaloHitList, "", clusterElement, clusterColor );
 
 
         // show tracks
         const pandora::TrackList& pTrackList = pCluster->GetAssociatedTrackList();
         if( !pTrackList.empty() )
         {
-            VisualizeTracks(&pTrackList, "", clusterElement, color );
+            VisualizeTracks(&pTrackList, "", caloHitsElement, color );
         }
 
-        clusterListElement->AddElement( clusterElement );
     }
 
-    if( parent )
-        parent->AddElement(clusterListElement);
-    else
+    if( !parent )
     {
         gEve->AddElement(clusterListElement);
         gEve->Redraw3D();
     }
 
     //    this->Pause();
+    return clusterListElement;
 #endif
 }
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, TEveElement* parent, Color color )
+TEveElement* PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, TEveElement* parent, Color color )
 {
 #ifndef USE_ROOT_EVE
     std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
+    return NULL;
 #else
     if( !PandoraMonitoring::m_eveInitialized )
         InitializeEve();
@@ -1423,8 +1427,9 @@ void PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitList *con
     if( parent == NULL )
     {
         m_eveElementVector.push_back( hits );
-        m_eveElementVector.push_back( hitsMarkers );
     }
+
+    hits->AddElement(hitsMarkers);
 
     hits->SetOwnIds(kTRUE);
 
@@ -1479,15 +1484,14 @@ void PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitList *con
     if( parent )
     {
         parent->AddElement(hits);
-        parent->AddElement(hitsMarkers);
     }
     else
     {
         gEve->AddElement(hits);
-        gEve->AddElement(hitsMarkers);
         gEve->Redraw3D();
     }
 
+    return hits;
 #endif
 }
 
@@ -1572,10 +1576,11 @@ void PandoraMonitoring::MakeCaloHitCell( const pandora::CartesianVector& positio
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, TEveElement* parent, Color color )
+TEveElement* PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, TEveElement* parent, Color color )
 {
 #ifndef USE_ROOT_EVE
     std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
+    return NULL;
 #else
 
     if( !PandoraMonitoring::m_eveInitialized )
@@ -1660,9 +1665,6 @@ void PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackLi
         track->MakeTrack();
     }
 
-    if( parent == trackList )
-        return;
-
     if( parent )
         parent->AddElement(trackList);
     else
@@ -1672,6 +1674,7 @@ void PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackLi
     }
 
     //    this->Pause();
+    return trackList;
 #endif
 }
 

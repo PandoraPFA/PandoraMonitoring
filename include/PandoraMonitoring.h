@@ -217,7 +217,7 @@ public:
      *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
      *  @param color The color the cluster elements are drawn with
      */  
-    void VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string& name, TEveElement* parent, Color color );
+    TEveElement* VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string& name, TEveElement* parent, Color color );
 
     /**
      *  @brief Add Tracks to the Eve event-display
@@ -227,7 +227,7 @@ public:
      *  @param parent pointer to the parent TEveElement. If NULL, the track will be parent element
      *  @param color The color the track elements are drawn with
      */  
-    void VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, TEveElement* parent, Color color );
+    TEveElement* VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, TEveElement* parent, Color color );
 
     /**
      *  @brief Add CaloHits to the Eve event-display
@@ -236,8 +236,10 @@ public:
      *  @param parent name of the calohitlist
      *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
      *  @param color The color the cluster elements are drawn with
+     *  
+     *  @return pointer to created TEveElement
      */  
-    void VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, TEveElement* parent, Color color );
+    TEveElement* VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, TEveElement* parent, Color color );
 
     /**
      *  @brief  Temporary function - just draw the detector outline
