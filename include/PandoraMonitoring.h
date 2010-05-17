@@ -474,6 +474,8 @@ private:
     CanvasMap                   m_canvasMap;            ///< The canvases for each of the detector-views the user has requested
     static bool                 m_eveInitialized;       ///< is set if ROOT Eve is initialized
 
+    static float                m_scalingFactor;        ///< TEve works with [cm], Pandora works with [mm]
+
     EveElementVector            m_eveElementVector;     ///< Stores all elements drawn in Eve, allows for easy deletion after viewing
 };
 

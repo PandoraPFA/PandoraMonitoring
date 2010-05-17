@@ -45,6 +45,7 @@
 #ifdef USE_ROOT_EVE
 #include <TEveManager.h>
 //#include <TEveProjectionManager.h>
+#include <TEveEventManager.h>
 #include <TEveViewer.h>
 #include <TEvePointSet.h>
 #include <TEveArrow.h>
@@ -90,8 +91,9 @@
 namespace pandora_monitoring
 {
 
-bool PandoraMonitoring::m_instanceFlag   = false;
-bool PandoraMonitoring::m_eveInitialized = false;
+bool  PandoraMonitoring::m_instanceFlag   = false;
+bool  PandoraMonitoring::m_eveInitialized = false;
+float PandoraMonitoring::m_scalingFactor = 0.1;
 
 PandoraMonitoring* PandoraMonitoring::m_pPandoraMonitoring = NULL;
 
@@ -1001,6 +1003,7 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
     if( PandoraMonitoring::m_eveInitialized )
         return;
 
+
     std::cout << "geometry manager init" << std::endl;
 
     gSystem->Load("libGeom");
@@ -1048,10 +1051,10 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
     TGeoVolume* mainTracker = NULL;
     mainTracker = MakePolygoneTube( "Tracker", 
                                     0, 0,
-                                    pGeometryHelper->GetMainTrackerInnerRadius(), 
-                                    pGeometryHelper->GetMainTrackerOuterRadius(), 
+                                    pGeometryHelper->GetMainTrackerInnerRadius()*m_scalingFactor, 
+                                    pGeometryHelper->GetMainTrackerOuterRadius()*m_scalingFactor, 
                                     0.0,0.0,
-                                    pGeometryHelper->GetMainTrackerZExtent(),
+                                    pGeometryHelper->GetMainTrackerZExtent()*m_scalingFactor,
                                     Al );
 
     mainTracker->SetLineColor(kGreen);
@@ -1062,10 +1065,10 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
     TGeoVolume* coil = NULL;
     coil = MakePolygoneTube( "Coil", 
                              0, 0,
-                             pGeometryHelper->GetCoilInnerRadius(), 
-                             pGeometryHelper->GetCoilOuterRadius(), 
+                             pGeometryHelper->GetCoilInnerRadius()*m_scalingFactor, 
+                             pGeometryHelper->GetCoilOuterRadius()*m_scalingFactor, 
                              0.0,0.0,
-                             pGeometryHelper->GetCoilZExtent(),
+                             pGeometryHelper->GetCoilZExtent()*m_scalingFactor,
                              Al );
 
     coil->SetLineColor(kBlue);
@@ -1092,8 +1095,8 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
             TGeoVolume* subDetVol = NULL;
 
             int sign = (left? -1 : 1 );
-            double zMin = detPar.GetInnerZCoordinate();
-            double zMax = detPar.GetOuterZCoordinate();
+            double zMin = detPar.GetInnerZCoordinate()*m_scalingFactor;
+            double zMax = detPar.GetOuterZCoordinate()*m_scalingFactor;
             double zThick = zMax-zMin;
             zMin *= sign;
             zMax *= sign;
@@ -1102,8 +1105,8 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
             subDetVol = MakePolygoneTube( sstr.str().c_str(), 
                                           detPar.GetInnerSymmetryOrder(),
                                           detPar.GetOuterSymmetryOrder(),
-                                          detPar.GetInnerRCoordinate(),
-                                          detPar.GetOuterRCoordinate(),
+                                          detPar.GetInnerRCoordinate()*m_scalingFactor,
+                                          detPar.GetOuterRCoordinate()*m_scalingFactor,
                                           detPar.GetInnerPhiCoordinate(),
                                           detPar.GetOuterPhiCoordinate(),
                                           (zThick/2.0), 
@@ -1277,12 +1280,15 @@ void PandoraMonitoring::View()
     
     this->Pause();
 
-    for( EveElementVector::iterator itEl = m_eveElementVector.begin(), itElEnd = m_eveElementVector.end(); itEl != itElEnd; ++itEl )
-    {
-        delete (*itEl);
-    }
-    m_eveElementVector.clear();
+//     for( EveElementVector::iterator itEl = m_eveElementVector.begin(), itElEnd = m_eveElementVector.end(); itEl != itElEnd; ++itEl )
+//     {
+//         TEveElement* element = (*itEl);
+//         gEve->RemoveElement(element);
+//         delete element;
+//     }
+//     m_eveElementVector.clear();
 
+    gEve->AddEvent( new TEveEventManager("Event","Event") );
 #endif
 }
 
@@ -1345,11 +1351,11 @@ void PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClu
         try
         {
             const pandora::ClusterHelper::ClusterFitResult& fit = pCluster->GetFitToAllHitsResult();
-            const pandora::CartesianVector& intercept = fit.GetIntercept();
-            pandora::CartesianVector direction = fit.GetDirection();
-            
+            const pandora::CartesianVector intercept = fit.GetIntercept()*m_scalingFactor;
+            pandora::CartesianVector direction = fit.GetDirection()*m_scalingFactor;
+
             const double length = 100;
-            const pandora::CartesianVector displacedStart = intercept- (direction*(length/2));
+            pandora::CartesianVector displacedStart = intercept- (direction*(length/2));
             direction *= length;
 
             TEveArrow* clusterArrow = new TEveArrow(direction.GetX(), direction.GetY(), direction.GetZ(), displacedStart.GetX(),displacedStart.GetY(), displacedStart.GetZ());
@@ -1415,7 +1421,10 @@ void PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitList *con
     //    hits->UseSingleColor();
 
     if( parent == NULL )
+    {
         m_eveElementVector.push_back( hits );
+        m_eveElementVector.push_back( hitsMarkers );
+    }
 
     hits->SetOwnIds(kTRUE);
 
@@ -1433,11 +1442,12 @@ void PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitList *con
         {
             const pandora::CaloHit* caloHit = (*caloHitIter);
 
-            const pandora::CartesianVector position = caloHit->GetPositionVector();
+            const pandora::CartesianVector position = caloHit->GetPositionVector()*m_scalingFactor;
             const pandora::CartesianVector normal   = caloHit->GetNormalVector();
-            const float sizeU = caloHit->GetCellSizeU();
-            const float sizeV = caloHit->GetCellSizeV();
-            const float thickness = caloHit->GetCellThickness();
+            const float sizeU = caloHit->GetCellSizeU()*m_scalingFactor;
+            const float sizeV = caloHit->GetCellSizeV()*m_scalingFactor;
+            const float thickness = caloHit->GetCellThickness()*m_scalingFactor;
+
 
             //            float hitEnergy = caloHit->GetElectromagneticEnergy();
 
@@ -1474,6 +1484,7 @@ void PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitList *con
     else
     {
         gEve->AddElement(hits);
+        gEve->AddElement(hitsMarkers);
         gEve->Redraw3D();
     }
 
@@ -1572,6 +1583,7 @@ void PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackLi
 
     TEveManager::Create();
 
+
     TEveTrackList *trackList = new TEveTrackList();
     trackList->SetMainColor( GetColor( TEAL ) );
     if( parent == NULL )
@@ -1581,7 +1593,7 @@ void PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackLi
         name = "Tracks";
     TEveTrackPropagator* propagator = trackList->GetPropagator();
 
-    bool isRungeKutta = false;
+    bool isRungeKutta = false; // if false --> helix fit
     if (isRungeKutta)
         propagator->SetStepper(TEveTrackPropagator::kRungeKutta);
 
@@ -1592,10 +1604,10 @@ void PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackLi
 
     float magneticField = pGeometryHelper->GetBField();
     propagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., magneticField));
-//     propagator->SetMaxR( pGeometryHelper->GetMainTrackerOuterRadius() );
-//     propagator->SetMaxZ( pGeometryHelper->GetMainTrackerZExtent() );
-    propagator->SetMaxR( pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate() );
-    propagator->SetMaxZ( pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate() );
+//     propagator->SetMaxR( pGeometryHelper->GetMainTrackerOuterRadius()*m_scalingFactor );
+//     propagator->SetMaxZ( pGeometryHelper->GetMainTrackerZExtent()*m_scalingFactor );
+    propagator->SetMaxR( pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate()*m_scalingFactor );
+    propagator->SetMaxZ( pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate()*m_scalingFactor );
     propagator->SetMaxOrbs( 5 );
 
     for (pandora::TrackList::const_iterator trackIter = pTrackList->begin(), trackIterEnd = pTrackList->end();
@@ -1604,11 +1616,11 @@ void PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackLi
         pandora::Track* pandoraTrack = (*trackIter);
 
         const pandora::TrackState& trackState = pandoraTrack->GetTrackStateAtStart();
-        const pandora::CartesianVector& position = trackState.GetPosition();
+        const pandora::CartesianVector position = trackState.GetPosition()*m_scalingFactor;
         const pandora::CartesianVector& momentum = trackState.GetMomentum();
 
         const pandora::TrackState& trackStateAtEnd = pandoraTrack->GetTrackStateAtEnd();
-        const pandora::CartesianVector& positionAtEnd = trackStateAtEnd.GetPosition();
+        const pandora::CartesianVector positionAtEnd = trackStateAtEnd.GetPosition()*m_scalingFactor;
         //        const pandora::CartesianVector& momentumAtEnd = trackStateAtEnd.GetMomentum();
 
         int chargeSign = pandoraTrack->GetChargeSign();
@@ -1633,7 +1645,7 @@ void PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackLi
         rc->fSign = -chargeSign; // "-" because of strange convention in ALICE : see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
 
         TEveTrack* track = new TEveTrack(rc, propagator);
-        track->SetName(Form("Charge %d, PID %d", chargeSign, pandoraTrack->GetParticleId()));
+        track->SetName(Form("Charge %d, PID %d, p %f", chargeSign, pandoraTrack->GetParticleId(), momentum.GetMagnitude()));
         
         TEvePathMark* pm1 = new TEvePathMark(TEvePathMark::kDecay);
         pm1->fV.Set(positionAtEnd.GetX(),positionAtEnd.GetY(),positionAtEnd.GetZ());
