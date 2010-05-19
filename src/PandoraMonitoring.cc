@@ -1288,6 +1288,7 @@ void PandoraMonitoring::View()
 //     }
 //     m_eveElementVector.clear();
 
+    gEve->GetCurrentEvent()->SetRnrSelfChildren(kFALSE,kFALSE);
     gEve->AddEvent( new TEveEventManager("Event","Event") );
 #endif
 }
@@ -1361,7 +1362,7 @@ TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
         {
             const pandora::ClusterHelper::ClusterFitResult& fit = pCluster->GetFitToAllHitsResult();
             const pandora::CartesianVector intercept = fit.GetIntercept()*m_scalingFactor;
-            pandora::CartesianVector direction = fit.GetDirection()*m_scalingFactor;
+            pandora::CartesianVector direction       = fit.GetDirection()*m_scalingFactor;
 
             const double length = 100;
             pandora::CartesianVector displacedStart = intercept- (direction*(length/2));
@@ -1448,32 +1449,36 @@ TEveElement* PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             const pandora::CaloHit* caloHit = (*caloHitIter);
 
             const pandora::CartesianVector position = caloHit->GetPositionVector()*m_scalingFactor;
-            const pandora::CartesianVector normal   = caloHit->GetNormalVector();
             const float sizeU = caloHit->GetCellSizeU()*m_scalingFactor;
             const float sizeV = caloHit->GetCellSizeV()*m_scalingFactor;
             const float thickness = caloHit->GetCellThickness()*m_scalingFactor;
 
-
             //            float hitEnergy = caloHit->GetElectromagneticEnergy();
 
-            const pandora::DetectorRegion& detReg = caloHit->GetDetectorRegion();
+            // direction vectors (normal and U)
+            const pandora::CartesianVector normal   = caloHit->GetNormalVector();
 
+            const pandora::DetectorRegion& detReg = caloHit->GetDetectorRegion();
             pandora::CartesianVector dirU( 0, 0, 1 );
             if( detReg == pandora::ENDCAP )
                 dirU.SetValues( 0, 1, 0 );
 
+            // compute the corners of the calohit calorimeter-cell
             MakeCaloHitCell( position, normal, dirU, sizeU, sizeV, thickness, corners );
 
 
+            // at hit marker
             hitsMarkers->SetNextPoint( position.GetX(), position.GetY(), position.GetZ() );
             //            hitMarkers->SetPointId(new TNamed(Form("Point %d", i), ""));
             hitsMarkers->SetMarkerColor(GetColor(color));
             hitsMarkers->SetMarkerSize(5);
             hitsMarkers->SetMarkerStyle(4);
 
+            // add calorimeter-cell for calo-hit
             hits->AddBox( corners );
             hits->SetPickable( kTRUE );
             hits->DigitColor(GetColor(color));
+
 //             float userData[1];
 //             userData[0] = hitEnergy;
 //             hits->DigitUserData( userData );
@@ -1510,7 +1515,7 @@ void PandoraMonitoring::MakeCaloHitCell( const pandora::CartesianVector& positio
     const float v2 = cellSizeV/2.0 ;
     const float t2 = cellSizeThickness/2.0 ;
 
-    pandora::CartesianVector dirV( normal.GetCrossProduct( dirU ));
+    pandora::CartesianVector dirV( norm.GetCrossProduct( dirU ));
     const float magnitudeV = dirV.GetMagnitude();
     if( magnitudeV<0.00001 )
     {
@@ -1529,15 +1534,15 @@ void PandoraMonitoring::MakeCaloHitCell( const pandora::CartesianVector& positio
     norm *= t2;
 
     // compute all 8 corners for the box
-    cornerVector[0] = position - dirU - dirV -normal;
-    cornerVector[1] = position + dirU - dirV -normal;
-    cornerVector[2] = position + dirU + dirV -normal;
-    cornerVector[3] = position - dirU + dirV -normal;
+    cornerVector[0] = position - dirU - dirV -norm;
+    cornerVector[1] = position + dirU - dirV -norm;
+    cornerVector[2] = position + dirU + dirV -norm;
+    cornerVector[3] = position - dirU + dirV -norm;
 
-    cornerVector[4] = position - dirU - dirV +normal;
-    cornerVector[5] = position + dirU - dirV +normal;
-    cornerVector[6] = position + dirU + dirV +normal;
-    cornerVector[7] = position - dirU + dirV +normal;
+    cornerVector[4] = position - dirU - dirV +norm;
+    cornerVector[5] = position + dirU - dirV +norm;
+    cornerVector[6] = position + dirU + dirV +norm;
+    cornerVector[7] = position - dirU + dirV +norm;
 
 
     //    corners = new Float_t[24];
