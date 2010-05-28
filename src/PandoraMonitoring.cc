@@ -35,9 +35,10 @@
 
 
 #define MINIMUM_ROOT_VERSION "5.20"
-#if (( ROOT_VERSION_CODE < ROOT_VERSION(5,20,0) ) || !ROOT_EVE)
-#else
+#ifdef ROOT_EVE
+#if ( ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0) )
 #define USE_ROOT_EVE 1
+#endif
 #endif
 
 

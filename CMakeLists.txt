@@ -144,10 +144,9 @@ FIND_FILE( LIB_EVE lib/libEve.so PATHS ${ROOT_HOME} )
 IF( LIB_EVE )
     MESSAGE( STATUS "ROOT Eve library found : ${LIB_EVE}" )
     LINK_LIBRARIES( ${LIB_EVE} )
-    SET( ROOT_EVE 1 )
+    ADD_DEFINITIONS( -DROOT_EVE )
 ELSE()
     MESSAGE( STATUS "ROOT Eve library not found" )
-#    SET( ROOT_EVE 0 )
 ENDIF()
 
 
