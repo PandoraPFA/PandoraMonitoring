@@ -265,6 +265,16 @@ public:
      */
     void Pause() const;
 
+    /**
+     *  @brief  Destructor
+     */
+    ~PandoraMonitoring();
+
+    /**
+     *  @brief Delete instance of PandoraMonitoring
+     */
+    void DeleteInstance();
+
 private:
     /**
      *  @brief  The x-y outline parameters class
@@ -462,7 +472,6 @@ private:
     typedef std::vector<TPolyMarker *> TPolyMarkerVector;
 
     typedef std::map<DetectorView,TCanvas*> CanvasMap;
-    typedef std::vector<TEveElement*> EveElementVector;
 
     bool                        m_isOutlineConstructed; ///< Whether the detector outline has been constructed
     TH2F                        *m_pXYAxes;             ///< The xy axes
@@ -478,7 +487,7 @@ private:
 
     static float                m_scalingFactor;        ///< TEve works with [cm], Pandora works with [mm]
 
-    EveElementVector            m_eveElementVector;     ///< Stores all elements drawn in Eve, allows for easy deletion after viewing
+    static bool                 m_openEveEvent;         ///< is set if an Event is open to store objects (hits, clusters,...) in it.
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

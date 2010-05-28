@@ -31,12 +31,24 @@ TTreeWrapper::TTreeWrapper()
 
 TTreeWrapper::~TTreeWrapper() 
 {
+//    Clear();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void TTreeWrapper::Clear() 
+{
     for(TreeMap::iterator itTreeMap = m_treeMap.begin(), itTreeMapEnd = m_treeMap.end(); itTreeMap != itTreeMapEnd; ++itTreeMap)
     {
-        delete itTreeMap->second.first;     // delete the TTree
-        for(BranchMap::iterator itBranchMap = itTreeMap->second.second->begin(), itBranchMapEnd = itTreeMap->second.second->end(); itBranchMap != itBranchMapEnd; ++itBranchMap)
+        TTree* tree = itTreeMap->second.first;
+        if( tree )
         {
-            delete itBranchMap->second;     // delete the BranchHandlers
+            delete itTreeMap->second.first;     // delete the TTree
+            itTreeMap->second.first = NULL;
+            for(BranchMap::iterator itBranchMap = itTreeMap->second.second->begin(), itBranchMapEnd = itTreeMap->second.second->end(); itBranchMap != itBranchMapEnd; ++itBranchMap)
+            {
+                delete itBranchMap->second;     // delete the BranchHandlers
+            }
         }
         delete itTreeMap->second.second;    // delete the BranchMap itself
     }
@@ -117,9 +129,9 @@ void TTreeWrapper::Scan(const std::string &treeName) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TTree* TTreeWrapper::GetTree(const std::string &treeName) const
+TTree*& TTreeWrapper::GetTree(const std::string &treeName) 
 {
-    TreeMap::const_iterator treeIt = m_treeMap.find(treeName);
+    TreeMap::iterator treeIt = m_treeMap.find(treeName);
     if(treeIt == m_treeMap.end())
         throw TreeNotFoundError();
 

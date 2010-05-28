@@ -184,3 +184,9 @@ void PandoraMonitoringApi::VisualizeCaloHits(const pandora::OrderedCaloHitList *
     PandoraMonitoring::GetInstance()->VisualizeCaloHits(pOrderedCaloHitList, name, NULL, color);
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+void PandoraMonitoringApi::Delete()
+{
+    PandoraMonitoring::GetInstance()->DeleteInstance();
+}
+

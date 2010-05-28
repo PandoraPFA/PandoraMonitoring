@@ -14,6 +14,7 @@
 #include "Objects/Cluster.h"
 #include "Objects/OrderedCaloHitList.h"
 #include "Objects/Track.h"
+#include "Objects/MCParticle.h"
 
 // LCIO includes
 #include "EVENT/Track.h"
@@ -93,9 +94,32 @@ namespace pandora_monitoring
 
 bool  PandoraMonitoring::m_instanceFlag   = false;
 bool  PandoraMonitoring::m_eveInitialized = false;
+bool  PandoraMonitoring::m_openEveEvent   = false;
 float PandoraMonitoring::m_scalingFactor = 0.1;
 
 PandoraMonitoring* PandoraMonitoring::m_pPandoraMonitoring = NULL;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PandoraMonitoring::~PandoraMonitoring()
+{
+    m_treeWrapper.Clear();
+    #ifdef USE_ROOT_EVE
+    if( m_eveInitialized )
+    {
+        TEveManager::Terminate();
+        gSystem->ProcessEvents();
+    }
+    #endif
+    m_pApplication->Terminate(0);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::DeleteInstance()
+{
+    delete GetInstance();
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -339,10 +363,20 @@ void PandoraMonitoring::ScanTree(const std::string &treeName)
 
 void PandoraMonitoring::SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions)
 {
-    TTree* tree = NULL;
     try
     {
-        tree = m_treeWrapper.GetTree(treeName);
+        TTree*& tree = m_treeWrapper.GetTree(treeName);
+
+        TFile* pTFile = new TFile(fileName.c_str(), fileOptions.c_str());
+
+        tree->SetDirectory(pTFile);
+        tree->Write(treeName.c_str(), TObject::kOverwrite);
+
+        pTFile->Close();
+
+        tree = 0; // pointer not valid any more
+
+        delete pTFile;
     }
     catch(TTreeWrapper::TreeNotFoundError& excpt)
     {
@@ -354,15 +388,6 @@ void PandoraMonitoring::SaveTree(const std::string &treeName, const std::string 
         std::cout << "PandoraMonitoring::SaveTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
         throw;
     }
-
-    TFile* pTFile = new TFile(fileName.c_str(), fileOptions.c_str());
-
-    tree->SetDirectory(pTFile);
-    tree->Write(treeName.c_str(), TObject::kOverwrite);
-
-    pTFile->Close();
-
-    delete pTFile;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -1001,10 +1026,14 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
     std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
 #else
     if( PandoraMonitoring::m_eveInitialized )
+    {
+        if( !m_openEveEvent )
+        {
+            gEve->AddEvent( new TEveEventManager("Event","Event") );
+            m_openEveEvent = true;
+        }
         return;
-
-
-    std::cout << "geometry manager init" << std::endl;
+    }
 
     gSystem->Load("libGeom");
     TGeoManager *geom = new TGeoManager("DetectorGeometry", "detector geometry");
@@ -1147,9 +1176,8 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
     //    gEve->SetMainColor( kWhite );
     gEve->Redraw3D(kTRUE);
 
-    //    this->Pause();
-
     m_eveInitialized = true;
+    m_openEveEvent = true;
 #endif
 }
 
@@ -1270,26 +1298,19 @@ void PandoraMonitoring::View()
 #ifndef USE_ROOT_EVE
     std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
 #else
-    if( !PandoraMonitoring::m_eveInitialized )
-        InitializeEve();
+    InitializeEve();
 
-    std::cout << "View Eve" << std::endl;
-
-    TEveManager::Create();
     gEve->Redraw3D();
     
     this->Pause();
 
-//     for( EveElementVector::iterator itEl = m_eveElementVector.begin(), itElEnd = m_eveElementVector.end(); itEl != itElEnd; ++itEl )
-//     {
-//         TEveElement* element = (*itEl);
-//         gEve->RemoveElement(element);
-//         delete element;
-//     }
-//     m_eveElementVector.clear();
+    TEveEventManager* current = gEve->GetCurrentEvent();
+    if( current )
+        current->SetRnrSelfChildren(kFALSE,kFALSE);
 
-    gEve->GetCurrentEvent()->SetRnrSelfChildren(kFALSE,kFALSE);
-    gEve->AddEvent( new TEveEventManager("Event","Event") );
+    m_openEveEvent = false;
+
+    std::cout << "View done" << std::endl;
 #endif
 }
 
@@ -1302,10 +1323,7 @@ TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
     return NULL;
 #else
 
-    if( !PandoraMonitoring::m_eveInitialized )
-        InitializeEve();
-
-    TEveManager::Create();
+    InitializeEve();
 
     std::string name = nameInput;
     if( name.empty() )
@@ -1318,10 +1336,6 @@ TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
     TEveElement* clusterListElement = new TEveElementList();
     clusterListElement->SetElementNameTitle( name.c_str(), name.c_str() );
 
-
-
-    if( parent == NULL )
-        m_eveElementVector.push_back( clusterListElement );
 
 
     for (pandora::ClusterList::const_iterator clusterIter = pClusterList->begin(), clusterIterEnd = pClusterList->end();
@@ -1391,13 +1405,16 @@ TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
 
     }
 
-    if( !parent )
+    if( parent )
+    {
+        parent->AddElement(clusterListElement);
+    }
+    else
     {
         gEve->AddElement(clusterListElement);
         gEve->Redraw3D();
     }
 
-    //    this->Pause();
     return clusterListElement;
 #endif
 }
@@ -1411,25 +1428,17 @@ TEveElement* PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
     std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
     return NULL;
 #else
-    if( !PandoraMonitoring::m_eveInitialized )
-        InitializeEve();
-
-    TEveManager::Create();
+    InitializeEve();
 
     if( name.empty() )
         name = "Hits";
 
-    TEvePointSet* hitsMarkers = new TEvePointSet((name+"_markers").c_str());
     TEveBoxSet* hits = new TEveBoxSet(name.c_str());
     hits->Reset(TEveBoxSet::kBT_FreeBox, kTRUE, 64);
-    hits->SetMainColor( GetColor( color ) );
+//    hits->SetMainColor( GetColor( color ) );
     //    hits->UseSingleColor();
 
-    if( parent == NULL )
-    {
-        m_eveElementVector.push_back( hits );
-    }
-
+    TEvePointSet* hitsMarkers = new TEvePointSet((name+"_markers").c_str());
     hits->AddElement(hitsMarkers);
 
     hits->SetOwnIds(kTRUE);
@@ -1439,7 +1448,7 @@ TEveElement* PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
     for (pandora::OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end();
          iter != iterEnd; ++iter)
     {
-        //        uint layer = iter->first;
+//        uint layer = iter->first;
         pandora::CaloHitList* pCaloHitList = iter->second;
 
         uint hitIndex = 0;
@@ -1448,12 +1457,23 @@ TEveElement* PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
         {
             const pandora::CaloHit* caloHit = (*caloHitIter);
 
+            std::stringstream sstr;
+
             const pandora::CartesianVector position = caloHit->GetPositionVector()*m_scalingFactor;
             const float sizeU = caloHit->GetCellSizeU()*m_scalingFactor;
             const float sizeV = caloHit->GetCellSizeV()*m_scalingFactor;
             const float thickness = caloHit->GetCellThickness()*m_scalingFactor;
 
-            //            float hitEnergy = caloHit->GetElectromagneticEnergy();
+            float hitEnergyEm = caloHit->GetElectromagneticEnergy();
+            float hitEnergyHad = caloHit->GetHadronicEnergy();
+
+            sstr << "Eem=" << hitEnergyEm << " Eh=" << hitEnergyHad;
+
+            const pandora::MCParticle* pMcParticle = NULL;
+            caloHit->GetMCParticle(pMcParticle);
+
+            if( pMcParticle )
+                sstr << " MC-PID=" << pMcParticle->GetParticleId();
 
             // direction vectors (normal and U)
             const pandora::CartesianVector normal   = caloHit->GetNormalVector();
@@ -1477,7 +1497,13 @@ TEveElement* PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             // add calorimeter-cell for calo-hit
             hits->AddBox( corners );
             hits->SetPickable( kTRUE );
+            
+//            int transparency = int(255-hitEnergyEm*1000);
+//            hits->DigitColor(GetColor(color),transparency);
             hits->DigitColor(GetColor(color));
+
+            hits->SetElementTitle(sstr.str().c_str());
+            //            hits->DigitValue( layer );
 
 //             float userData[1];
 //             userData[0] = hitEnergy;
@@ -1588,16 +1614,10 @@ TEveElement* PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
     return NULL;
 #else
 
-    if( !PandoraMonitoring::m_eveInitialized )
-        InitializeEve();
-
-    TEveManager::Create();
-
+    InitializeEve();
 
     TEveTrackList *trackList = new TEveTrackList();
     trackList->SetMainColor( GetColor( TEAL ) );
-    if( parent == NULL )
-        m_eveElementVector.push_back( trackList );
 
     if( name.empty() )
         name = "Tracks";
@@ -1629,9 +1649,12 @@ TEveElement* PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
         const pandora::CartesianVector position = trackState.GetPosition()*m_scalingFactor;
         const pandora::CartesianVector& momentum = trackState.GetMomentum();
 
+        const pandora::TrackState& trackStateAtECal = pandoraTrack->GetTrackStateAtECal();
+        const pandora::CartesianVector positionAtECal = trackStateAtECal.GetPosition()*m_scalingFactor;
+
         const pandora::TrackState& trackStateAtEnd = pandoraTrack->GetTrackStateAtEnd();
         const pandora::CartesianVector positionAtEnd = trackStateAtEnd.GetPosition()*m_scalingFactor;
-        //        const pandora::CartesianVector& momentumAtEnd = trackStateAtEnd.GetMomentum();
+        const pandora::CartesianVector& momentumAtEnd = trackStateAtEnd.GetMomentum();
 
         int chargeSign = pandoraTrack->GetChargeSign();
 
@@ -1657,9 +1680,14 @@ TEveElement* PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
         TEveTrack* track = new TEveTrack(rc, propagator);
         track->SetName(Form("Charge %d, PID %d, p %f", chargeSign, pandoraTrack->GetParticleId(), momentum.GetMagnitude()));
         
-        TEvePathMark* pm1 = new TEvePathMark(TEvePathMark::kDecay);
-        pm1->fV.Set(positionAtEnd.GetX(),positionAtEnd.GetY(),positionAtEnd.GetZ());
-        track->AddPathMark(*pm1);
+        TEvePathMark* pmEnd = new TEvePathMark(TEvePathMark::kReference);
+        pmEnd->fV.Set(positionAtEnd.GetX(),positionAtEnd.GetY(),positionAtEnd.GetZ());
+        pmEnd->fP.Set(momentumAtEnd.GetX(),momentumAtEnd.GetY(),momentumAtEnd.GetZ());
+        track->AddPathMark(*pmEnd);
+
+        TEvePathMark* pmECal = new TEvePathMark(TEvePathMark::kDecay);
+        pmECal->fV.Set(positionAtECal.GetX(),positionAtECal.GetY(),positionAtECal.GetZ());
+        track->AddPathMark(*pmECal);
 
         track->SetLineColor( trackColor );
         track->SetLineWidth( 1 );
@@ -1678,7 +1706,6 @@ TEveElement* PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
         gEve->Redraw3D();
     }
 
-    //    this->Pause();
     return trackList;
 #endif
 }

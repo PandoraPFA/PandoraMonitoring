@@ -268,6 +268,12 @@ public:
      *  @param  pClusterList address of the cluster list
      */
     static void Test2(const pandora::ClusterList *const pClusterList);
+
+    /**
+     *  @brief  Delete monitoring instance
+     * 
+     */
+    static void Delete();
 };
 
 #endif // #ifndef PANDORA_MONITORING_API_H

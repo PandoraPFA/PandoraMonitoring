@@ -44,7 +44,9 @@ public:
     void Print(const std::string &treeName) const ;
     void Scan(const std::string &treeName) const ;
 
-    TTree* GetTree(const std::string &treeName) const;
+    TTree*& GetTree(const std::string& treeName);
+
+    void Clear();  ///< clear tree with name 'treeName' in the TTreeWrapper
 
     template <typename T>
     class Branch
