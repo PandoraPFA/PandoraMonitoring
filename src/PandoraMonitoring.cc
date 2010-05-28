@@ -34,9 +34,9 @@
 #include "TColor.h"
 
 
-#define MINIMUM_ROOT_VERSION "5.20"
+#define MINIMUM_ROOT_VERSION "5.24"
 #ifdef ROOT_EVE
-#if ( ROOT_VERSION_CODE >= ROOT_VERSION(5,20,0) )
+#if ( ROOT_VERSION_CODE >= ROOT_VERSION(5,24,0) )
 #define USE_ROOT_EVE 1
 #endif
 #endif
