@@ -140,7 +140,7 @@ ENDIF()
 ### ADDITIONAL LIBRARIES ############################################################
 
 MESSAGE( STATUS "ROOT_HOME : ${ROOT_HOME}" )
-FIND_FILE( LIB_EVE lib/libEve.so PATHS ${ROOT_HOME} )
+FIND_FILE( LIB_EVE lib/libEve.so ${ROOT_HOME} PATHS )
 IF( LIB_EVE )
     MESSAGE( STATUS "ROOT Eve library found : ${LIB_EVE}" )
     LINK_LIBRARIES( ${LIB_EVE} )
