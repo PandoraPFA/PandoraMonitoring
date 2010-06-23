@@ -167,9 +167,10 @@ void PandoraMonitoringApi::View()
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color )
+void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color, 
+                                             bool showAssociatedTracks, bool showFit )
 {
-    PandoraMonitoring::GetInstance()->VisualizeClusters(pClusterList, name, NULL, color);
+    PandoraMonitoring::GetInstance()->VisualizeClusters(pClusterList, name, NULL, color, showAssociatedTracks, showFit);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -1317,7 +1317,8 @@ void PandoraMonitoring::View()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string& nameInput, TEveElement* parent, Color color )
+TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string& nameInput, TEveElement* parent, Color color, 
+                                                  bool showAssociatedTracks, bool showFit )
 {
 #ifndef USE_ROOT_EVE
     std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
@@ -1383,14 +1384,17 @@ TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
             pandora::CartesianVector displacedStart = intercept- (direction*(length/2));
             direction *= length;
 
-            TEveArrow* clusterArrow = new TEveArrow(direction.GetX(), direction.GetY(), direction.GetZ(), displacedStart.GetX(),displacedStart.GetY(), displacedStart.GetZ());
-            clusterArrow->SetConeR( 0.03 );
-            clusterArrow->SetConeL( 0.2 );
-            clusterArrow->SetMainColor( GetColor(clusterColor) );
-            clusterArrow->SetPickable( kTRUE );
-            clusterArrow->SetElementNameTitle( sstr.str().c_str(), sstr.str().c_str() );
+            if( showFit )
+            {
+                TEveArrow* clusterArrow = new TEveArrow(direction.GetX(), direction.GetY(), direction.GetZ(), displacedStart.GetX(),displacedStart.GetY(), displacedStart.GetZ());
+                clusterArrow->SetConeR( 0.03 );
+                clusterArrow->SetConeL( 0.2 );
+                clusterArrow->SetMainColor( GetColor(clusterColor) );
+                clusterArrow->SetPickable( kTRUE );
+                clusterArrow->SetElementNameTitle( sstr.str().c_str(), sstr.str().c_str() );
             
-            caloHitsElement->AddElement( clusterArrow );
+                caloHitsElement->AddElement( clusterArrow );
+            }
         }
         catch(...)
         {
@@ -1398,10 +1402,13 @@ TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
 
 
         // show tracks
-        const pandora::TrackList& pTrackList = pCluster->GetAssociatedTrackList();
-        if( !pTrackList.empty() )
+        if( showAssociatedTracks )
         {
-            VisualizeTracks(&pTrackList, "", caloHitsElement, color );
+            const pandora::TrackList& pTrackList = pCluster->GetAssociatedTrackList();
+            if( !pTrackList.empty() )
+            {
+                VisualizeTracks(&pTrackList, "", caloHitsElement, color );
+            }
         }
 
     }

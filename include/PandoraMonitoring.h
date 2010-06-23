@@ -216,8 +216,11 @@ public:
      *  @param name of the cluster list
      *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
      *  @param color The color the cluster elements are drawn with
+     *  @param showAssociatedTracks draw the tracks associated to the cluster
+     *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
      */  
-    TEveElement* VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string& name, TEveElement* parent, Color color );
+    TEveElement* VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string& name, TEveElement* parent, Color color, 
+				   bool showAssociatedTracks, bool showFit  );
 
     /**
      *  @brief Add Tracks to the Eve event-display

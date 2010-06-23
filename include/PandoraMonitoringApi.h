@@ -196,8 +196,11 @@ public:
      *  @param pClusterList list of clusters to be added to the event display
      *  @param name of the cluster list
      *  @param color The color the cluster elements are drawn with
+     *  @param showAssociatedTracks draw the tracks associated to the cluster
+     *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
      */  
-    static void VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color );
+    static void VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color,
+				  bool showAssociatedTracks = true, bool showFit = true );
 
     /**
      *  @brief Add Tracks to the Eve event-display
