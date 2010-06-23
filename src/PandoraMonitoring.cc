@@ -1670,7 +1670,6 @@ TEveElement* PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
                 trackColor = AZURE;
             
         }
-
         
 
         TEveRecTrack *rc = new TEveRecTrack();
@@ -1690,7 +1689,7 @@ TEveElement* PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
         pmECal->fV.Set(positionAtECal.GetX(),positionAtECal.GetY(),positionAtECal.GetZ());
         track->AddPathMark(*pmECal);
 
-        track->SetLineColor( trackColor );
+        track->SetLineColor( GetColor(trackColor) );
         track->SetLineWidth( 1 );
 
         track->SetPickable( kTRUE );
