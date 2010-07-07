@@ -13,6 +13,7 @@
 #include "PandoraMonitoringApi.h"
 
 #include "TApplication.h"
+#include "TColor.h"
 
 #include "TTreeWrapper.h"
 
@@ -209,6 +210,20 @@ public:
      */  
     void View();
 
+
+    /**
+     *  @brief Add Particle flow objects to the Eve event-display
+     * 
+     *  @param pPfoList list of particle flow objects to be added to the event display
+     *  @param name of the pfo list
+     *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
+     *  @param color The color the cluster elements are drawn with
+     *  @param showAssociatedTracks draw the tracks associated to the cluster
+     *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
+     */  
+    TEveElement* VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name, TEveElement* parent, Color color, 
+					      bool showAssociatedTracks, bool showFit  );
+
     /**
      *  @brief Add Clusters to the Eve event-display
      * 
@@ -219,7 +234,7 @@ public:
      *  @param showAssociatedTracks draw the tracks associated to the cluster
      *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
      */  
-    TEveElement* VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string& name, TEveElement* parent, Color color, 
+    TEveElement* VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, TEveElement* parent, Color color, 
 				   bool showAssociatedTracks, bool showFit  );
 
     /**
@@ -453,7 +468,14 @@ private:
      * 
      *  @param  color in Pandora monitoring API enum
      */
-    EColor GetColor( Color color );
+    EColor GetROOTColor( Color color );
+
+    /**
+     *  @brief  Get a color for a PDG code
+     * 
+     *  @param  pdgCode of the particle
+     */
+    Color GetColorForPdgCode(int pdgCode);
 
 
     void InitializeEve(Char_t transparency = 70);
@@ -489,8 +511,8 @@ private:
     static bool                 m_eveInitialized;       ///< is set if ROOT Eve is initialized
 
     static float                m_scalingFactor;        ///< TEve works with [cm], Pandora works with [mm]
-
     static bool                 m_openEveEvent;         ///< is set if an Event is open to store objects (hits, clusters,...) in it.
+    static int                  m_eventDisplayCounter;  ///< counter for the event displays
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -536,6 +558,125 @@ inline float PandoraMonitoring::XYOutlineParameters::GetClosestDistanceToIp() co
     return m_closestDistanceToIp;
 }
 
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+// Specify (color, ROOT-color)
+#define COLOR_TABLE(d)                         \
+    d(WHITE,           kWhite)                 \
+    d(BLACK,           kBlack)                 \
+    d(RED,             kRed)                   \
+    d(GREEN,           kGreen)                 \
+    d(BLUE,            kBlue)                  \
+    d(MAGENTA,         kMagenta)               \
+    d(CYAN,            kCyan)                  \
+    d(VIOLET,          kViolet)                \
+    d(PINK,            kPink)                  \
+    d(ORANGE,          kOrange)                \
+    d(YELLOW,          kYellow)                \
+    d(SPRING,          kSpring)                \
+    d(TEAL,            kTeal)                  \
+    d(AZURE,           kAzure)                 \
+    d(GRAY,            kGray)                  \
+    d(DARKRED,         EColor(TColor::GetColorDark(kRed)))       \
+    d(DARKGREEN,       EColor(TColor::GetColorDark(kGreen)))     \
+    d(DARKBLUE,        EColor(TColor::GetColorDark(kBlue)))      \
+    d(DARKMAGENTA,     EColor(TColor::GetColorDark(kMagenta)))   \
+    d(DARKCYAN,        EColor(TColor::GetColorDark(kCyan)))      \
+    d(DARKVIOLET,      EColor(TColor::GetColorDark(kViolet)))    \
+    d(DARKPINK,        EColor(TColor::GetColorDark(kPink)))      \
+    d(DARKORANGE,      EColor(TColor::GetColorDark(kOrange)))    \
+    d(DARKYELLOW,      EColor(TColor::GetColorDark(kYellow)))    \
+    d(LIGHTGREEN,      EColor(TColor::GetColorBright(kGreen)))   \
+    d(LIGHTBLUE,       EColor(TColor::GetColorBright(kBlue)))    \
+    d(LIGHTMAGENTA,    EColor(TColor::GetColorBright(kMagenta))) \
+    d(LIGHTCYAN,       EColor(TColor::GetColorBright(kCyan)))    \
+    d(LIGHTVIOLET,     EColor(TColor::GetColorBright(kViolet)))  \
+    d(LIGHTPINK,       EColor(TColor::GetColorBright(kPink)))    \
+    d(LIGHTORANGE,     EColor(TColor::GetColorBright(kOrange)))  \
+    d(LIGHTYELLOW,     EColor(TColor::GetColorBright(kYellow))) 
+
+
+
+// Specify (name, pdg code, color)
+#define PARTICLE_DATA_COLOR_TABLE(d)                         \
+    d(PHOTON,               22,             DARKYELLOW)      \
+    d(E_MINUS,              11,             LIGHTBLUE)       \
+    d(E_PLUS,              -11,             LIGHTRED)      \
+    d(MU_MINUS,             13,             BLUE)      \
+    d(MU_PLUS,             -13,             RED)      \
+    d(TAU_MINUS,            15,             DARKBLUE)      \
+    d(TAU_PLUS,            -15,             DARKRED)      \
+    d(NU_E,                 12,             DARKBLUE)      \
+    d(NU_E_BAR,            -12,             DARKRED)      \
+    d(NU_MU,                14,             DARKBLUE)      \
+    d(NU_MU_BAR,           -14,             DARKRED)      \
+    d(NU_TAU,               16,             DARKBLUE)      \
+    d(NU_TAU_BAR,          -16,             DARKRED)      \
+    d(PI_PLUS,             211,             MAGENTA)      \
+    d(PI_MINUS,           -211,             VIOLET)      \
+    d(PI_ZERO,             111,             LIGHTGREEN)      \
+    d(PI_ZERO_BAR,        -111,             LIGHTGREEN)      \
+    d(LAMBDA,             3122,             DARKGREEN)      \
+    d(LAMBDA_BAR,        -3122,             DARKGREEN)      \
+    d(K_PLUS,              321,             DARKGREEN)      \
+    d(K_MINUS,            -321,             DARKGREEN)      \
+    d(K_SHORT,             310,             LIGHTGREEN)      \
+    d(K_SHORT_BAR,        -310,             LIGHTGREEN)      \
+    d(K_LONG,              130,             GREEN)      \
+    d(K_LONG_BAR,         -130,             GREEN)      \
+    d(SIGMA_MINUS,        3112,             GREEN)      \
+    d(SIGMA_PLUS,         3222,             GREEN)      \
+    d(PROTON,             2212,             ORANGE)      \
+    d(NEUTRON,            2112,             CYAN)
+
+
+
+/**
+ *  @brief  The mass switch statement macro
+ */
+#define GET_ROOT_COLOR(a, b)                                         \
+    case a : return b;
+
+/**
+ *  @brief  The mass switch statement macro
+ */
+#define GET_PARTICLE_COLOR_SWITCH(a, b, c)                                         \
+    case a : return c;
+
+/**
+ *  @brief  The mass switch statement macro
+ */
+#define GET_PDG_COLOR_SWITCH(a, b, c)                                         \
+    case b : return c;
+
+
+inline EColor PandoraMonitoring::GetROOTColor(Color color)
+{
+    switch (color)
+    {
+        COLOR_TABLE(GET_ROOT_COLOR)
+        default : return kGray;
+    }
+}
+
+inline Color PandoraMonitoring::GetColorForPdgCode(int pdgCode)
+{
+    switch (pdgCode)
+    {
+        PARTICLE_DATA_COLOR_TABLE(GET_PDG_COLOR_SWITCH)
+        default : return GRAY;
+    }
+}
+
+
+
+
+
 } // namespace pandora_monitoring
 
 #endif // #ifndef PANDORA_MONITORING_H
+
+
+

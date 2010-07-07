@@ -190,6 +190,20 @@ public:
      */  
     static void View();
 
+
+    /**
+     *  @brief Add Particle flow objects to the Eve event-display
+     * 
+     *  @param pPfoList list of particle flow objects to be added to the event display
+     *  @param name of the pfo list
+     *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
+     *  @param color The color the cluster elements are drawn with
+     *  @param showAssociatedTracks draw the tracks associated to the cluster
+     *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
+     */  
+    static void VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name, Color color, 
+					     bool showAssociatedTracks = true, bool showFit = true );
+
     /**
      *  @brief Add Clusters to the Eve event-display
      * 

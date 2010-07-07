@@ -174,6 +174,13 @@ void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const p
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name, Color color, 
+                                                        bool showAssociatedTracks, bool showFit )
+{
+    PandoraMonitoring::GetInstance()->VisualizeParticleFlowObjects(pPfoList, name, NULL, color, showAssociatedTracks, showFit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 void PandoraMonitoringApi::VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, Color color )
 {
     PandoraMonitoring::GetInstance()->VisualizeTracks(pTrackList, name, NULL, color);

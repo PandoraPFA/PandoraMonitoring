@@ -12,6 +12,7 @@
 #include "Objects/CaloHit.h"
 #include "Objects/CartesianVector.h"
 #include "Objects/Cluster.h"
+#include "Objects/ParticleFlowObject.h"
 #include "Objects/OrderedCaloHitList.h"
 #include "Objects/Track.h"
 #include "Objects/MCParticle.h"
@@ -93,10 +94,14 @@
 namespace pandora_monitoring
 {
 
+
+
+
 bool  PandoraMonitoring::m_instanceFlag   = false;
 bool  PandoraMonitoring::m_eveInitialized = false;
 bool  PandoraMonitoring::m_openEveEvent   = false;
 float PandoraMonitoring::m_scalingFactor = 0.1;
+int   PandoraMonitoring::m_eventDisplayCounter = 0;
 
 PandoraMonitoring* PandoraMonitoring::m_pPandoraMonitoring = NULL;
 
@@ -629,7 +634,7 @@ void PandoraMonitoring::DrawTracks(DetectorView detectorView, const pandora::Tra
         }
 
         pTPolyMarker->SetMarkerStyle(20);
-        pTPolyMarker->SetMarkerColor(GetColor(color));
+        pTPolyMarker->SetMarkerColor(GetROOTColor(color));
         pTPolyMarker->SetMarkerSize(0.1);
         pTPolyMarker->Draw();
 
@@ -692,7 +697,7 @@ void PandoraMonitoring::DrawCaloHits(DetectorView detectorView, const pandora::O
         pTPolyMarker->SetMarkerStyle(20);
         pTPolyMarker->SetMarkerSize(0.5);
 
-        int col = GetColor(color);
+        int col = GetROOTColor(color);
         if( color == AUTO )
         {
             unsigned int layerModN(pseudoLayer % 7);
@@ -766,7 +771,7 @@ void PandoraMonitoring::DrawClusters(DetectorView detectorView, const pandora::C
         if (1 == nHits)
         {
             pTPolyMarker->SetMarkerSize(0.2);
-            pTPolyMarker->SetMarkerColor(GetColor(color));
+            pTPolyMarker->SetMarkerColor(GetROOTColor(color));
         }
         else
         {
@@ -777,7 +782,7 @@ void PandoraMonitoring::DrawClusters(DetectorView detectorView, const pandora::C
                 pTPolyMarker->SetMarkerColor(autoColor);
             }
             else
-                pTPolyMarker->SetMarkerColor(GetColor(color));
+                pTPolyMarker->SetMarkerColor(GetROOTColor(color));
         }
 
         pTPolyMarker->Draw();
@@ -942,81 +947,11 @@ void PandoraMonitoring::MakeXZLayerOutline(float innerRCoordinate, float outerRC
 }
 
 
-//------------------------------------------------------------------------------------------------------------------------------------------
 
-EColor PandoraMonitoring::GetColor(Color color)
-{
-    switch(color)
-    {
-    case WHITE:
-        return kWhite;
-    case BLACK:
-        return kBlack;
-    case RED:
-        return kRed;
-    case GREEN:
-        return kGreen;
-    case BLUE:
-        return kBlue;
-    case MAGENTA:
-        return kMagenta;
-    case CYAN:
-        return kCyan;
-    case VIOLET:
-        return kViolet;
-    case PINK:
-        return kPink;
-    case ORANGE:
-        return kOrange;
-    case YELLOW:
-        return kYellow;
-    case SPRING:
-        return kSpring;
-    case TEAL:
-        return kTeal;
-    case AZURE:
-        return kAzure;
-    case GRAY:
-        return kGray;
-    case DARKRED:
-        return EColor(TColor::GetColorDark(kRed));
-    case DARKGREEN:
-        return EColor(TColor::GetColorDark(kGreen));
-    case DARKBLUE:
-        return EColor(TColor::GetColorDark(kBlue));
-    case DARKMAGENTA:
-        return EColor(TColor::GetColorDark(kMagenta));
-    case DARKCYAN:
-        return EColor(TColor::GetColorDark(kCyan));
-    case DARKVIOLET:
-        return EColor(TColor::GetColorDark(kViolet));
-    case DARKPINK:
-        return EColor(TColor::GetColorDark(kPink));
-    case DARKORANGE:
-        return EColor(TColor::GetColorDark(kOrange));
-    case DARKYELLOW:
-        return EColor(TColor::GetColorDark(kYellow));
-    case LIGHTGREEN:
-        return EColor(TColor::GetColorBright(kGreen));
-    case LIGHTBLUE:
-        return EColor(TColor::GetColorBright(kBlue));
-    case LIGHTMAGENTA:
-        return EColor(TColor::GetColorBright(kMagenta));
-    case LIGHTCYAN:
-        return EColor(TColor::GetColorBright(kCyan));
-    case LIGHTVIOLET:
-        return EColor(TColor::GetColorBright(kViolet));
-    case LIGHTPINK:
-        return EColor(TColor::GetColorBright(kPink));
-    case LIGHTORANGE:
-        return EColor(TColor::GetColorBright(kOrange));
-    case LIGHTYELLOW:
-        return EColor(TColor::GetColorBright(kYellow));
-    default:
-        return kBlack;
-    }
-    return kBlack;
-}
+
+
+
+
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -1026,12 +961,20 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
 #ifndef USE_ROOT_EVE
     std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
 #else
+    std::stringstream sstr;
+    sstr << "Event Display " << m_eventDisplayCounter;
+
     if( PandoraMonitoring::m_eveInitialized )
     {
+        TEveEventManager* currEv = gEve->GetCurrentEvent();
+        if( currEv )
+            currEv->SetElementNameTitle(sstr.str().c_str(),sstr.str().c_str());
+
         if( !m_openEveEvent )
         {
-            gEve->AddEvent( new TEveEventManager("Event","Event") );
+            gEve->AddEvent( new TEveEventManager(sstr.str().c_str(),sstr.str().c_str()) );
             m_openEveEvent = true;
+            m_eventDisplayCounter++;
         }
         return;
     }
@@ -1142,8 +1085,8 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
                                           (zThick/2.0), 
                                           Al );
 
-            subDetVol->SetLineColor(GetColor(Color(col)));
-            subDetVol->SetFillColor(GetColor(Color(col)));
+            subDetVol->SetLineColor(GetROOTColor(Color(col)));
+            subDetVol->SetFillColor(GetROOTColor(Color(col)));
             subDetVol->SetTransparency(transparency);
 
             size_t found=name.find("subDet_");
@@ -1317,7 +1260,70 @@ void PandoraMonitoring::View()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string& nameInput, TEveElement* parent, Color color, 
+TEveElement* PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string nameInput, 
+                                                             TEveElement* parent, Color color, bool showAssociatedTracks, bool showFit )
+{
+#ifndef USE_ROOT_EVE
+    std::cout << "ERROR: Visualization with ROOT TEve needs ROOT version >= " << MINIMUM_ROOT_VERSION << " !" << std::endl;
+    return NULL;
+#else
+
+    InitializeEve();
+
+
+    std::string name = nameInput;
+    if( name.empty() )
+    {
+        std::stringstream sstr;
+        sstr << "pfo, #" << pPfoList->size();
+        name = sstr.str();
+    }
+    
+    TEveElement* pfoListElement = new TEveElementList();
+    pfoListElement->SetElementNameTitle( name.c_str(), name.c_str() );
+
+
+
+    for (pandora::ParticleFlowObjectList::const_iterator pfoIter = pPfoList->begin(), pfoIterEnd = pPfoList->end();
+        pfoIter != pfoIterEnd; ++pfoIter)
+    { 
+        pandora::ParticleFlowObject* pPfo = (*pfoIter);
+
+        Color pfoColor = color;
+        if( color == AUTO )
+            pfoColor = GetColorForPdgCode(pPfo->GetParticleId());
+
+        std::stringstream sstr;
+        sstr << "--- PFO"  
+             << "\nE=" << pPfo->GetEnergy() 
+             << "\nm=" << pPfo->GetMass()
+             << "\nPDG=" << pPfo->GetParticleId();
+
+        // show clusters
+        const pandora::ClusterList clusterList(pPfo->GetClusterList());
+        /*TEveElement* clusterElements = */VisualizeClusters(&clusterList, sstr.str().c_str(), pfoListElement, pfoColor,
+                                                         showAssociatedTracks, showFit);
+
+
+    }
+
+    if( parent )
+    {
+        parent->AddElement(pfoListElement);
+    }
+    else
+    {
+        gEve->AddElement(pfoListElement);
+        gEve->Redraw3D();
+    }
+
+    return pfoListElement;
+#endif
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string nameInput, TEveElement* parent, Color color, 
                                                   bool showAssociatedTracks, bool showFit )
 {
 #ifndef USE_ROOT_EVE
@@ -1363,7 +1369,11 @@ TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
         }
 
         std::stringstream sstr;
-        sstr << "Eem=" << pCluster->GetElectromagneticEnergy() << " Ehad=" << pCluster->GetHadronicEnergy() << " NHits=" << pCluster->GetNCaloHits();
+        if( !nameInput.empty() )
+            sstr << nameInput << "\n";
+        sstr << "--- cluster\nEem=" << pCluster->GetElectromagneticEnergy() 
+             << "\nEhad=" << pCluster->GetHadronicEnergy() 
+             << "\nNHits=" << pCluster->GetNCaloHits();
 
 //         TEveElement* clusterElement = new TEveElementList();
 //         clusterElement->SetElementNameTitle( sstr.str().c_str(), sstr.str().c_str() );
@@ -1389,7 +1399,7 @@ TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
                 TEveArrow* clusterArrow = new TEveArrow(direction.GetX(), direction.GetY(), direction.GetZ(), displacedStart.GetX(),displacedStart.GetY(), displacedStart.GetZ());
                 clusterArrow->SetConeR( 0.03 );
                 clusterArrow->SetConeL( 0.2 );
-                clusterArrow->SetMainColor( GetColor(clusterColor) );
+                clusterArrow->SetMainColor( GetROOTColor(clusterColor) );
                 clusterArrow->SetPickable( kTRUE );
                 clusterArrow->SetElementNameTitle( sstr.str().c_str(), sstr.str().c_str() );
             
@@ -1407,7 +1417,7 @@ TEveElement* PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
             const pandora::TrackList& pTrackList = pCluster->GetAssociatedTrackList();
             if( !pTrackList.empty() )
             {
-                VisualizeTracks(&pTrackList, "", caloHitsElement, color );
+                VisualizeTracks(&pTrackList, sstr.str().c_str(), caloHitsElement, color );
             }
         }
 
@@ -1438,15 +1448,18 @@ TEveElement* PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
 #else
     InitializeEve();
 
-    if( name.empty() )
-        name = "Hits";
+    const float markerSize = 0.1f;
+
+    std::string hitListName = "Hits";
+    if( !name.empty() )
+        hitListName = name;
 
     TEveBoxSet* hits = new TEveBoxSet(name.c_str());
     hits->Reset(TEveBoxSet::kBT_FreeBox, kTRUE, 64);
-//    hits->SetMainColor( GetColor( color ) );
+//    hits->SetMainColor( GetROOTColor( color ) );
     //    hits->UseSingleColor();
 
-    TEvePointSet* hitsMarkers = new TEvePointSet((name+"_markers").c_str());
+    TEvePointSet* hitsMarkers = new TEvePointSet((hitListName+"_markers").c_str());
     hits->AddElement(hitsMarkers);
 
     hits->SetOwnIds(kTRUE);
@@ -1475,13 +1488,17 @@ TEveElement* PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             float hitEnergyEm = caloHit->GetElectromagneticEnergy();
             float hitEnergyHad = caloHit->GetHadronicEnergy();
 
-            sstr << "Eem=" << hitEnergyEm << " Eh=" << hitEnergyHad;
+            if( !name.empty() )
+                sstr << name << "\n";
+            sstr << "--- calo-hits"
+                 << "\nEem=" << hitEnergyEm 
+                 << "\nEhad=" << hitEnergyHad;
 
             const pandora::MCParticle* pMcParticle = NULL;
             caloHit->GetMCParticle(pMcParticle);
 
             if( pMcParticle )
-                sstr << " MC-PID=" << pMcParticle->GetParticleId();
+                sstr << "\nMC-PID=" << pMcParticle->GetParticleId();
 
             // direction vectors (normal and U)
             const pandora::CartesianVector normal   = caloHit->GetNormalVector();
@@ -1498,8 +1515,8 @@ TEveElement* PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             // at hit marker
             hitsMarkers->SetNextPoint( position.GetX(), position.GetY(), position.GetZ() );
             //            hitMarkers->SetPointId(new TNamed(Form("Point %d", i), ""));
-            hitsMarkers->SetMarkerColor(GetColor(color));
-            hitsMarkers->SetMarkerSize(5);
+            hitsMarkers->SetMarkerColor(GetROOTColor(color));
+            hitsMarkers->SetMarkerSize( markerSize );
             hitsMarkers->SetMarkerStyle(4);
 
             // add calorimeter-cell for calo-hit
@@ -1507,8 +1524,8 @@ TEveElement* PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             hits->SetPickable( kTRUE );
             
 //            int transparency = int(255-hitEnergyEm*1000);
-//            hits->DigitColor(GetColor(color),transparency);
-            hits->DigitColor(GetColor(color));
+//            hits->DigitColor(GetROOTColor(color),transparency);
+            hits->DigitColor(GetROOTColor(color));
 
             hits->SetElementTitle(sstr.str().c_str());
             //            hits->DigitValue( layer );
@@ -1625,17 +1642,18 @@ TEveElement* PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
     InitializeEve();
 
     TEveTrackList *trackList = new TEveTrackList();
-    trackList->SetMainColor( GetColor( TEAL ) );
+    trackList->SetMainColor( GetROOTColor( TEAL ) );
 
-    if( name.empty() )
-        name = "Tracks";
+    std::string trackListName = "Tracks";
+    if( !name.empty() )
+        trackListName = name;
     TEveTrackPropagator* propagator = trackList->GetPropagator();
 
     bool isRungeKutta = false; // if false --> helix fit
     if (isRungeKutta)
         propagator->SetStepper(TEveTrackPropagator::kRungeKutta);
 
-    trackList->SetElementNameTitle( name.c_str(), name.c_str() );
+    trackList->SetElementNameTitle( trackListName.c_str(), trackListName.c_str() );
 
 
     pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
@@ -1684,8 +1702,18 @@ TEveElement* PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
         rc->fP.Set(momentum.GetX(),momentum.GetY(),momentum.GetZ());
         rc->fSign = -chargeSign; // "-" because of strange convention in ALICE : see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
 
+        std::stringstream sstr;
+        if( !name.empty() )
+            sstr << name << "\n";
+        sstr << "--- track"
+             << "\np=" << momentum.GetMagnitude()
+             << "\nCharge=" << chargeSign 
+             << "\nPDG=" << pandoraTrack->GetParticleId();
+
+
         TEveTrack* track = new TEveTrack(rc, propagator);
-        track->SetName(Form("Charge %d, PID %d, p %f", chargeSign, pandoraTrack->GetParticleId(), momentum.GetMagnitude()));
+        track->SetName(sstr.str().c_str());
+        track->SetTitle(sstr.str().c_str());
         
         TEvePathMark* pmEnd = new TEvePathMark(TEvePathMark::kReference);
         pmEnd->fV.Set(positionAtEnd.GetX(),positionAtEnd.GetY(),positionAtEnd.GetZ());
@@ -1696,7 +1724,7 @@ TEveElement* PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
         pmECal->fV.Set(positionAtECal.GetX(),positionAtECal.GetY(),positionAtECal.GetZ());
         track->AddPathMark(*pmECal);
 
-        track->SetLineColor( GetColor(trackColor) );
+        track->SetLineColor( GetROOTColor(trackColor) );
         track->SetLineWidth( 1 );
 
         track->SetPickable( kTRUE );
