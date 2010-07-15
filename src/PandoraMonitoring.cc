@@ -639,7 +639,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
         const pandora::CartesianVector positionAtECal = trackStateAtECal.GetPosition()*m_scalingFactor;
 
         // Color assignment
-        int charge = pandoraTrack->GetCharge();
+        int charge = pandoraTrack->GetChargeSign();
 
         Color trackColor = color;
         if (color == AUTO)
