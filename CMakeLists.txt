@@ -37,7 +37,7 @@ OPTION( BUILD_32BIT_COMPATIBLE "Set to ON to build in 32 bit compatibility mode"
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" ON )
 
 # project dependencies
-SET( ${PROJECT_NAME}_DEPENDS "LCIO ROOT" )
+SET( ${PROJECT_NAME}_DEPENDS "ROOT" )
 
 IF( APPLE )
     LIST(APPEND ${PROJECT_NAME}_DEPENDS "streamlog")
@@ -154,7 +154,6 @@ ENDIF()
 ##########################################################################################
 # End of User section: please try not to modify below this line
 ##########################################################################################
-
 
 # library *nix style versioning
 SET( ${PROJECT_NAME}_SOVERSION "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}" )

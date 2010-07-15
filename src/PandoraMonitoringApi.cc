@@ -113,88 +113,44 @@ void PandoraMonitoringApi::SaveTree(const std::string &treeName, const std::stri
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::DrawDetectorOutline(DetectorView detectorView)
-{
-    PandoraMonitoring::GetInstance()->DetectorOutlineTest(detectorView);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoringApi::Test()
-{
-    PandoraMonitoring::GetInstance()->DrawCanvas();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoringApi::Test2(const pandora::ClusterList *const pClusterList)
-{
-    PandoraMonitoring::GetInstance()->LookAtClusters(pClusterList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoringApi::AddClusterList(DetectorView detectorView, const pandora::ClusterList *const pClusterList, Color color)
-{
-    PandoraMonitoring::GetInstance()->AddClusterList(detectorView, pClusterList, color);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoringApi::AddTrackList(DetectorView detectorView, const pandora::TrackList *const pTrackList, Color color)
-{
-    PandoraMonitoring::GetInstance()->AddTrackList(detectorView, pTrackList, color);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PandoraMonitoringApi::AddCaloHitList(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color)
-{
-    PandoraMonitoring::GetInstance()->AddCaloHitList(detectorView, pOrderedCaloHitList, color);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 void PandoraMonitoringApi::ViewEvent()
 {
     PandoraMonitoring::GetInstance()->ViewEvent();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-void PandoraMonitoringApi::View()
-{
-    PandoraMonitoring::GetInstance()->View();
-}
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color, 
-                                             bool showAssociatedTracks, bool showFit )
-{
-    PandoraMonitoring::GetInstance()->VisualizeClusters(pClusterList, name, NULL, color, showAssociatedTracks, showFit);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name, Color color, 
-                                                        bool showAssociatedTracks, bool showFit )
-{
-    PandoraMonitoring::GetInstance()->VisualizeParticleFlowObjects(pPfoList, name, NULL, color, showAssociatedTracks, showFit);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
 void PandoraMonitoringApi::VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, Color color )
 {
     PandoraMonitoring::GetInstance()->VisualizeTracks(pTrackList, name, NULL, color);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoringApi::VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, Color color )
 {
     PandoraMonitoring::GetInstance()->VisualizeCaloHits(pOrderedCaloHitList, name, NULL, color);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color, 
+    bool showAssociatedTracks, bool showFit)
+{
+    PandoraMonitoring::GetInstance()->VisualizeClusters(pClusterList, name, NULL, color, showAssociatedTracks, showFit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name,
+    Color color, bool showAssociatedTracks, bool showFit)
+{
+    PandoraMonitoring::GetInstance()->VisualizeParticleFlowObjects(pPfoList, name, NULL, color, showAssociatedTracks, showFit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoringApi::Delete()
 {
     PandoraMonitoring::GetInstance()->DeleteInstance();
 }
-

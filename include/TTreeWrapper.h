@@ -96,13 +96,13 @@ public:
 
         BranchType              m_branchType;               ///<
 
-        Branch<float>           *m_branchFloat;             ///<
-        Branch<double>          *m_branchDouble;            ///<
-        Branch<int>             *m_branchInt;               ///<
+        Branch<float>          *m_branchFloat;              ///<
+        Branch<double>         *m_branchDouble;             ///<
+        Branch<int>            *m_branchInt;                ///<
 
-        Branch<VectorFloat*>    *m_branchVectorFloat;       ///<
-        Branch<VectorDouble*>   *m_branchVectorDouble;      ///<
-        Branch<VectorInt*>      *m_branchVectorInt;         ///<
+        Branch<VectorFloat*>   *m_branchVectorFloat;        ///<
+        Branch<VectorDouble*>  *m_branchVectorDouble;       ///<
+        Branch<VectorInt*>     *m_branchVectorInt;          ///<
 
         TTree*                  m_tree;                     ///<
         std::string             m_branchName;               ///<

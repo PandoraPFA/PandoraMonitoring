@@ -20,19 +20,15 @@ SET( ILC_HOME "path_to_ilc_home"
     CACHE PATH "Path to ILC Software" FORCE )
 
 # Path to PandoraPFANew
-SET( PandoraPFANew_HOME "${ILC_HOME}/PandoraPFANew"
+SET( PandoraPFANew_HOME "${ILC_HOME}/PandoraPFANew/a.b.c.d"
     CACHE PATH "Path to PandoraPFANew" FORCE )
 
-# Path to LCIO
-SET( LCIO_HOME "${ILC_HOME}/lcio/v01-11"
-    CACHE PATH "Path to LCIO" FORCE )
-
 # Path to ROOT
-SET( ROOT_HOME "${ILC_HOME}/root/5.16.00"
+SET( ROOT_HOME "${ILC_HOME}/root/a.b.c.d"
      CACHE PATH "Path to ROOT" FORCE )
 
 # CMake Modules Path
-SET( CMAKE_MODULE_PATH "${ILC_HOME}/CMakeModules/v01-08"
+SET( CMAKE_MODULE_PATH "${ILC_HOME}/CMakeModules/a.b.c.d"
     CACHE PATH "Path to CMake Modules" FORCE )
 
 ###############################################

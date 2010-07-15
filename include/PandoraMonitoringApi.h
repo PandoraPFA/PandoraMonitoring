@@ -19,6 +19,8 @@ enum DetectorView
     DETECTOR_VIEW_XZ
 };
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 /**
  *  @brief  The color enum
  */
@@ -118,7 +120,7 @@ public:
      * 
      *  @param  treeName name of the tree (is created if it does not exist yet)
      *  @param  variableName name of the branch in the tree (the branch is created if it does not exist yet)
-     *  @param  variable sets value of the variable (permitted types are float/double/int and std::vector<float>*,std::vector<double>*,std::vector<int>*
+     *  @param  t sets value of the variable (permitted types are float/double/int and std::vector<float>*,std::vector<double>*,std::vector<int>*
      */
     template <typename T>
     static void SetTreeVariable(const std::string &treeName, const std::string &variableName, T t);
@@ -185,11 +187,27 @@ public:
     static void DeleteHistogram(const std::string &name);
 
     /**
-     *  @brief Show the Eve Event-display and pause.
-     * 
-     */  
-    static void View();
+     *  @brief  Show the Eve Event-display and pause.
+     */
+    static void ViewEvent();
 
+    /**
+     *  @brief Add Tracks to the Eve event-display
+     * 
+     *  @param pTrackList list of tracks to be added to the event display
+     *  @param name of the track list
+     *  @param color The color the track elements are drawn with
+     */  
+    static void VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, Color color);
+
+    /**
+     *  @brief Add CaloHits to the Eve event-display
+     * 
+     *  @param pOrderedCaloHitList list of calohits to be added to the event display
+     *  @param name of the calohit list
+     *  @param color The color the cluster elements are drawn with
+     */  
+    static void VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, Color color);
 
     /**
      *  @brief Add Particle flow objects to the Eve event-display
@@ -201,8 +219,8 @@ public:
      *  @param showAssociatedTracks draw the tracks associated to the cluster
      *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
      */  
-    static void VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name, Color color, 
-					     bool showAssociatedTracks = true, bool showFit = true );
+    static void VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name, Color color,
+        bool showAssociatedTracks = true, bool showFit = true);
 
     /**
      *  @brief Add Clusters to the Eve event-display
@@ -214,81 +232,10 @@ public:
      *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
      */  
     static void VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color,
-				  bool showAssociatedTracks = true, bool showFit = true );
-
-    /**
-     *  @brief Add Tracks to the Eve event-display
-     * 
-     *  @param pTrackList list of tracks to be added to the event display
-     *  @param name of the track list
-     *  @param color The color the track elements are drawn with
-     */  
-    static void VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, Color color );
-
-    /**
-     *  @brief Add CaloHits to the Eve event-display
-     * 
-     *  @param pOrderedCaloHitList list of calohits to be added to the event display
-     *  @param name of the calohit list
-     *  @param color The color the cluster elements are drawn with
-     */  
-    static void VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, Color color );
-
-    /**
-     *  @brief  Pauses the monitoring, such that the user can see the output. Clear the canvases and other data. Waits for key-press
-     * 
-     */ 
-    static void ViewEvent();
-
-    /**
-     *  @brief  Add ClusterList to the output. The canvas is automatically created if not existing. Pause the output with ViewEvent()
-     * 
-     *  @param  detectorView the detector view
-     *  @param  pClusterList address of the cluster list
-     *  @param  color in which the clusters should be drawn
-     */ 
-    static void AddClusterList(DetectorView detectorView, const pandora::ClusterList *const pClusterList, Color color = AUTO);
-
-    /**
-     *  @brief  Add TrackList to the output. The canvas is automatically created if not existing. Pause the output with ViewEvent()
-     * 
-     *  @param  detectorView the detector view
-     *  @param  pTrackList address of the track list
-     *  @param  color in which the tracks should be drawn
-     */ 
-    static void AddTrackList(DetectorView detectorView, const pandora::TrackList *const pTrackList, Color color = AUTO);
-
-    /**
-     *  @brief  Add OrderedCaloHitList to the output. The canvas is automatically created if not existing. Pause the output with ViewEvent()
-     * 
-     *  @param  detectorView the detector view
-     *  @param  pOrderedCaloHitList address of the orderedCaloHit list
-     *  @param  color in which the orderedCaloHits should be drawn
-     */ 
-    static void AddCaloHitList(DetectorView detectorView, const pandora::OrderedCaloHitList *const pOrderedCaloHitList, Color color = AUTO);
-
-    /**
-     *  @brief  Draw the detector outline
-     * 
-     *  @param  detectorView the detector view
-     */ 
-    static void DrawDetectorOutline(DetectorView detectorView);
-
-    /**
-     *  @brief  Temporary function - draw a test canvas and histogram
-     */
-    static void Test();
-
-    /**
-     *  @brief  Temporary function - display the parent addresses of calo hits contained in a cluster list
-     * 
-     *  @param  pClusterList address of the cluster list
-     */
-    static void Test2(const pandora::ClusterList *const pClusterList);
+        bool showAssociatedTracks = true, bool showFit = true);
 
     /**
      *  @brief  Delete monitoring instance
-     * 
      */
     static void Delete();
 };
