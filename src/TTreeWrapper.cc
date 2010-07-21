@@ -24,14 +24,14 @@ namespace pandora_monitoring
 
 TTreeWrapper::TTreeWrapper() 
 {
-//    gROOT->ProcessLine("#include <vector>"); // should not be necessary for newer versions of ROOT
+    gROOT->ProcessLine("#include <vector>"); // should not be necessary for newer versions of ROOT
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TTreeWrapper::~TTreeWrapper() 
 {
-//    Clear();
+    Clear();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
