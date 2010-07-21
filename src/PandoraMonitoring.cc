@@ -784,7 +784,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
         {
             const pandora::TrackList& pTrackList = pCluster->GetAssociatedTrackList();
             bool clusterHasTracks = !(pTrackList.empty());
-            bool clusterIsPhoton  = pCluster->IsPhoton();
+            bool clusterIsPhoton  = pCluster->IsPhotonFast();
 
             if (clusterIsPhoton)
             {
