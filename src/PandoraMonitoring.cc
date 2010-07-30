@@ -872,20 +872,38 @@ void PandoraMonitoring::MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, 
     pandora::CartesianVector dirV(normal.GetCrossProduct(dirU));
     const float magnitudeV(dirV.GetMagnitude());
 
+
+    const pandora::CartesianVector position(pCaloHit->GetPositionVector() * m_scalingFactor);
+    float u2(pCaloHit->GetCellSizeU() * m_scalingFactor / 2.0);
+    float v2(pCaloHit->GetCellSizeV() * m_scalingFactor / 2.0);
+    float t2(pCaloHit->GetCellThickness() * m_scalingFactor / 2.0);
+
     if (magnitudeV < 0.00001)
     {
-        std::cout << "PandoraMonitoring::MakeCaloHitCell, ERROR: direction vectors U and V are parallel." << std::endl;
-        throw std::exception();
+        const pandora::DetectorRegion dr(pCaloHit->GetDetectorRegion() );
+        std::string detectorRegion( (dr==pandora::ENDCAP?"ENDCAP":(dr==pandora::BARREL?"BARREL":"UNKNOWN")) );
+        std::cout << "PandoraMonitoring::MakeCaloHitCell, ERROR: direction vectors U and V are parallel. "
+                  << "Normal("
+                  << normal.GetX() << ", " << normal.GetY() << ", " << normal.GetZ() << ") "
+                  << "U("
+                  << dirU.GetX() << ", " << dirU.GetY() << ", " << dirU.GetZ() << ") "
+                  << "V("
+                  << dirV.GetX() << ", " << dirV.GetY() << ", " << dirV.GetZ() << ") "
+                  << " in Detector-region: " << detectorRegion << std::endl;
+        normal.SetValues(1,0, 0 );
+        dirU.SetValues( 0, 1, 0 );
+        dirV.SetValues( 0, 0, 1 );
+        
+        const float size = 0.5;
+        u2 = size*m_scalingFactor/2.0;
+        u2 = size*m_scalingFactor/2.0;
+        t2 = size*m_scalingFactor/2.0;
+        //        throw std::exception();
     }
     else
     {
         dirV *= 1. / magnitudeV;
     }
-
-    const pandora::CartesianVector position(pCaloHit->GetPositionVector() * m_scalingFactor);
-    const float u2(pCaloHit->GetCellSizeU() * m_scalingFactor / 2.0);
-    const float v2(pCaloHit->GetCellSizeV() * m_scalingFactor / 2.0);
-    const float t2(pCaloHit->GetCellThickness() * m_scalingFactor / 2.0);
 
     dirU *= u2;
     dirV *= v2;
