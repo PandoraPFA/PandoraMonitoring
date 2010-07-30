@@ -889,14 +889,16 @@ void PandoraMonitoring::MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, 
                   << dirU.GetX() << ", " << dirU.GetY() << ", " << dirU.GetZ() << ") "
                   << "V("
                   << dirV.GetX() << ", " << dirV.GetY() << ", " << dirV.GetZ() << ") "
-                  << " in Detector-region: " << detectorRegion << std::endl;
+                  << " in Detector-region: " << detectorRegion << "  caloHit-coordinates: " 
+                  << position.GetX() << ", " << position.GetY() << ", " << position.GetZ()
+                  << std::endl;
         normal.SetValues(1,0, 0 );
         dirU.SetValues( 0, 1, 0 );
         dirV.SetValues( 0, 0, 1 );
         
-        const float size = 0.5;
+        const float size = 0.1;
         u2 = size*m_scalingFactor/2.0;
-        u2 = size*m_scalingFactor/2.0;
+        v2 = size*m_scalingFactor/2.0;
         t2 = size*m_scalingFactor/2.0;
         //        throw std::exception();
     }
