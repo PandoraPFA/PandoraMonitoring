@@ -881,7 +881,7 @@ void PandoraMonitoring::MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, 
     if (magnitudeV < 0.00001)
     {
         const pandora::DetectorRegion dr(pCaloHit->GetDetectorRegion() );
-        std::string detectorRegion( (dr==pandora::ENDCAP?"ENDCAP":(dr==pandora::BARREL?"BARREL":"UNKNOWN")) );
+        std::string detectorRegion( (dr==pandora::ENDCAP ? "ENDCAP":(dr==pandora::BARREL?"BARREL":"UNKNOWN")) );
         std::cout << "PandoraMonitoring::MakeCaloHitCell, ERROR: direction vectors U and V are parallel. "
                   << "Normal("
                   << normal.GetX() << ", " << normal.GetY() << ", " << normal.GetZ() << ") "

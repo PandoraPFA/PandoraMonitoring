@@ -49,6 +49,64 @@ gmake install
 
 
 
+
+Installation of PandoraMonitoring without CMake
+==============================================================
+
+If cmake is not available a file called "Makefile" has to be created with the following text in it:
+(without the start and stop marks "---")
+
+---- Makefile ---
+LCIO =  /afs/cern.ch/eng/clic/work/sailer/sl5/ilcsoft/v01-08afs/lcio/v01-12-03
+PANDORAPFA=/home/speckmay/code/devPandora/PandoraPFANew
+DEFINES = -DROOT_EVE=1
+
+CC=gcc
+CFLAGS=-c -Wall -g -w -fPIC
+LDFLAGS   = $(shell $(ROOTSYS)/bin/root-config --auxcflags)
+LDFLAGS  += $(LIBS) -Wl,-rpath
+
+INCLUDES  = -I../include/
+INCLUDES += -I$(shell $(ROOTSYS)/bin/root-config --incdir)
+INCLUDES += -I$(LCIO)/include
+INCLUDES += -I$(PANDORAPFA)/include/
+INCLUDES += -I$(PANDORAPFA)/src/
+
+LIBS      = $(shell $(ROOTSYS)/bin/root-config --glibs) -lEve
+LIBS     += -L$(LCIO)/lib -llcio
+
+DIR= ../src/
+SOURCES= $(DIR)PandoraMonitoringApi.cc $(DIR)PandoraMonitoring.cc $(DIR)TTreeWrapper.cc
+OBJECTS=$(SOURCES:.cc=.o)
+
+LIBRARY=libPandoraMonitoring.so
+
+CFLAGS += $(INCLUDES)
+
+all: $(SOURCES) $(OBJECTS)
+        $(CC) $(OBJECTS) $(LIBS) -shared -o $(LIBRARY)
+
+$(LIBRARY): $(OBJECTS)
+        $(CC) $(LDFLAGS) -fPIC $(OBJECTS) -o $@
+
+.cc.o:
+        $(CC) $(CFLAGS) $(DEFINES) $< -o $@
+
+clean:
+        rm -f ../src/*.o
+        rm -f $(LIBRARY)
+--- Makefile end ---
+
+
+- make the pandora monitoring:
+make
+
+
+
+
+
+
+
 recompilation of PandoraPFANew with PandoraMonitoring support:
 ==============================================================
 
@@ -56,6 +114,9 @@ recompilation of PandoraPFANew with PandoraMonitoring support:
 - tell PandoraPFANew the path to the monitoring directory
 cmake -C BuildSetup.cmake -DMONITORING_DIRECTORY=/<path_to_monitoring_directory> ..
 gmake install
+
+
+
 
 
 
