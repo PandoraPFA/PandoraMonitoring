@@ -740,9 +740,18 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
             pfoColor = GetColorForPdgCode(pPfo->GetParticleId());
         }
 
-        // show clusters
+        // show clusters and tracks
         const pandora::ClusterList clusterList(pPfo->GetClusterList());
-        VisualizeClusters(&clusterList, sstr.str().c_str(), pfoListElement, pfoColor, showAssociatedTracks, showFit);
+        const pandora::TrackList trackList(pPfo->GetTrackList());
+
+        if (clusterList.empty())
+        {
+            VisualizeTracks(&trackList, sstr.str().c_str(), pfoListElement, pfoColor);
+        }
+        else
+        {
+            VisualizeClusters(&clusterList, sstr.str().c_str(), pfoListElement, pfoColor, showAssociatedTracks, showFit);
+        }
     }
 
     if (parent)

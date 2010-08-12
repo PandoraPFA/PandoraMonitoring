@@ -45,7 +45,7 @@ cp ../BuildSetup.cmake ./
 
 - cmake and make:
 cmake -C BuildSetup.cmake ..
-gmake install
+make install
 
 
 
@@ -112,8 +112,8 @@ recompilation of PandoraPFANew with PandoraMonitoring support:
 
 
 - tell PandoraPFANew the path to the monitoring directory
-cmake -C BuildSetup.cmake -DMONITORING_DIRECTORY=/<path_to_monitoring_directory> ..
-gmake install
+cmake -C BuildSetup.cmake -DPandoraMonitoring_HOME=/<path_to_monitoring_directory> ..
+make install
 
 
 
