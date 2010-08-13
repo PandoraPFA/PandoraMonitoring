@@ -139,6 +139,7 @@ ENDIF()
 
 ### ADDITIONAL LIBRARIES ############################################################
 
+SET( LIB_EVE LIB_EVE-NOTFOUND )
 MESSAGE( STATUS "ROOT_HOME : ${ROOT_HOME}" )
 FIND_FILE( LIB_EVE lib/libEve.so ${ROOT_HOME} )
 IF( LIB_EVE )
