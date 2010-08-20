@@ -63,6 +63,7 @@
 #include <iostream>
 #include <cmath>
 #include <fcntl.h>
+#include <limits>
 
 namespace pandora_monitoring
 {
@@ -429,6 +430,13 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
     subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalEndCapParameters(), "ECalEndCap") );
     subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalBarrelParameters(), "HCalBarrel") );
     subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalEndCapParameters(), "HCalEndCap") );
+    subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetMuonBarrelParameters(), "MuonBarrel") );
+    subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetMuonEndCapParameters(), "MuonEndCap") );
+
+    typedef std::set<std::string> StringSet;
+    StringSet setInvisible;
+    setInvisible.insert( "MuonBarrel" );
+    setInvisible.insert( "MuonEndCap" );
 
     TGeoVolume* mainTracker = NULL;
     mainTracker = MakePolygonTube("Tracker", 0, 0,pGeometryHelper->GetMainTrackerInnerRadius() * m_scalingFactor,
@@ -457,6 +465,9 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
             const pandora::GeometryHelper::SubDetectorParameters& detPar = (*iter).first;
             std::string name = (*iter).second;
 
+            StringSet::iterator itSetInvisible = setInvisible.find(name);
+            bool drawInvisible = (itSetInvisible != setInvisible.end() ? true : false );
+
             std::stringstream sstr;
             sstr << name;
             sstr << (left? "_left" : "_right" );
@@ -480,7 +491,7 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
             subDetVol->SetTransparency(transparency);
 
             size_t found=name.find("subDet_");
-            if (found!=std::string::npos)
+            if (found!=std::string::npos || drawInvisible)
                 subDetVol->SetVisibility(kFALSE);
 
             top->AddNode( subDetVol, 0, new TGeoTranslation(0,0, zPosition) );
@@ -542,29 +553,60 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
     hits->AddElement(hitsMarkers);
     hits->SetOwnIds(kTRUE);
 
+    typedef std::map<int,float> EnergyForParticleId;
+    EnergyForParticleId energyDepositsForMCParticlesId;
+
+    int numberHits = 0;
+    pandora::PseudoLayer firstLayer = 0;
+    pandora::PseudoLayer lastLayer = 0;
+
+    firstLayer = pOrderedCaloHitList->begin()->first;
+
+    float minInteractionLengthsFromIp = std::numeric_limits<float>::max();
+    float maxInteractionLengthsFromIp = std::numeric_limits<float>::min();
+
+    float energySumElectromagnetic = 0.f;
+    float energySumHadronic = 0.f;
+
     for (pandora::OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end();
          iter != iterEnd; ++iter)
     {
+        lastLayer = iter->first;
+
         for (pandora::CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end();
              caloHitIter != caloHitIterEnd; ++caloHitIter)
         {
             const pandora::CaloHit *pCaloHit = (*caloHitIter);
+            ++numberHits;
 
-            // Build information string
-            std::stringstream sstr;
+            float interactionLengthsFromIp = pCaloHit->GetNInteractionLengthsFromIp();
+            if( interactionLengthsFromIp < minInteractionLengthsFromIp )
+                minInteractionLengthsFromIp = interactionLengthsFromIp;
 
-            if (!name.empty())
-                sstr << name << "\n";
-
-            sstr << "--- calo-hits"
-                 << "\nEem=" << pCaloHit->GetElectromagneticEnergy() 
-                 << "\nEhad=" << pCaloHit->GetHadronicEnergy();
+            if( interactionLengthsFromIp > maxInteractionLengthsFromIp )
+                maxInteractionLengthsFromIp = interactionLengthsFromIp;
 
             const pandora::MCParticle *pMCParticle = NULL;
             pCaloHit->GetMCParticle(pMCParticle);
 
+            float hitEnergy = pCaloHit->GetElectromagneticEnergy();
+            energySumElectromagnetic += hitEnergy;
+
+            float hitEnergyHadronic = pCaloHit->GetHadronicEnergy();
+            energySumHadronic += hitEnergyHadronic;
+
             if (pMCParticle)
-                sstr << "\nMC-PID=" << pMCParticle->GetParticleId();
+            {
+                int particleId = pMCParticle->GetParticleId();
+                EnergyForParticleId::iterator it = energyDepositsForMCParticlesId.find( particleId );
+                if( it == energyDepositsForMCParticlesId.end() )
+                    energyDepositsForMCParticlesId.insert( std::make_pair(particleId, hitEnergy) );
+                else
+                {
+                    float oldValue = it->second;
+                    it->second = oldValue + hitEnergy;
+                }
+            }
 
             // Compute the corners of calohit calorimeter-cell, 8 corners x 3 dimensions
             Float_t corners[24];
@@ -582,9 +624,27 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             hits->AddBox(corners);
             hits->SetPickable(kTRUE);
             hits->DigitColor(GetROOTColor(color));
-            hits->SetElementTitle(sstr.str().c_str());
+            //            hits->DigitValue(90);
         }
     }
+
+
+    // Build information string
+    std::stringstream sstr;
+
+    if (!name.empty())
+        sstr << name << "\n";
+
+    sstr << "--- calo-hits"
+         << "\nEem=" << energySumElectromagnetic
+         << "\nEhad=" << energySumHadronic
+         << "\nfirst pseudo-layer=" << firstLayer
+         << "\nlast  pseudo-layer=" << lastLayer
+         << "\nmin intLenFromIP=" << minInteractionLengthsFromIp
+         << "\nmax intLenFromIP=" << maxInteractionLengthsFromIp;
+
+    hits->SetElementTitle(sstr.str().c_str());
+
 
     if (parent)
     {
