@@ -494,11 +494,71 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
             if (found!=std::string::npos || drawInvisible)
                 subDetVol->SetVisibility(kFALSE);
 
-            top->AddNode( subDetVol, 0, new TGeoTranslation(0,0, zPosition) );
+            top->AddNode(subDetVol, 0, new TGeoTranslation(0, 0, zPosition));
             left = false;
         }
 
         ++col;
+    }
+
+    //--- gaps in active detector medium
+    const pandora::GeometryHelper::GapList &gapList(pGeometryHelper->GetGapList());
+    unsigned int gapCounter(0);
+
+    for (pandora::GeometryHelper::GapList::const_iterator iter = gapList.begin(), iterEnd = gapList.end(); iter != iterEnd; ++iter)
+    {
+        std::string gapName("gap" + pandora::TypeToString(gapCounter++));
+
+        // --- box gaps
+        pandora::GeometryHelper::BoxGap *pBoxGap = NULL;
+        pBoxGap = dynamic_cast<pandora::GeometryHelper::BoxGap *>(*iter);
+
+        if (NULL != pBoxGap)
+        {
+            TGeoShape *pGapShape = new TGeoBBox(gapName.c_str(), 0.5f * pBoxGap->m_side1.GetMagnitude() * m_scalingFactor,
+                0.5f * pBoxGap->m_side2.GetMagnitude() * m_scalingFactor, 0.5f * pBoxGap->m_side3.GetMagnitude() * m_scalingFactor);
+
+            TGeoVolume *pGapVol = new TGeoVolume(gapName.c_str(), pGapShape, Vacuum);
+
+            const float phi(std::atan2(pBoxGap->m_vertex.GetX(), pBoxGap->m_vertex.GetY()));
+            static const float pi(std::acos(-1.));
+
+            const TGeoTranslation trans("trans",
+                ( 0.5f * pBoxGap->m_side1.GetMagnitude() * std::cos(phi) + 0.5f * pBoxGap->m_side2.GetMagnitude() * std::sin(phi)+ pBoxGap->m_vertex.GetX()) * m_scalingFactor,
+                (-0.5f * pBoxGap->m_side1.GetMagnitude() * std::sin(phi) + 0.5f * pBoxGap->m_side2.GetMagnitude() * std::cos(phi)+ pBoxGap->m_vertex.GetY()) * m_scalingFactor,
+                0);
+
+            const TGeoRotation rot("rot", -180.f * phi / pi, 0, 0);
+
+            pGapVol->SetLineColor(1);
+            pGapVol->SetFillColor(1);
+            pGapVol->SetTransparency(transparency + 15);
+
+            top->AddNode(pGapVol, 0, new TGeoCombiTrans(trans, rot));
+            continue;
+        }
+
+        // --- concentric polygon gaps
+        pandora::GeometryHelper::ConcentricGap *pConcentricGap = NULL;
+        pConcentricGap = dynamic_cast<pandora::GeometryHelper::ConcentricGap *>(*iter);
+
+        if (NULL != pConcentricGap)
+        {
+            const double zMin = pConcentricGap->m_minZCoordinate * m_scalingFactor;
+            const double zMax = pConcentricGap->m_maxZCoordinate * m_scalingFactor;
+            const double zThick = zMax - zMin;
+
+            TGeoVolume *pGapVol = MakePolygonTube(gapName.c_str(), pConcentricGap->m_innerSymmetryOrder, pConcentricGap->m_outerSymmetryOrder,
+                pConcentricGap->m_innerRCoordinate * m_scalingFactor, pConcentricGap->m_outerRCoordinate * m_scalingFactor,
+                pConcentricGap->m_innerPhiCoordinate, pConcentricGap->m_outerPhiCoordinate, (zThick / 2.), Vacuum);
+
+            pGapVol->SetLineColor(1);
+            pGapVol->SetFillColor(1);
+            pGapVol->SetTransparency(transparency + 15);
+
+            top->AddNode(pGapVol, 0, new TGeoTranslation(0, 0, zMin + (zThick / 2.f)));
+            continue;
+        }
     }
 
     //--- close the geometry
@@ -1095,7 +1155,7 @@ void PandoraMonitoring::ComputePolygonCorners( int symmetryOrder, double closest
 {
     if (symmetryOrder > 2)
     {
-        const Double_t pi(3.1415927);
+        static const Double_t pi(std::acos(-1.));
         const Double_t x0(-1. * closestDistanceToIp * tan(pi / Double_t(symmetryOrder)));
         const Double_t y0(closestDistanceToIp);
 
