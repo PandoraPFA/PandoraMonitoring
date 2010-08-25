@@ -384,15 +384,12 @@ inline PandoraMonitoring::PandoraMonitoring()
     d(PI_PLUS,             211,             MAGENTA)                        \
     d(PI_MINUS,           -211,             VIOLET)                         \
     d(PI_ZERO,             111,             LIGHTGREEN)                     \
-    d(PI_ZERO_BAR,        -111,             LIGHTGREEN)                     \
     d(LAMBDA,             3122,             DARKGREEN)                      \
     d(LAMBDA_BAR,        -3122,             DARKGREEN)                      \
     d(K_PLUS,              321,             DARKGREEN)                      \
     d(K_MINUS,            -321,             DARKGREEN)                      \
     d(K_SHORT,             310,             LIGHTGREEN)                     \
-    d(K_SHORT_BAR,        -310,             LIGHTGREEN)                     \
     d(K_LONG,              130,             GREEN)                          \
-    d(K_LONG_BAR,         -130,             GREEN)                          \
     d(SIGMA_MINUS,        3112,             GREEN)                          \
     d(SIGMA_PLUS,         3222,             GREEN)                          \
     d(PROTON,             2212,             ORANGE)                         \
