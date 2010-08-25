@@ -300,6 +300,24 @@ private:
      */
     void InitializeEve(Char_t transparency = 70);
 
+    /**
+     *  @brief  Initialize subdetector eve elements
+     * 
+     *  @param  pMainDetectorVolume address of the main detector volume
+     *  @param  pSubDetectorMedium address of the medium to be used for the subdetectors
+     *  @param  transparency the transparency
+     */
+    void InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, TGeoMedium *pSubDetectorMedium, Char_t transparency);
+
+    /**
+     *  @brief  Initialize detector gap eve elements
+     * 
+     *  @param  pMainDetectorVolume address of the main detector volume
+     *  @param  pSubDetectorMedium address of the medium to be used for the gaps
+     *  @param  transparency the transparency
+     */
+    void InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedium *pGapMedium, Char_t transparency);
+
     typedef std::map<const std::string, TH1 *> HistogramMap;
 
     static bool                 m_instanceFlag;         ///< The pandora monitoring instance flag

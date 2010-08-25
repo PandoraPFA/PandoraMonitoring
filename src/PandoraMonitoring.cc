@@ -379,7 +379,7 @@ void PandoraMonitoring::Pause() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::InitializeEve( Char_t transparency )
+void PandoraMonitoring::InitializeEve(Char_t transparency)
 {
     std::stringstream sstr;
     sstr << "Event Display " << m_eventDisplayCounter;
@@ -400,20 +400,46 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
     }
 
     gSystem->Load("libGeom");
-    TGeoManager *geom = new TGeoManager("DetectorGeometry", "detector geometry");
+    TGeoManager *pGeoManager = new TGeoManager("DetectorGeometry", "detector geometry");
 
     //--- define some materials
-    TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0,0,0);
-    TGeoMaterial *matAl = new TGeoMaterial("Al", 26.98,13,2.7);
+    TGeoMaterial *pVacuumMaterial = new TGeoMaterial("Vacuum", 0, 0, 0);
+    TGeoMaterial *pAluminiumMaterial = new TGeoMaterial("Aluminium", 26.98, 13, 2.7);
 
     //--- define some media
-    TGeoMedium *Vacuum = new TGeoMedium("Vacuum",1, matVacuum);
-    TGeoMedium *Al = new TGeoMedium("Aluminium",2, matAl);
+    TGeoMedium *pVacuum = new TGeoMedium("Vacuum",1, pVacuumMaterial);
+    TGeoMedium *pAluminium = new TGeoMedium("Aluminium",2, pAluminiumMaterial);
 
     //--- make the top container volume
-    TGeoVolume *top = geom->MakeBox("Detector", Vacuum, 1000., 1000., 100.);
-    geom->SetTopVolume(top);
+    TGeoVolume *pMainDetectorVolume = pGeoManager->MakeBox("Detector", pVacuum, 1000., 1000., 100.);
+    pGeoManager->SetTopVolume(pMainDetectorVolume);
 
+    this->InitializeSubDetectors(pMainDetectorVolume, pAluminium, transparency);
+    this->InitializeGaps(pMainDetectorVolume, pVacuum, transparency);
+
+    //--- close the geometry
+    pGeoManager->CloseGeometry();
+
+    TEveManager::Create();
+
+    TGeoNode* pGeoNode = gGeoManager->GetTopNode();
+    TEveGeoTopNode* pEveGeoTopNode = new TEveGeoTopNode(gGeoManager, pGeoNode);
+    pEveGeoTopNode->SetVisLevel(1);
+    pEveGeoTopNode->GetNode()->GetVolume()->SetVisibility(kFALSE);
+
+    gEve->AddGlobalElement(pEveGeoTopNode);
+
+    gEve->GetDefaultViewer()->SetMainColor(kWhite);
+    gEve->Redraw3D(kTRUE);
+
+    m_eveInitialized = true;
+    m_openEveEvent = true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, TGeoMedium *pSubDetectorMedium, Char_t transparency)
+{
     pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
 
     typedef std::vector<std::pair<pandora::GeometryHelper::SubDetectorParameters, std::string> > SubDetectorParametersList;
@@ -435,26 +461,26 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
 
     typedef std::set<std::string> StringSet;
     StringSet setInvisible;
-    setInvisible.insert( "MuonBarrel" );
-    setInvisible.insert( "MuonEndCap" );
+    setInvisible.insert("MuonBarrel");
+    setInvisible.insert("MuonEndCap");
 
     TGeoVolume* mainTracker = NULL;
     mainTracker = MakePolygonTube("Tracker", 0, 0,pGeometryHelper->GetMainTrackerInnerRadius() * m_scalingFactor,
-        pGeometryHelper->GetMainTrackerOuterRadius()*m_scalingFactor, 0.,0., pGeometryHelper->GetMainTrackerZExtent() * m_scalingFactor, Al);
+        pGeometryHelper->GetMainTrackerOuterRadius()*m_scalingFactor, 0.,0., pGeometryHelper->GetMainTrackerZExtent() * m_scalingFactor, pSubDetectorMedium);
 
     mainTracker->SetLineColor(kGreen);
     mainTracker->SetTransparency(transparency);
     mainTracker->SetVisibility(kFALSE);
-    top->AddNode( mainTracker, 0, new TGeoTranslation(0, 0, 0));
+    pMainDetectorVolume->AddNode(mainTracker, 0, new TGeoTranslation(0, 0, 0));
 
     TGeoVolume* coil = NULL;
     coil = MakePolygonTube("Coil", 0, 0, pGeometryHelper->GetCoilInnerRadius() * m_scalingFactor,
-        pGeometryHelper->GetCoilOuterRadius() * m_scalingFactor, 0.,0., pGeometryHelper->GetCoilZExtent() * m_scalingFactor, Al );
+        pGeometryHelper->GetCoilOuterRadius() * m_scalingFactor, 0.,0., pGeometryHelper->GetCoilZExtent() * m_scalingFactor, pSubDetectorMedium);
 
     coil->SetLineColor(kBlue);
     coil->SetTransparency(transparency);
     coil->SetVisibility(kFALSE);
-    top->AddNode(coil, 0, new TGeoTranslation(0,0,0));
+    pMainDetectorVolume->AddNode(coil, 0, new TGeoTranslation(0,0,0));
 
     Int_t col = 2;
     for (SubDetectorParametersList::const_iterator iter = subDetectorParametersList.begin(); iter != subDetectorParametersList.end(); ++iter)
@@ -484,7 +510,7 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
 
             subDetVol = MakePolygonTube(sstr.str().c_str(), detPar.GetInnerSymmetryOrder(), detPar.GetOuterSymmetryOrder(),
                 detPar.GetInnerRCoordinate() * m_scalingFactor, detPar.GetOuterRCoordinate() * m_scalingFactor,
-                detPar.GetInnerPhiCoordinate(), detPar.GetOuterPhiCoordinate(), (zThick / 2.), Al);
+                detPar.GetInnerPhiCoordinate(), detPar.GetOuterPhiCoordinate(), (zThick / 2.), pSubDetectorMedium);
 
             subDetVol->SetLineColor(GetROOTColor(Color(col)));
             subDetVol->SetFillColor(GetROOTColor(Color(col)));
@@ -494,14 +520,19 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
             if (found!=std::string::npos || drawInvisible)
                 subDetVol->SetVisibility(kFALSE);
 
-            top->AddNode(subDetVol, 0, new TGeoTranslation(0, 0, zPosition));
+            pMainDetectorVolume->AddNode(subDetVol, 0, new TGeoTranslation(0, 0, zPosition));
             left = false;
         }
-
         ++col;
     }
+}
 
-    //--- gaps in active detector medium
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedium *pGapMedium, Char_t transparency)
+{
+    pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
+
     const pandora::GeometryHelper::GapList &gapList(pGeometryHelper->GetGapList());
     unsigned int gapCounter(0);
 
@@ -509,7 +540,6 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
     {
         std::string gapName("gap" + pandora::TypeToString(gapCounter++));
 
-        // --- box gaps
         pandora::GeometryHelper::BoxGap *pBoxGap = NULL;
         pBoxGap = dynamic_cast<pandora::GeometryHelper::BoxGap *>(*iter);
 
@@ -518,27 +548,33 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
             TGeoShape *pGapShape = new TGeoBBox(gapName.c_str(), 0.5f * pBoxGap->m_side1.GetMagnitude() * m_scalingFactor,
                 0.5f * pBoxGap->m_side2.GetMagnitude() * m_scalingFactor, 0.5f * pBoxGap->m_side3.GetMagnitude() * m_scalingFactor);
 
-            TGeoVolume *pGapVol = new TGeoVolume(gapName.c_str(), pGapShape, Vacuum);
+            TGeoVolume *pGapVol = new TGeoVolume(gapName.c_str(), pGapShape, pGapMedium);
 
-            const float phi(std::atan2(pBoxGap->m_vertex.GetX(), pBoxGap->m_vertex.GetY()));
+            const float vertexZ(pBoxGap->m_vertex.GetZ());
+            static const float hcalEndCapInnerZ(pGeometryHelper->GetHCalEndCapParameters().GetInnerZCoordinate());
+
+            // TODO Remove ILD-specific correction, required for endcap box gaps that do not point back to origin in xy plane.
+            //      Pandora gaps are self-describing (four vectors), but this does not map cleanly to TGeoBBox class.
+            //      Best solution may be to move to different root TGeoShape.
             static const float pi(std::acos(-1.));
+            const float correction((std::fabs(vertexZ) < hcalEndCapInnerZ) ? 0 : ((vertexZ > 0) ? pi / 4.f : -pi / 4.f));
+            const float phi(correction + std::atan2(pBoxGap->m_vertex.GetX(), pBoxGap->m_vertex.GetY()));
 
             const TGeoTranslation trans("trans",
-                ( 0.5f * pBoxGap->m_side1.GetMagnitude() * std::cos(phi) + 0.5f * pBoxGap->m_side2.GetMagnitude() * std::sin(phi)+ pBoxGap->m_vertex.GetX()) * m_scalingFactor,
-                (-0.5f * pBoxGap->m_side1.GetMagnitude() * std::sin(phi) + 0.5f * pBoxGap->m_side2.GetMagnitude() * std::cos(phi)+ pBoxGap->m_vertex.GetY()) * m_scalingFactor,
-                0);
+                ( 0.5f * pBoxGap->m_side1.GetMagnitude() * std::cos(phi) + 0.5f * pBoxGap->m_side2.GetMagnitude() * std::sin(phi) + pBoxGap->m_vertex.GetX()) * m_scalingFactor,
+                (-0.5f * pBoxGap->m_side1.GetMagnitude() * std::sin(phi) + 0.5f * pBoxGap->m_side2.GetMagnitude() * std::cos(phi) + pBoxGap->m_vertex.GetY()) * m_scalingFactor,
+                ( 0.5f * (2.f * pBoxGap->m_vertex.GetZ() + pBoxGap->m_side3.GetZ()) * m_scalingFactor));
 
             const TGeoRotation rot("rot", -180.f * phi / pi, 0, 0);
 
             pGapVol->SetLineColor(1);
             pGapVol->SetFillColor(1);
-            pGapVol->SetTransparency(transparency + 15);
+            pGapVol->SetTransparency(transparency + 23);
 
-            top->AddNode(pGapVol, 0, new TGeoCombiTrans(trans, rot));
+            pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoCombiTrans(trans, rot));
             continue;
         }
 
-        // --- concentric polygon gaps
         pandora::GeometryHelper::ConcentricGap *pConcentricGap = NULL;
         pConcentricGap = dynamic_cast<pandora::GeometryHelper::ConcentricGap *>(*iter);
 
@@ -550,34 +586,16 @@ void PandoraMonitoring::InitializeEve( Char_t transparency )
 
             TGeoVolume *pGapVol = MakePolygonTube(gapName.c_str(), pConcentricGap->m_innerSymmetryOrder, pConcentricGap->m_outerSymmetryOrder,
                 pConcentricGap->m_innerRCoordinate * m_scalingFactor, pConcentricGap->m_outerRCoordinate * m_scalingFactor,
-                pConcentricGap->m_innerPhiCoordinate, pConcentricGap->m_outerPhiCoordinate, (zThick / 2.), Vacuum);
+                pConcentricGap->m_innerPhiCoordinate, pConcentricGap->m_outerPhiCoordinate, (zThick / 2.), pGapMedium);
 
             pGapVol->SetLineColor(1);
             pGapVol->SetFillColor(1);
-            pGapVol->SetTransparency(transparency + 15);
+            pGapVol->SetTransparency(transparency + 23);
 
-            top->AddNode(pGapVol, 0, new TGeoTranslation(0, 0, zMin + (zThick / 2.f)));
+            pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoTranslation(0, 0, zMin + (zThick / 2.f)));
             continue;
         }
     }
-
-    //--- close the geometry
-    geom->CloseGeometry();
-
-    TEveManager::Create();
-
-    TGeoNode* node = gGeoManager->GetTopNode();
-    TEveGeoTopNode* en = new TEveGeoTopNode(gGeoManager, node);
-    en->SetVisLevel(1);
-    en->GetNode()->GetVolume()->SetVisibility(kFALSE);
-
-    gEve->AddGlobalElement(en);
-
-    gEve->GetDefaultViewer()->SetMainColor( kWhite );
-    gEve->Redraw3D(kTRUE);
-
-    m_eveInitialized = true;
-    m_openEveEvent = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
