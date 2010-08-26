@@ -673,17 +673,18 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             float hitEnergyHadronic = pCaloHit->GetHadronicEnergy();
             energySumHadronic += hitEnergyHadronic;
 
+            int particleId = 0;
             if (pMCParticle)
             {
                 int particleId = pMCParticle->GetParticleId();
-                EnergyForParticleId::iterator it = energyDepositsForMCParticlesId.find( particleId );
-                if( it == energyDepositsForMCParticlesId.end() )
-                    energyDepositsForMCParticlesId.insert( std::make_pair(particleId, hitEnergy) );
-                else
-                {
-                    float oldValue = it->second;
-                    it->second = oldValue + hitEnergy;
-                }
+            }
+            EnergyForParticleId::iterator it = energyDepositsForMCParticlesId.find( particleId );
+            if( it == energyDepositsForMCParticlesId.end() )
+                energyDepositsForMCParticlesId.insert( std::make_pair(particleId, hitEnergy) );
+            else
+            {
+                float oldValue = it->second;
+                it->second = oldValue + hitEnergy;
             }
 
             // Compute the corners of calohit calorimeter-cell, 8 corners x 3 dimensions
@@ -720,6 +721,15 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
          << "\nlast  pseudo-layer=" << lastLayer
          << "\nmin intLenFromIP=" << minInteractionLengthsFromIp
          << "\nmax intLenFromIP=" << maxInteractionLengthsFromIp;
+    for( EnergyForParticleId::iterator itEForId = energyDepositsForMCParticlesId.begin(), itEForIdEnd = energyDepositsForMCParticlesId.end(); 
+         itEForId != itEForIdEnd; ++itEForId )
+    {
+        int mcPDG = itEForId->first;
+        float energy = itEForId->second;
+        if( mcPDG == 0 )
+            sstr << "\nCaloHits w/o MC particle = " << energy << " GeV";
+        sstr << "\nfrom MC with PDG " << mcPDG << " = " << energy << " GeV";
+    }
 
     hits->SetElementTitle(sstr.str().c_str());
 
