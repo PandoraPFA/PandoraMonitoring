@@ -676,7 +676,7 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             int particleId = 0;
             if (pMCParticle)
             {
-                int particleId = pMCParticle->GetParticleId();
+                particleId = pMCParticle->GetParticleId();
             }
             EnergyForParticleId::iterator it = energyDepositsForMCParticlesId.find( particleId );
             if( it == energyDepositsForMCParticlesId.end() )
@@ -728,7 +728,8 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
         float energy = itEForId->second;
         if( mcPDG == 0 )
             sstr << "\nCaloHits w/o MC particle = " << energy << " GeV";
-        sstr << "\nfrom MC with PDG " << mcPDG << " = " << energy << " GeV";
+        else
+            sstr << "\nfrom MC with PDG " << mcPDG << " = " << energy << " GeV";
     }
 
     hits->SetElementTitle(sstr.str().c_str());
