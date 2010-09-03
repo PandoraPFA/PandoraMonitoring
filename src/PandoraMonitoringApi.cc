@@ -122,6 +122,13 @@ void PandoraMonitoringApi::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoringApi::VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, Color color )
+{
+    PandoraMonitoring::GetInstance()->VisualizeMCParticles(pMCParticleList, name, NULL, color);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoringApi::VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, Color color )
 {
     PandoraMonitoring::GetInstance()->VisualizeTracks(pTrackList, name, NULL, color);

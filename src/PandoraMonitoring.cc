@@ -17,6 +17,8 @@
 #include "Objects/Track.h"
 #include "Objects/MCParticle.h"
 
+#include "Pandora/PdgTable.h"
+
 // ROOT include files
 #include "TCanvas.h"
 #include "TFile.h"
@@ -748,6 +750,115 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
     return hits;
 }
 
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, TEveElement *parent, Color color)
+{
+    InitializeEve();
+
+    TEveTrackList *mcParticleList = new TEveTrackList();
+    const std::string mcParticleListName(name.empty() ? "MCParticles" : name);
+    mcParticleList->SetElementNameTitle( mcParticleListName.c_str(), mcParticleListName.c_str() );
+    mcParticleList->SetMainColor(GetROOTColor(TEAL));
+
+    TEveTrackPropagator *propagator = mcParticleList->GetPropagator();
+    // propagator->SetStepper(TEveTrackPropagator::kRungeKutta);
+
+    pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
+    const float magneticField(pGeometryHelper->GetBField());
+
+    propagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., magneticField));
+    propagator->SetMaxR(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);
+    propagator->SetMaxZ(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate() * m_scalingFactor);
+    propagator->SetMaxOrbs(5);
+
+    for (pandora::MCParticleList::const_iterator mcParticleIter = pMCParticleList->begin(), mcParticleIterEnd = pMCParticleList->end();
+         mcParticleIter != mcParticleIterEnd; ++mcParticleIter)
+    { 
+        pandora::MCParticle *pandoraMCParticle = (*mcParticleIter);
+
+        // Get mc particle position and momentum
+        const pandora::CartesianVector &momentum = pandoraMCParticle->GetMomentum();
+        const pandora::CartesianVector position = pandoraMCParticle->GetVertex() * m_scalingFactor;
+
+        const pandora::CartesianVector positionAtEnd = pandoraMCParticle->GetEndpoint()*m_scalingFactor;
+
+        // Color assignment
+        int particleId = pandoraMCParticle->GetParticleId();
+        int charge = pandora::PdgTable::GetParticleCharge(particleId);
+
+        Color mcParticleColor = color;
+        if (color == AUTO)
+        {
+            mcParticleColor = CYAN;
+
+            if (charge > 0)
+            {
+                mcParticleColor = LIGHTRED;
+            }
+            else if(charge < 0)
+            {
+                mcParticleColor = LIGHTGREEN;
+            }
+        }
+
+        // Build information string
+        std::stringstream sstr;
+
+        if (!name.empty())
+            sstr << name << "\n";
+
+        sstr << "--- MC particle"
+             << "\np=" << momentum.GetMagnitude()
+             << "\nCharge=" << charge
+             << "\nPDG=" << particleId;
+
+        // Create track path, note strange ALICE charge sign convention,
+        // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
+        TEveRecTrack *rc = new TEveRecTrack();
+        rc->fV.Set(position.GetX(),position.GetY(),position.GetZ());
+        rc->fP.Set(momentum.GetX(),momentum.GetY(),momentum.GetZ());
+        rc->fSign = -charge;
+
+        TEveTrack *track = new TEveTrack(rc, propagator);
+        track->SetName(sstr.str().c_str());
+        track->SetTitle(sstr.str().c_str());
+        track->SetLineColor(GetROOTColor(mcParticleColor));
+        track->SetLineWidth(1);
+        track->SetLineStyle(2);
+        track->SetPickable(kTRUE);
+
+        // Create mark at track end
+        TEvePathMark* pmEnd = new TEvePathMark(TEvePathMark::kReference);
+        pmEnd->fV.Set(positionAtEnd.GetX(),positionAtEnd.GetY(),positionAtEnd.GetZ());
+        //        pmEnd->fP.Set(momentum.GetX(),momentum.GetY(),momentum.GetZ());
+        track->AddPathMark(*pmEnd);
+
+        // Create mark at track projection to ecal
+//         TEvePathMark *pmECal = new TEvePathMark(TEvePathMark::kDecay);
+//         pmECal->fV.Set(positionAtECal.GetX(),positionAtECal.GetY(),positionAtECal.GetZ());
+//         track->AddPathMark(*pmECal);
+
+        mcParticleList->AddElement(track);
+        track->MakeTrack();
+    }
+
+    if (parent)
+    {
+        parent->AddElement(mcParticleList);
+    }
+    else
+    {
+        gEve->AddElement(mcParticleList);
+        gEve->Redraw3D();
+    }
+
+    return mcParticleList;
+}
+
+
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, TEveElement *parent, Color color)
@@ -858,6 +969,9 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
     return trackList;
 }
 
+
+
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name,
@@ -964,8 +1078,8 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
         if (!name.empty())
             sstr << name << "\n";
 
-        sstr << "--- cluster\nEem=" << pCluster->GetElectromagneticEnergy() 
-             << "\nEhad=" << pCluster->GetHadronicEnergy() 
+        sstr << "--- cluster\nEem(corr)=" << pCluster->GetElectromagneticEnergy() 
+             << "\nEhad(corr)=" << pCluster->GetHadronicEnergy() 
              << "\nNHits=" << pCluster->GetNCaloHits();
 
         // Display constituent calo hits

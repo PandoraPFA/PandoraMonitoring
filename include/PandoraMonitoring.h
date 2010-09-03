@@ -158,6 +158,18 @@ public:
     void ViewEvent();
 
     /**
+     *  @brief Add MC particles to the Eve event-display
+     * 
+     *  @param pMCParticleList list of tracks to be added to the event display
+     *  @param name of the MC particle list
+     *  @param parent pointer to the parent TEveElement. If NULL, the track will be parent element
+     *  @param color The color the track elements are drawn with
+     *
+     *  @return pointer to created TEveElement
+     */
+    TEveElement *VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, TEveElement *parent, Color color);
+
+    /**
      *  @brief Add Tracks to the Eve event-display
      * 
      *  @param pTrackList list of tracks to be added to the event display

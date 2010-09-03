@@ -192,6 +192,15 @@ public:
     static void ViewEvent();
 
     /**
+     *  @brief Add MCParticles to the Eve event-display
+     * 
+     *  @param pMCParticleList list of MC particles to be added to the event display
+     *  @param name of the MC particle list
+     *  @param color The color the track elements are drawn with
+     */  
+    static void VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, Color color);
+
+    /**
      *  @brief Add Tracks to the Eve event-display
      * 
      *  @param pTrackList list of tracks to be added to the event display
