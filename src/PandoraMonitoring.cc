@@ -778,15 +778,18 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
     { 
         pandora::MCParticle *pandoraMCParticle = (*mcParticleIter);
 
+        if (!pandoraMCParticle->IsInitialized())
+            continue;
+
         // Get mc particle position and momentum
         const pandora::CartesianVector &momentum = pandoraMCParticle->GetMomentum();
-        const pandora::CartesianVector position = pandoraMCParticle->GetVertex() * m_scalingFactor;
 
-        const pandora::CartesianVector positionAtEnd = pandoraMCParticle->GetEndpoint()*m_scalingFactor;
+        const pandora::CartesianVector position = pandoraMCParticle->GetVertex() * m_scalingFactor;
+        const pandora::CartesianVector positionAtEnd = pandoraMCParticle->GetEndpoint() * m_scalingFactor;
 
         // Color assignment
         int particleId = pandoraMCParticle->GetParticleId();
-        int charge = pandora::PdgTable::GetParticleCharge(particleId);
+        int charge = 0;//pandora::PdgTable::GetParticleCharge(particleId);
 
         Color mcParticleColor = color;
         if (color == AUTO)
@@ -814,7 +817,7 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
              << "\nCharge=" << charge
              << "\nPDG=" << particleId;
 
-        // Create track path, note strange ALICE charge sign convention,
+        // Create particle path, note strange ALICE charge sign convention,
         // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
         TEveRecTrack *rc = new TEveRecTrack();
         rc->fV.Set(position.GetX(),position.GetY(),position.GetZ());
@@ -829,16 +832,10 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
         track->SetLineStyle(2);
         track->SetPickable(kTRUE);
 
-        // Create mark at track end
+        // Create mark at end position
         TEvePathMark* pmEnd = new TEvePathMark(TEvePathMark::kReference);
         pmEnd->fV.Set(positionAtEnd.GetX(),positionAtEnd.GetY(),positionAtEnd.GetZ());
-        //        pmEnd->fP.Set(momentum.GetX(),momentum.GetY(),momentum.GetZ());
         track->AddPathMark(*pmEnd);
-
-        // Create mark at track projection to ecal
-//         TEvePathMark *pmECal = new TEvePathMark(TEvePathMark::kDecay);
-//         pmECal->fV.Set(positionAtECal.GetX(),positionAtECal.GetY(),positionAtECal.GetZ());
-//         track->AddPathMark(*pmECal);
 
         mcParticleList->AddElement(track);
         track->MakeTrack();
@@ -856,8 +853,6 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
 
     return mcParticleList;
 }
-
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
