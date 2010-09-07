@@ -197,8 +197,9 @@ public:
      *  @param pMCParticleList list of MC particles to be added to the event display
      *  @param name of the MC particle list
      *  @param color The color the track elements are drawn with
+     *  @param suppressParticlesMap map of pdg-codes (int) and energies (float) of particles to be suppressed if their energy is below the given value
      */  
-    static void VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, Color color);
+    static void VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, Color color, const std::map<int,float> * suppressParticlesMap = NULL );
 
     /**
      *  @brief Add Tracks to the Eve event-display

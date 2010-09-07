@@ -46,6 +46,7 @@
 #include "TEveTrackPropagator.h"
 #include "TEveTrack.h"
 #include "TEveVSDStructs.h" // for TEveRecTrack
+#include "TParticlePDG.h"
 
 #include <TSystem.h>
 #include <TGeoManager.h>
@@ -753,7 +754,8 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, TEveElement *parent, Color color)
+TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, TEveElement *parent, Color color, 
+                                                     const std::map<int,float> * suppressParticlesMap )
 {
     InitializeEve();
 
@@ -768,9 +770,14 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
     pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
     const float magneticField(pGeometryHelper->GetBField());
 
-    propagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., magneticField));
-    propagator->SetMaxR(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);
-    propagator->SetMaxZ(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate() * m_scalingFactor);
+    // Create particle path, note strange ALICE charge sign convention,
+    // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
+    // thats why the magneticField is here set to -magneticField :((
+    propagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -magneticField));
+
+
+    propagator->SetMaxR(pGeometryHelper->GetHCalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);
+    propagator->SetMaxZ(pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate() * m_scalingFactor);
     propagator->SetMaxOrbs(5);
 
     for (pandora::MCParticleList::const_iterator mcParticleIter = pMCParticleList->begin(), mcParticleIterEnd = pMCParticleList->end();
@@ -783,13 +790,36 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
 
         // Get mc particle position and momentum
         const pandora::CartesianVector &momentum = pandoraMCParticle->GetMomentum();
+        const float energy = pandoraMCParticle->GetEnergy();
 
         const pandora::CartesianVector position = pandoraMCParticle->GetVertex() * m_scalingFactor;
         const pandora::CartesianVector positionAtEnd = pandoraMCParticle->GetEndpoint() * m_scalingFactor;
 
+
         // Color assignment
         int particleId = pandoraMCParticle->GetParticleId();
-        int charge = 0;//pandora::PdgTable::GetParticleCharge(particleId);
+        float innerRadius = pandoraMCParticle->GetInnerRadius();
+        float outerRadius = pandoraMCParticle->GetOuterRadius();
+        int charge = 0;
+
+        std::map<int,float>::const_iterator itSuppPtcl = suppressParticlesMap->find(particleId);
+        if( itSuppPtcl != suppressParticlesMap->end() && itSuppPtcl->second > energy )
+        {
+//            std::cout << "suppressed ptcl " << particleId << " with E " << energy << std::endl;
+            continue;
+        }
+
+        // Create particle path, note strange ALICE charge sign convention,
+        // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
+        TEveMCTrack *rc = new TEveMCTrack();
+
+        rc->SetProductionVertex(position.GetX(),position.GetY(),position.GetZ(),0.f);
+        rc->SetMomentum(momentum.GetX(),momentum.GetY(),momentum.GetZ(),energy);
+        rc->SetPdgCode(particleId);
+        
+
+        if( rc->GetPDG() ) // if known PDG code
+            charge = ((int)rc->GetPDG()->Charge())/3;
 
         Color mcParticleColor = color;
         if (color == AUTO)
@@ -814,28 +844,45 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
 
         sstr << "--- MC particle"
              << "\np=" << momentum.GetMagnitude()
+             << "\nE=" << energy
              << "\nCharge=" << charge
-             << "\nPDG=" << particleId;
+             << "\nPDG=" << particleId
+             << "\nr_inner=" << innerRadius
+             << "\nr_outer=" << outerRadius;
+//             << "\nvx=" << position.GetX() << " vy=" << position.GetY() << " vz=" << position.GetZ()
+//             << "\n x=" << positionAtEnd.GetX() << "  y=" << positionAtEnd.GetY() << "  z=" << positionAtEnd.GetZ();
 
-        // Create particle path, note strange ALICE charge sign convention,
-        // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
-        TEveRecTrack *rc = new TEveRecTrack();
-        rc->fV.Set(position.GetX(),position.GetY(),position.GetZ());
-        rc->fP.Set(momentum.GetX(),momentum.GetY(),momentum.GetZ());
-        rc->fSign = -charge;
+        std::stringstream sstrName;
+        sstrName << "MC/p=" << momentum.GetMagnitude()
+                 << "/E=" << energy
+                 << "/c=" << charge
+                 << "/PDG=" << particleId
+                 << "/r_inner=" << innerRadius
+                 << "/r_outer=" << outerRadius;
+
 
         TEveTrack *track = new TEveTrack(rc, propagator);
-        track->SetName(sstr.str().c_str());
+        track->SetName(sstrName.str().c_str());
         track->SetTitle(sstr.str().c_str());
         track->SetLineColor(GetROOTColor(mcParticleColor));
         track->SetLineWidth(1);
         track->SetLineStyle(2);
         track->SetPickable(kTRUE);
 
-        // Create mark at end position
-        TEvePathMark* pmEnd = new TEvePathMark(TEvePathMark::kReference);
-        pmEnd->fV.Set(positionAtEnd.GetX(),positionAtEnd.GetY(),positionAtEnd.GetZ());
-        track->AddPathMark(*pmEnd);
+        const pandora::MCParticleList &daughterList = pandoraMCParticle->GetDaughterList();
+//         for( pandora::MCParticleList::const_iterator itDaugh = daughterList.begin(), itDaughEnd = daughterList.end(); itDaugh != itDaughEnd; ++itDaugh )
+//         {
+//             const MCParticle* mcDaughter = (*itDaugh);
+//         }
+
+        if( !daughterList.empty() )
+        {
+            // Create mark at end position
+            TEvePathMark* pmEnd = new TEvePathMark(TEvePathMark::kDecay);
+            pmEnd->fV.Set(positionAtEnd.GetX(),positionAtEnd.GetY(),positionAtEnd.GetZ());
+            track->AddPathMark(*pmEnd);
+            track->SetLineColor(GetROOTColor(YELLOW));
+        }
 
         mcParticleList->AddElement(track);
         track->MakeTrack();
