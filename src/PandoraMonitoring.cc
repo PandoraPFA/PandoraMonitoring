@@ -875,14 +875,14 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
 //             const MCParticle* mcDaughter = (*itDaugh);
 //         }
 
-        if( !daughterList.empty() )
-        {
+//         if( !daughterList.empty() )
+//         {
             // Create mark at end position
             TEvePathMark* pmEnd = new TEvePathMark(TEvePathMark::kDecay);
             pmEnd->fV.Set(positionAtEnd.GetX(),positionAtEnd.GetY(),positionAtEnd.GetZ());
             track->AddPathMark(*pmEnd);
             track->SetLineColor(GetROOTColor(YELLOW));
-        }
+//         }
 
         mcParticleList->AddElement(track);
         track->MakeTrack();
