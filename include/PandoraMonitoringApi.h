@@ -191,15 +191,18 @@ public:
      */
     static void ViewEvent();
 
+    typedef std::map<int, float> PdgCodeToEnergyMap;
+
     /**
      *  @brief Add MCParticles to the Eve event-display
      * 
      *  @param pMCParticleList list of MC particles to be added to the event display
      *  @param name of the MC particle list
      *  @param color The color the track elements are drawn with
-     *  @param suppressParticlesMap map of pdg-codes (int) and energies (float) of particles to be suppressed if their energy is below the given value
+     *  @param pParticleSuppressionMap map from pdg-codes to energy for suppression of particles types below specific energies
      */  
-    static void VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, Color color, const std::map<int,float> * suppressParticlesMap = NULL );
+    static void VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, Color color,
+        const PdgCodeToEnergyMap *pParticleSuppressionMap = NULL);
 
     /**
      *  @brief Add Tracks to the Eve event-display
@@ -230,7 +233,7 @@ public:
      *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
      */  
     static void VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name, Color color,
-        bool showAssociatedTracks = true, bool showFit = true);
+        bool showAssociatedTracks = true, bool showFit = false);
 
     /**
      *  @brief Add Clusters to the Eve event-display
@@ -242,7 +245,7 @@ public:
      *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
      */  
     static void VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color,
-        bool showAssociatedTracks = true, bool showFit = true);
+        bool showAssociatedTracks = true, bool showFit = false);
 
     /**
      *  @brief  Delete monitoring instance

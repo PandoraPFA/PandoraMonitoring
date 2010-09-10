@@ -164,12 +164,12 @@ public:
      *  @param name of the MC particle list
      *  @param parent pointer to the parent TEveElement. If NULL, the track will be parent element
      *  @param color The color the track elements are drawn with
-     *  @param suppressParticlesMap map of pdg-codes (int) and energies (float) of particles to be suppressed if their energy is below the given value
+     *  @param pParticleSuppressionMap map from pdg-codes to energy for suppression of particles types below specific energies
      *
      *  @return pointer to created TEveElement
      */
     TEveElement *VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, TEveElement *parent, Color color, 
-				      const std::map<int,float> * suppressParticlesMap );
+        const PandoraMonitoringApi::PdgCodeToEnergyMap *pParticleSuppressionMap);
 
     /**
      *  @brief Add Tracks to the Eve event-display

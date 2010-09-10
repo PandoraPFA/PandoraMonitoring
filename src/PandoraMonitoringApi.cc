@@ -122,9 +122,10 @@ void PandoraMonitoringApi::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, Color color, const std::map<int,float> * suppressParticlesMap )
+void PandoraMonitoringApi::VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, Color color,
+    const PdgCodeToEnergyMap *pParticleSuppressionMap)
 {
-    PandoraMonitoring::GetInstance()->VisualizeMCParticles(pMCParticleList, name, NULL, color, suppressParticlesMap );
+    PandoraMonitoring::GetInstance()->VisualizeMCParticles(pMCParticleList, name, NULL, color, pParticleSuppressionMap);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
