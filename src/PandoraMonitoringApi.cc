@@ -77,12 +77,10 @@ void PandoraMonitoringApi::SetTreeVariable(const std::string &treeName, const st
 // instantiations of this template member function for the permitted types
 template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, float  t);
 template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, int    t);
-template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, unsigned int t);
 template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, double t);
 
 template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<float>*  t);
 template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<int>*    t);
-template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<unsigned int>* t);
 template void PandoraMonitoringApi::SetTreeVariable(const std::string&, const std::string&, std::vector<double>* t);
 
 //------------------------------------------------------------------------------------------------------------------------------------------
