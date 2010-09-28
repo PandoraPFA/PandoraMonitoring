@@ -1,0 +1,24 @@
+************************************************************************
+LCD_WG2_VALIDATION_3 TAG
+************************************************************************
+Flip sign of magnetic field, rather than individual track charges, in order to match ALICE sign convention.
+Cluster fit arrow now turned off by default.
+Added visualization of MCParticles.
+Only draw MC particles up to their specified "EndPoint"
+Added suppression of MC particles, with given PDG codes, below specified energy thresholds.
+Added output showing the division of energy between MC particles for a calo hit list.
+Added visualization of specified detector gaps.
+Added muon system to the visualized detector geometry (by default invisible)
+Added calo hit title information (interaction lengths, pseudolayers)
+Draw charged PFOs even if they contain no associated clusters.
+
+************************************************************************
+LCD_WG2_VALIDATION_2 TAG
+************************************************************************
+Add checks for incorrect calo hit normal vectors
+Tidied entire package, aggressively removing outdated features and support for old root versions (pre ~5.25.00).
+Removed lcio dependency.
+
+************************************************************************
+LCD_WG2_VALIDATION TAG
+************************************************************************
