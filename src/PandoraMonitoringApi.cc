@@ -11,17 +11,18 @@
 
 using namespace pandora_monitoring;
 
-void PandoraMonitoringApi::Create1DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp)
+void PandoraMonitoringApi::Create1DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp, 
+    const std::string xAxisTitle, const std::string yAxisTitle)
 {
-    PandoraMonitoring::GetInstance()->Create1DHistogram(name, title, nBinsX, xLow, xUp);
+    PandoraMonitoring::GetInstance()->Create1DHistogram(name, title, nBinsX, xLow, xUp, xAxisTitle, yAxisTitle);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PandoraMonitoringApi::Create2DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp,
-    int nBinsY, double yLow, double yUp)
+    int nBinsY, double yLow, double yUp, const std::string xAxisTitle, const std::string yAxisTitle)
 {
-    PandoraMonitoring::GetInstance()->Create2DHistogram(name, title, nBinsX, xLow, xUp, nBinsY, yLow, yUp);
+    PandoraMonitoring::GetInstance()->Create2DHistogram(name, title, nBinsX, xLow, xUp, nBinsY, yLow, yUp, xAxisTitle, yAxisTitle);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -36,6 +37,15 @@ void PandoraMonitoringApi::Fill1DHistogram(const std::string &name, float xValue
 void PandoraMonitoringApi::Fill2DHistogram(const std::string &name, float xValue, float yValue, float weight)
 {
     PandoraMonitoring::GetInstance()->Fill2DHistogram(name, xValue, yValue, weight);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::AddMultiplyOrDivideHistograms(const std::string &nameHisto0, const std::string &nameHisto1, 
+				       double coeff0, double coeff1,
+				       bool add, bool multiply )
+{
+    PandoraMonitoring::GetInstance()->AddMultiplyOrDivideHistograms(nameHisto0, nameHisto1, coeff0, coeff1, add, multiply );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -138,6 +138,9 @@ reconstruction should be visualized.
 
         <!--  Use ROOT TEve for visualization -->
         <UseROOTEve>true</UseROOTEve>
+
+        <!--  draw Monte Carlo particles -->
+        <ShowMCParticles>true</ShowMCParticles> 
         
         <!--  draw the current PFOs -->
         <ShowCurrentPfos>true</ShowCurrentPfos>

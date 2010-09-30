@@ -67,6 +67,7 @@
 #include <cmath>
 #include <fcntl.h>
 #include <limits>
+#include <algorithm>
 
 namespace pandora_monitoring
 {
@@ -119,7 +120,8 @@ PandoraMonitoring *PandoraMonitoring::GetInstance()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::Create1DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp)
+void PandoraMonitoring::Create1DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp, 
+                                          const std::string xAxisTitle, const std::string yAxisTitle)
 {
     if (m_histogramMap.end() != m_histogramMap.find(name))
     {
@@ -128,13 +130,17 @@ void PandoraMonitoring::Create1DHistogram(const std::string &name, const std::st
     }
 
     TH1F* pTH1F = new TH1F(name.c_str(), title.c_str(), nBinsX, xLow, xUp);
+    if (!xAxisTitle.empty())
+        pTH1F->GetXaxis()->SetTitle(xAxisTitle.c_str());
+    if (!yAxisTitle.empty())
+        pTH1F->GetYaxis()->SetTitle(yAxisTitle.c_str());
     m_histogramMap.insert(HistogramMap::value_type(name, pTH1F));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PandoraMonitoring::Create2DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp, int nBinsY,
-    double yLow, double yUp)
+                                          double yLow, double yUp, const std::string xAxisTitle, const std::string yAxisTitle)
 {
     if (m_histogramMap.end() != m_histogramMap.find(name))
     {
@@ -143,6 +149,10 @@ void PandoraMonitoring::Create2DHistogram(const std::string &name, const std::st
     }
 
     TH2F* pTH2F = new TH2F(name.c_str(), title.c_str(), nBinsX, xLow, xUp, nBinsY, yLow, yUp);
+    if (!xAxisTitle.empty())
+        pTH2F->GetXaxis()->SetTitle(xAxisTitle.c_str());
+    if (!yAxisTitle.empty())
+        pTH2F->GetYaxis()->SetTitle(yAxisTitle.c_str());
     m_histogramMap.insert(HistogramMap::value_type(name, pTH2F));
 }
 
@@ -179,6 +189,43 @@ void PandoraMonitoring::Fill2DHistogram(const std::string &name, float xValue, f
         throw std::exception();
 
     pTH2F->Fill(xValue, yValue, weight);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::AddMultiplyOrDivideHistograms(const std::string &nameHisto0, const std::string &nameHisto1, 
+                                                      double coeff0, double coeff1,
+                                                      bool add, bool multiply )
+{
+    HistogramMap::iterator iter0 = m_histogramMap.find(nameHisto0);
+    if (m_histogramMap.end() == iter0)
+    {
+        std::cout << "PandoraMonitoring::Fill2DHistogram, error: No histogram with name '"<< nameHisto0 <<"' exists." << std::endl;
+        throw std::exception();
+    }
+    HistogramMap::iterator iter1 = m_histogramMap.find(nameHisto1);
+    if (m_histogramMap.end() == iter1)
+    {
+        std::cout << "PandoraMonitoring::Fill2DHistogram, error: No histogram with name '"<< nameHisto1 <<"' exists." << std::endl;
+        throw std::exception();
+    }
+
+    TH1 *pHisto0 = iter0->second;
+    TH1 *pHisto1 = iter1->second;
+
+    if (NULL == pHisto0)
+        throw std::exception();
+
+    if (NULL == pHisto1)
+        throw std::exception();
+
+    if (add)
+        pHisto0->Add(pHisto0,pHisto1,coeff0,coeff1);
+    else
+        if (multiply)
+            pHisto0->Multiply(pHisto0,pHisto1,coeff0,coeff1);
+        else
+            pHisto0->Divide(pHisto0,pHisto1,coeff0,coeff1);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -273,12 +320,12 @@ void PandoraMonitoring::FillTree(const std::string &treeName)
     catch(TTreeWrapper::TreeNotFoundError& excpt)
     {
         std::cout << "PandoraMonitoring::FillTree, error: No tree with name '" << treeName <<"' exists." << std::endl;
-        throw;
+//        throw;
     }
     catch(...)
     {
         std::cout << "PandoraMonitoring::FillTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
-        throw;
+//        throw;
     }
 }
 
@@ -293,12 +340,12 @@ void PandoraMonitoring::PrintTree(const std::string &treeName)
     catch(TTreeWrapper::TreeNotFoundError& excpt)
     {
         std::cout << "PandoraMonitoring::PrintTree, error: No tree with name '" << treeName <<"' exists." << std::endl;
-        throw;
+//        throw;
     }
     catch(...)
     {
         std::cout << "PandoraMonitoring::PrintTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
-        throw;
+//        throw;
     }
 }
 
@@ -313,12 +360,12 @@ void PandoraMonitoring::ScanTree(const std::string &treeName)
     catch(TTreeWrapper::TreeNotFoundError& excpt)
     {
         std::cout << "PandoraMonitoring::ScanTree, error: No tree with name '" << treeName <<"' exists." << std::endl;
-        throw;
+//        throw;
     }
     catch(...)
     {
         std::cout << "PandoraMonitoring::ScanTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
-        throw;
+//        throw;
     }
 }
 
@@ -328,28 +375,28 @@ void PandoraMonitoring::SaveTree(const std::string &treeName, const std::string 
 {
     try
     {
-        TTree*& tree = m_treeWrapper.GetTree(treeName);
+       TTree*& tree = m_treeWrapper.GetTree(treeName);
 
-        TFile* pTFile = new TFile(fileName.c_str(), fileOptions.c_str());
+       TFile* pTFile = new TFile(fileName.c_str(), fileOptions.c_str());
 
-        tree->SetDirectory(pTFile);
-        tree->Write(treeName.c_str(), TObject::kOverwrite);
+       tree->SetDirectory(pTFile);
+       tree->Write(TString(treeName.c_str()), TObject::kOverwrite);
 
-        pTFile->Close();
+       pTFile->Close();
 
-        tree = 0; // pointer not valid any more
+       tree = 0; // pointer not valid any more
 
-        delete pTFile;
+       delete pTFile;
     }
     catch(TTreeWrapper::TreeNotFoundError& excpt)
     {
         std::cout << "PandoraMonitoring::SaveTree, error: No tree with name '" << treeName <<"' exists." << std::endl;
-        throw;
+//        throw;
     }
     catch(...)
     {
         std::cout << "PandoraMonitoring::SaveTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
-        throw;
+//        throw;
     }
 }
 
@@ -718,7 +765,7 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
     }
 
     // Build information string
-    std::stringstream sstr;
+    std::stringstream sstr, sstrName;
 
     if (!name.empty())
         sstr << name << "\n";
@@ -731,6 +778,14 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
          << "\nmin intLenFromIP=" << minInteractionLengthsFromIp
          << "\nmax intLenFromIP=" << maxInteractionLengthsFromIp;
 
+    sstrName << "calohits"
+             << "/Eem=" << energySumElectromagnetic
+             << "/Ehad=" << energySumHadronic
+             << "/first pseudo-layer=" << firstLayer
+             << "/last  pseudo-layer=" << lastLayer
+             << "/min intLenFromIP=" << minInteractionLengthsFromIp
+             << "/max intLenFromIP=" << maxInteractionLengthsFromIp;
+    
     for (PandoraMonitoringApi::PdgCodeToEnergyMap::const_iterator it = pdgCodeToEnergyMap.begin(), itEnd = pdgCodeToEnergyMap.end();
         it != itEnd; ++it)
     {
@@ -740,13 +795,16 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
         if (0 == mcPDG)
         {
             sstr << "\nCaloHits w/o MC particle = " << energy << " GeV";
+            sstrName << "/CaloHits wo MC particle = " << energy << " GeV";
         }
         else
         {
             sstr << "\nfrom MC with PDG " << mcPDG << " = " << energy << " GeV";
+            sstrName << "/from MC with PDG " << mcPDG << " = " << energy << " GeV";
         }
     }
 
+    hits->SetElementName(sstrName.str().c_str());
     hits->SetElementTitle(sstr.str().c_str());
 
     if (parent)
@@ -770,8 +828,12 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
     InitializeEve();
 
     TEveTrackList *pTEveTrackList = new TEveTrackList();
-    const std::string mcParticleListName(name.empty() ? "MCParticles" : name);
-    pTEveTrackList->SetElementNameTitle( mcParticleListName.c_str(), mcParticleListName.c_str() );
+    const std::string mcParticleListTitle(name.empty() ? "MCParticles" : name);
+
+    std::string mcParticleListName(mcParticleListTitle);
+    std::replace_if(mcParticleListName.begin(), mcParticleListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
+
+    pTEveTrackList->SetElementNameTitle( mcParticleListName.c_str(), mcParticleListTitle.c_str() );
     pTEveTrackList->SetMainColor(GetROOTColor(TEAL));
 
     TEveTrackPropagator *pTEveTrackPropagator = pTEveTrackList->GetPropagator();
@@ -849,6 +911,7 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
 
         // Build information string
         std::stringstream sstr;
+        std::stringstream sstrName;
 
         if (!name.empty())
             sstr << name << "\n";
@@ -861,8 +924,16 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
              << "\nr_inner=" << innerRadius
              << "\nr_outer=" << outerRadius;
 
+        sstrName << "MC"
+                 << "/PDG=" << particleId
+                 << "/p=" << momentum.GetMagnitude()
+                 << "/E=" << energy
+                 << "/Charge=" << charge
+                 << "/r_inner=" << innerRadius
+                 << "/r_outer=" << outerRadius;
+
         TEveTrack *pTEveTrack = new TEveTrack(pTEveRecTrack, pTEveTrackPropagator);
-        pTEveTrack->SetName(sstr.str().c_str());
+        pTEveTrack->SetName(sstrName.str().c_str());
         pTEveTrack->SetTitle(sstr.str().c_str());
         pTEveTrack->SetLineColor(GetROOTColor(mcParticleColor));
         pTEveTrack->SetLineWidth(1);
@@ -898,8 +969,12 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
     InitializeEve();
 
     TEveTrackList *pTEveTrackList = new TEveTrackList();
-    const std::string trackListName(name.empty() ? "Tracks" : name);
-    pTEveTrackList->SetElementNameTitle( trackListName.c_str(), trackListName.c_str() );
+    const std::string trackListTitle(name.empty() ? "Tracks" : name);
+
+    std::string trackListName(trackListTitle);
+    std::replace_if(trackListName.begin(), trackListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
+
+    pTEveTrackList->SetElementNameTitle( trackListName.c_str(), trackListTitle.c_str() );
     pTEveTrackList->SetMainColor(GetROOTColor(TEAL));
 
     TEveTrackPropagator *pTEveTrackPropagator = pTEveTrackList->GetPropagator();
@@ -951,7 +1026,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
         }
 
         // Build information string
-        std::stringstream sstr;
+        std::stringstream sstr, sstrName;
 
         if (!name.empty())
             sstr << name << "\n";
@@ -961,6 +1036,11 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
              << "\nCharge=" << charge
              << "\nPDG=" << pPandoraTrack->GetParticleId();
 
+        sstrName << "track"
+                 << "/p=" << momentum.GetMagnitude()
+                 << "/Charge=" << charge
+                 << "/PDG=" << pPandoraTrack->GetParticleId();
+
         // Create track path
         TEveRecTrack *pTEveRecTrack = new TEveRecTrack();
         pTEveRecTrack->fV.Set(position.GetX(), position.GetY(), position.GetZ());
@@ -968,7 +1048,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
         pTEveRecTrack->fSign = charge;
 
         TEveTrack *pTEveTrack = new TEveTrack(pTEveRecTrack, pTEveTrackPropagator);
-        pTEveTrack->SetName(sstr.str().c_str());
+        pTEveTrack->SetName(sstrName.str().c_str());
         pTEveTrack->SetTitle(sstr.str().c_str());
         pTEveTrack->SetLineColor(GetROOTColor(trackColor));
         pTEveTrack->SetLineWidth(1);
@@ -1010,8 +1090,12 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
     InitializeEve();
 
     TEveElement *pPfoListElement = new TEveElementList();
-    const std::string pfoListName(name.empty() ? "Pfos" : name);
-    pPfoListElement->SetElementNameTitle(pfoListName.c_str(), pfoListName.c_str());
+    const std::string pfoListTitle(name.empty() ? "Pfos" : name);
+
+    std::string pfoListName(pfoListTitle);
+    std::replace_if(pfoListName.begin(), pfoListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
+
+    pPfoListElement->SetElementNameTitle(pfoListName.c_str(), pfoListTitle.c_str());
 
     for (pandora::ParticleFlowObjectList::const_iterator pfoIter = pPfoList->begin(), pfoIterEnd = pPfoList->end();
         pfoIter != pfoIterEnd; ++pfoIter)
@@ -1068,8 +1152,12 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
     InitializeEve();
 
     TEveElement *pClusterListElement = new TEveElementList();
-    const std::string clusterListName(name.empty() ? "Clusters" : name);
-    pClusterListElement->SetElementNameTitle( name.c_str(), name.c_str());
+    const std::string clusterListTitle(name.empty() ? "Clusters" : name);
+
+    std::string clusterListName(clusterListTitle);
+    std::replace_if(clusterListName.begin(), clusterListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
+
+    pClusterListElement->SetElementNameTitle( clusterListName.c_str(), clusterListTitle.c_str());
 
     for (pandora::ClusterList::const_iterator clusterIter = pClusterList->begin(), clusterIterEnd = pClusterList->end();
         clusterIter != clusterIterEnd; ++clusterIter)
@@ -1103,7 +1191,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
         }
 
         // Build information string
-        std::stringstream sstr;
+        std::stringstream sstr, sstrName;
 
         if (!name.empty())
             sstr << name << "\n";
@@ -1111,6 +1199,10 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
         sstr << "--- cluster\nEem(corr)=" << pCluster->GetElectromagneticEnergy() 
              << "\nEhad(corr)=" << pCluster->GetHadronicEnergy() 
              << "\nNHits=" << pCluster->GetNCaloHits();
+
+        sstrName << "cluster/Eem(corr)=" << pCluster->GetElectromagneticEnergy() 
+                 << "/Ehad(corr)=" << pCluster->GetHadronicEnergy() 
+                 << "/NHits=" << pCluster->GetNCaloHits();
 
         // Display constituent calo hits
         const pandora::OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
@@ -1134,7 +1226,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
             pClusterArrow->SetConeL(0.2);
             pClusterArrow->SetMainColor(GetROOTColor(clusterColor));
             pClusterArrow->SetPickable(kTRUE);
-            pClusterArrow->SetElementNameTitle(sstr.str().c_str(), sstr.str().c_str());
+            pClusterArrow->SetElementNameTitle(sstr.str().c_str(), sstrName.str().c_str());
 
             pCaloHitsElement->AddElement(pClusterArrow);
         }
