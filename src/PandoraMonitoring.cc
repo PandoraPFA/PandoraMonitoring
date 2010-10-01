@@ -12,6 +12,7 @@
 #include "Objects/CaloHit.h"
 #include "Objects/CartesianVector.h"
 #include "Objects/Cluster.h"
+#include "Objects/DetectorGap.h"
 #include "Objects/ParticleFlowObject.h"
 #include "Objects/OrderedCaloHitList.h"
 #include "Objects/Track.h"
@@ -587,15 +588,15 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
 {
     pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
 
-    const pandora::GeometryHelper::GapList &gapList(pGeometryHelper->GetGapList());
+    const pandora::GeometryHelper::DetectorGapList &detectorGapList(pGeometryHelper->GetDetectorGapList());
     unsigned int gapCounter(0);
 
-    for (pandora::GeometryHelper::GapList::const_iterator iter = gapList.begin(), iterEnd = gapList.end(); iter != iterEnd; ++iter)
+    for (pandora::GeometryHelper::DetectorGapList::const_iterator iter = detectorGapList.begin(), iterEnd = detectorGapList.end(); iter != iterEnd; ++iter)
     {
         std::string gapName("gap" + pandora::TypeToString(gapCounter++));
 
-        pandora::GeometryHelper::BoxGap *pBoxGap = NULL;
-        pBoxGap = dynamic_cast<pandora::GeometryHelper::BoxGap *>(*iter);
+        pandora::BoxGap *pBoxGap = NULL;
+        pBoxGap = dynamic_cast<pandora::BoxGap *>(*iter);
 
         if (NULL != pBoxGap)
         {
@@ -629,8 +630,8 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
             continue;
         }
 
-        pandora::GeometryHelper::ConcentricGap *pConcentricGap = NULL;
-        pConcentricGap = dynamic_cast<pandora::GeometryHelper::ConcentricGap *>(*iter);
+        pandora::ConcentricGap *pConcentricGap = NULL;
+        pConcentricGap = dynamic_cast<pandora::ConcentricGap *>(*iter);
 
         if (NULL != pConcentricGap)
         {

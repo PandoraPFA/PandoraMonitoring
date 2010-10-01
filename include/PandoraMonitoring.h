@@ -52,8 +52,8 @@ public:
      *  @param  xLow the the lower bound for the x axis
      *  @param  xUp the upper bound for the x axis
      */
-    void Create1DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp, 
-			   const std::string xAxisTitle, const std::string yAxisTitle);
+    void Create1DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp,
+        const std::string xAxisTitle, const std::string yAxisTitle);
 
     /**
      *  @brief  Create a 2D histogram
@@ -68,7 +68,7 @@ public:
      *  @param  yUp the upper bound for the y axis
      */
     void Create2DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp, int nBinsY,
-			   double yLow, double yUp, const std::string xAxisTitle, const std::string yAxisTitle);
+        double yLow, double yUp, const std::string xAxisTitle, const std::string yAxisTitle);
 
     /**
      *  @brief  Add a single entry to a 1D histogram
@@ -99,9 +99,8 @@ public:
      *  @param  add add histograms
      *  @param  multiply if "add" is false, multiply the histograms (if multiply is true), else divide
      */
-    void AddMultiplyOrDivideHistograms(const std::string &nameHisto0, const std::string &nameHisto1, 
-				       double coeff0, double coeff1,
-				       bool add, bool multiply );
+    void AddMultiplyOrDivideHistograms(const std::string &nameHisto0, const std::string &nameHisto1, double coeff0, double coeff1,
+        bool add, bool multiply );
 
     /**
      *  @brief  Set a variable in a tree (create the tree and the branch if not yet existing)
