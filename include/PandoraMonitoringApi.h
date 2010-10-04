@@ -117,17 +117,34 @@ public:
     static void Fill2DHistogram(const std::string &name, float xValue, float yValue, float weight = 1);
 
     /**
-     *  @brief  Add, multiply or divide two histograms
+     *  @brief  Add
      * 
      *  @param  nameHisto0 the name associated with the first histogram
      *  @param  nameHisto1 the name associated with the second histogram
      *  @param  coeff0 coefficient for the first histogram
      *  @param  coeff1 coefficient for the second histogram
-     *  @param  add add histograms
-     *  @param  multiply if "add" is false, multiply the histograms (if multiply is true), else divide
      */
-    static void AddMultiplyOrDivideHistograms(const std::string &nameHisto0, const std::string &nameHisto1, double coeff0, double coeff1,
-        bool add, bool multiply );
+    static void AddHistograms(const std::string &nameHisto0, const std::string &nameHisto1, double coeff0, double coeff1);
+
+    /**
+     *  @brief  Multiply
+     * 
+     *  @param  nameHisto0 the name associated with the first histogram
+     *  @param  nameHisto1 the name associated with the second histogram
+     *  @param  coeff0 coefficient for the first histogram
+     *  @param  coeff1 coefficient for the second histogram
+     */
+    static void MultiplyHistograms(const std::string &nameHisto0, const std::string &nameHisto1, double coeff0, double coeff1);
+
+    /**
+     *  @brief  Divide two histograms
+     * 
+     *  @param  nameHisto0 the name associated with the first histogram
+     *  @param  nameHisto1 the name associated with the second histogram
+     *  @param  coeff0 coefficient for the first histogram
+     *  @param  coeff1 coefficient for the second histogram
+     */
+    static void DivideHistograms(const std::string &nameHisto0, const std::string &nameHisto1, double coeff0, double coeff1);
 
     /**
      *  @brief  Set a variable in a tree (create the tree and the branch if not yet existing)
