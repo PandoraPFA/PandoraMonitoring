@@ -41,24 +41,21 @@ void PandoraMonitoringApi::Fill2DHistogram(const std::string &name, float xValue
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::AddHistograms(const std::string &nameHisto0, const std::string &nameHisto1, 
-                                         double coeff0, double coeff1)
+void PandoraMonitoringApi::AddHistograms(const std::string &nameHisto0, const std::string &nameHisto1, double coeff0, double coeff1)
 {
     PandoraMonitoring::GetInstance()->AddMultiplyOrDivideHistograms(nameHisto0, nameHisto1, coeff0, coeff1, true, false );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::MultiplyHistograms(const std::string &nameHisto0, const std::string &nameHisto1, 
-                                              double coeff0, double coeff1)
+void PandoraMonitoringApi::MultiplyHistograms(const std::string &nameHisto0, const std::string &nameHisto1, double coeff0, double coeff1)
 {
     PandoraMonitoring::GetInstance()->AddMultiplyOrDivideHistograms(nameHisto0, nameHisto1, coeff0, coeff1, false, true);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::DivideHistograms(const std::string &nameHisto0, const std::string &nameHisto1, 
-                                            double coeff0, double coeff1)
+void PandoraMonitoringApi::DivideHistograms(const std::string &nameHisto0, const std::string &nameHisto1, double coeff0, double coeff1)
 {
     PandoraMonitoring::GetInstance()->AddMultiplyOrDivideHistograms(nameHisto0, nameHisto1, coeff0, coeff1, false, false);
 }
