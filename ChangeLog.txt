@@ -1,4 +1,12 @@
 ************************************************************************
+TAG V00-01 FOR ILCSOFT USAGE
+************************************************************************
+Added axis title parameters for histograms.
+Added functionality to add, multiply or divide histograms.
+Updated to reflect changes to pandora GeometryHelper.
+Set BUILD_32BIT_COMPATIBLE to OFF by default.
+
+************************************************************************
 LCD_WG2_VALIDATION_3 TAG
 ************************************************************************
 Flip sign of magnetic field, rather than individual track charges, in order to match ALICE sign convention.
