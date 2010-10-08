@@ -1,5 +1,5 @@
 ************************************************************************
-TAG V00-01 FOR ILCSOFT USAGE
+TAG V00-02 FOR ILCSOFT USAGE
 ************************************************************************
 Added axis title parameters for histograms.
 Added functionality to add, multiply or divide histograms.
