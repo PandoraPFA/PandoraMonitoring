@@ -34,6 +34,7 @@
 #include <TEvePointSet.h>
 #include <TEveArrow.h>
 #include <TEveRGBAPalette.h>
+#include <TGLViewer.h>
 
 #include <TGeoXtru.h>
 #include <TEveGeoShapeExtract.h>
@@ -484,7 +485,12 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
     gEve->AddGlobalElement(pEveGeoTopNode);
 
-    gEve->GetDefaultViewer()->SetMainColor(kWhite);
+//     gEve->GetDefaultViewer()->SetMainColor(kWhite);
+//     gEve->GetDefaultViewer()->SetCurrentBackgroundColor(kWhite);
+
+    TGLViewer *viewerGL = gEve->GetDefaultGLViewer();
+    viewerGL->ColorSet().Background().SetColor(kWhite);
+
     gEve->Redraw3D(kTRUE);
 
     m_eveInitialized = true;
@@ -1026,6 +1032,9 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
             }
         }
 
+        const pandora::MCParticle* pMCParticle = NULL;
+        pPandoraTrack->GetMCParticle(pMCParticle);
+
         // Build information string
         std::stringstream sstr, sstrName;
 
@@ -1041,6 +1050,13 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
                  << "/p=" << momentum.GetMagnitude()
                  << "/Charge=" << charge
                  << "/PDG=" << pPandoraTrack->GetParticleId();
+
+        if (pMCParticle)
+        {
+            int mcPdg = pMCParticle->GetParticleId();
+            sstr << "\nPDG_MC=" << mcPdg;
+            sstrName << "/PDG_MC=" << mcPdg;
+        }
 
         // Create track path
         TEveRecTrack *pTEveRecTrack = new TEveRecTrack();
