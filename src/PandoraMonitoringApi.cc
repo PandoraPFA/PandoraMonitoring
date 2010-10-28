@@ -142,6 +142,13 @@ void PandoraMonitoringApi::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoringApi::SetEveDisplayParameters(Color backgroundColor, bool showDetectors)
+{
+    PandoraMonitoring::GetInstance()->SetEveDisplayParameters(backgroundColor, showDetectors);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoringApi::VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, Color color,
     const PdgCodeToEnergyMap *pParticleSuppressionMap)
 {

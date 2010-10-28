@@ -224,6 +224,15 @@ public:
 
     typedef std::map<int, float> PdgCodeToEnergyMap;
 
+
+    /**
+     *  @brief  Set TEve display parameters
+     * 
+     *  @param  color denotes the background color
+     *  @param  showDetectors turns the visibility of the detector geometry on or off
+     */
+    static void SetEveDisplayParameters(Color backgroundColor, bool showDetectors);
+
     /**
      *  @brief Add MCParticles to the Eve event-display
      * 

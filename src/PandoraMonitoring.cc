@@ -59,6 +59,7 @@
 #include <TGeoTube.h>
 #include <TEveBoxSet.h>
 #include <TGeoCompositeShape.h>
+#include <TEveScene.h>
 
 #include "PandoraMonitoring.h"
 
@@ -495,6 +496,20 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
     m_eveInitialized = true;
     m_openEveEvent = true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::SetEveDisplayParameters(Color backgroundColor, bool showDetectors)
+{
+    InitializeEve();
+
+    TGLViewer *viewerGL = gEve->GetDefaultGLViewer();
+    viewerGL->ColorSet().Background().SetColor(GetROOTColor(backgroundColor));
+
+    gEve->GetGlobalScene()->SetRnrSelf(showDetectors);
+    gEve->Redraw3D(kTRUE);
+        
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

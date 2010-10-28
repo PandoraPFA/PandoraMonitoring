@@ -172,6 +172,14 @@ public:
     void ViewEvent();
 
     /**
+     *  @brief  Set TEve display parameters
+     * 
+     *  @param  color denotes the background color
+     *  @param  showDetectors turns the visibility of the detector geometry on or off
+     */
+    void SetEveDisplayParameters(Color backgroundColor, bool showDetectors);
+
+    /**
      *  @brief Add MC particles to the Eve event-display
      * 
      *  @param pMCParticleList list of tracks to be added to the event display
