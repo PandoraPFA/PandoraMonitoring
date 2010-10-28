@@ -847,6 +847,10 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
 TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name,
     TEveElement *parent, Color color, const PandoraMonitoringApi::PdgCodeToEnergyMap *pParticleSuppressionMap)
 {
+    pandora::MCParticleVector * pMCParticleVector = new pandora::MCParticleVector(pMCParticleList->begin(),pMCParticleList->end());
+
+    std::sort(pMCParticleVector->begin(),pMCParticleVector->end(),pandora::MCParticle::SortByEnergy);
+
     InitializeEve();
 
     TEveTrackList *pTEveTrackList = new TEveTrackList();
@@ -872,7 +876,7 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
     pTEveTrackPropagator->SetMaxZ(pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate() * m_scalingFactor);
     pTEveTrackPropagator->SetMaxOrbs(5);
 
-    for (pandora::MCParticleList::const_iterator mcParticleIter = pMCParticleList->begin(), mcParticleIterEnd = pMCParticleList->end();
+    for (pandora::MCParticleVector::const_iterator mcParticleIter = pMCParticleVector->begin(), mcParticleIterEnd = pMCParticleVector->end();
          mcParticleIter != mcParticleIterEnd; ++mcParticleIter)
     { 
         pandora::MCParticle *pPandoraMCParticle = (*mcParticleIter);
@@ -988,6 +992,9 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
 
 TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, TEveElement *parent, Color color)
 {
+    pandora::TrackVector *  pTrackVector = new pandora::TrackVector(pTrackList->begin(),pTrackList->end());
+    std::sort(pTrackVector->begin(),pTrackVector->end(),pandora::Track::SortByMomentum);
+    
     InitializeEve();
 
     TEveTrackList *pTEveTrackList = new TEveTrackList();
@@ -1012,7 +1019,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
     pTEveTrackPropagator->SetMaxZ(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate() * m_scalingFactor);
     pTEveTrackPropagator->SetMaxOrbs(5);
 
-    for (pandora::TrackList::const_iterator trackIter = pTrackList->begin(), trackIterEnd = pTrackList->end();
+    for (pandora::TrackVector::const_iterator trackIter = pTrackVector->begin(), trackIterEnd = pTrackVector->end();
         trackIter != trackIterEnd; ++trackIter)
     { 
         pandora::Track *pPandoraTrack = (*trackIter);
@@ -1119,17 +1126,21 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
 TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name,
     TEveElement *parent, Color color, bool showAssociatedTracks, bool showFit)
 {
+    pandora::ParticleFlowObjectVector *  pPfoVector = new pandora::ParticleFlowObjectVector(pPfoList->begin(),pPfoList->end());
+    std::sort(pPfoVector->begin(),pPfoVector->end(),pandora::ParticleFlowObject::SortByEnergy);
+
+
     InitializeEve();
 
-    TEveElement *pPfoListElement = new TEveElementList();
+    TEveElement *pPfoVectorElement = new TEveElementList();
     const std::string pfoListTitle(name.empty() ? "Pfos" : name);
 
     std::string pfoListName(pfoListTitle);
     std::replace_if(pfoListName.begin(), pfoListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
 
-    pPfoListElement->SetElementNameTitle(pfoListName.c_str(), pfoListTitle.c_str());
+    pPfoVectorElement->SetElementNameTitle(pfoListName.c_str(), pfoListTitle.c_str());
 
-    for (pandora::ParticleFlowObjectList::const_iterator pfoIter = pPfoList->begin(), pfoIterEnd = pPfoList->end();
+    for (pandora::ParticleFlowObjectVector::const_iterator pfoIter = pPfoVector->begin(), pfoIterEnd = pPfoVector->end();
         pfoIter != pfoIterEnd; ++pfoIter)
     { 
         pandora::ParticleFlowObject *pPfo = (*pfoIter);
@@ -1155,25 +1166,25 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
 
         if (clusterList.empty())
         {
-            VisualizeTracks(&trackList, sstr.str().c_str(), pPfoListElement, pfoColor);
+            VisualizeTracks(&trackList, sstr.str().c_str(), pPfoVectorElement, pfoColor);
         }
         else
         {
-            VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoListElement, pfoColor, showAssociatedTracks, showFit);
+            VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, showAssociatedTracks, showFit);
         }
     }
 
     if (parent)
     {
-        parent->AddElement(pPfoListElement);
+        parent->AddElement(pPfoVectorElement);
     }
     else
     {
-        gEve->AddElement(pPfoListElement);
+        gEve->AddElement(pPfoVectorElement);
         gEve->Redraw3D();
     }
 
-    return pPfoListElement;
+    return pPfoVectorElement;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -1181,17 +1192,21 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
 TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, TEveElement *parent,
     Color color, bool showAssociatedTracks, bool showFit)
 {
+    pandora::ClusterVector *  pClusterVector = new pandora::ClusterVector(pClusterList->begin(),pClusterList->end());
+    std::sort(pClusterVector->begin(),pClusterVector->end(),pandora::Cluster::SortByHadronicEnergy);
+
+
     InitializeEve();
 
-    TEveElement *pClusterListElement = new TEveElementList();
+    TEveElement *pClusterVectorElement = new TEveElementList();
     const std::string clusterListTitle(name.empty() ? "Clusters" : name);
 
     std::string clusterListName(clusterListTitle);
     std::replace_if(clusterListName.begin(), clusterListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
 
-    pClusterListElement->SetElementNameTitle( clusterListName.c_str(), clusterListTitle.c_str());
+    pClusterVectorElement->SetElementNameTitle( clusterListName.c_str(), clusterListTitle.c_str());
 
-    for (pandora::ClusterList::const_iterator clusterIter = pClusterList->begin(), clusterIterEnd = pClusterList->end();
+    for (pandora::ClusterVector::const_iterator clusterIter = pClusterVector->begin(), clusterIterEnd = pClusterVector->end();
         clusterIter != clusterIterEnd; ++clusterIter)
     {
         pandora::Cluster *pCluster = (*clusterIter);
@@ -1238,7 +1253,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
 
         // Display constituent calo hits
         const pandora::OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-        TEveElement *pCaloHitsElement = VisualizeCaloHits(&orderedCaloHitList, sstr.str().c_str(), pClusterListElement, clusterColor);
+        TEveElement *pCaloHitsElement = VisualizeCaloHits(&orderedCaloHitList, sstr.str().c_str(), pClusterVectorElement, clusterColor);
 
         const pandora::ClusterHelper::ClusterFitResult &fit = pCluster->GetFitToAllHitsResult();
 
@@ -1277,15 +1292,15 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
 
     if (parent)
     {
-        parent->AddElement(pClusterListElement);
+        parent->AddElement(pClusterVectorElement);
     }
     else
     {
-        gEve->AddElement(pClusterListElement);
+        gEve->AddElement(pClusterVectorElement);
         gEve->Redraw3D();
     }
 
-    return pClusterListElement;
+    return pClusterVectorElement;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
