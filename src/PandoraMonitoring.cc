@@ -694,18 +694,24 @@ void PandoraMonitoring::ViewEvent()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name,
-    TEveElement *parent, Color color)
+    TEveElement *parent, Color color, Int_t pfoId )
 {
     InitializeEve();
 
-    const float markerSize(0.1);
-    const std::string hitListName(name.empty() ? "Hits" : name);
-    TEvePointSet *hitsMarkers = new TEvePointSet((hitListName+"_markers").c_str());
-
     TEveBoxSet *hits = new TEveBoxSet(name.c_str());
     hits->Reset(TEveBoxSet::kBT_FreeBox, kTRUE, 64);
-    hits->AddElement(hitsMarkers);
     hits->SetOwnIds(kTRUE);
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,27,02)
+    hits->SetAntiFlick(kTRUE);
+#endif
+
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,27,02)
+    const std::string hitListName(name.empty() ? "Hits" : name);
+    TEvePointSet *hitsMarkers = new TEvePointSet((hitListName+"_markers").c_str());
+    hitsMarkers->SetOwnIds(kTRUE);
+    hits->AddElement(hitsMarkers);
+#endif 
+    
 
     PandoraMonitoringApi::PdgCodeToEnergyMap pdgCodeToEnergyMap;
 
@@ -774,15 +780,31 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             // Supply hit marker details
             const pandora::CartesianVector position = pCaloHit->GetPositionVector() * m_scalingFactor;
 
-            hitsMarkers->SetNextPoint(position.GetX(), position.GetY(), position.GetZ());
-            hitsMarkers->SetMarkerColor(GetROOTColor(color));
-            hitsMarkers->SetMarkerSize(markerSize);
-            hitsMarkers->SetMarkerStyle(4);
+            Color hitColor = color;
+            if (color == AUTOID)
+            {
+                if( pfoId == particleId )
+                    hitColor = GRAY;
+                else
+                    hitColor = GetColorForPdgCode(particleId);
+            }
+
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,27,02)
+            if (color != AUTOID)
+            {
+                const float markerSize(0.1);
+                hitsMarkers->SetNextPoint(position.GetX(), position.GetY(), position.GetZ());
+                hitsMarkers->SetMarkerColor(GetROOTColor(hitColor));
+                hitsMarkers->SetMarkerSize(markerSize);
+                hitsMarkers->SetMarkerStyle(4);
+            }
+#endif
 
             // Add calorimeter-cell for calo-hit
             hits->AddBox(corners);
             hits->SetPickable(kTRUE);
-            hits->DigitColor(GetROOTColor(color));
+            hits->DigitColor(GetROOTColor(hitColor));
+            
         }
     }
 
@@ -1040,7 +1062,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
         const int charge(pPandoraTrack->GetCharge());
 
         Color trackColor = color;
-        if (color == AUTO)
+        if (color == AUTO || color==AUTOID)
         {
             trackColor = AZURE;
 
@@ -1155,7 +1177,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
         // Default color assignment
         Color pfoColor = color;
 
-        if (color == AUTO)
+        if (color == AUTO || color == AUTOID)
         {
             pfoColor = GetColorForPdgCode(pPfo->GetParticleId());
         }
@@ -1170,7 +1192,9 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
         }
         else
         {
-            VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, showAssociatedTracks, showFit);
+            if (color == AUTOID)
+                pfoColor = AUTOID;
+            VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, showAssociatedTracks, showFit, pPfo->GetParticleId());
         }
     }
 
@@ -1190,7 +1214,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, TEveElement *parent,
-    Color color, bool showAssociatedTracks, bool showFit)
+    Color color, bool showAssociatedTracks, bool showFit, Int_t pfoId)
 {
     pandora::ClusterVector *  pClusterVector = new pandora::ClusterVector(pClusterList->begin(),pClusterList->end());
     std::sort(pClusterVector->begin(),pClusterVector->end(),pandora::Cluster::SortByHadronicEnergy);
@@ -1217,7 +1241,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
         // Color assignment
         Color clusterColor = color;
 
-        if (color == AUTO)
+        if (color == AUTO || color == AUTOID)
         {
             const pandora::TrackList &trackList(pCluster->GetAssociatedTrackList());
             bool clusterHasTracks = !(trackList.empty());
@@ -1253,7 +1277,11 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
 
         // Display constituent calo hits
         const pandora::OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-        TEveElement *pCaloHitsElement = VisualizeCaloHits(&orderedCaloHitList, sstr.str().c_str(), pClusterVectorElement, clusterColor);
+
+        Color caloHitColor = clusterColor;
+        if (color == AUTOID)
+            caloHitColor = AUTOID;
+        TEveElement *pCaloHitsElement = VisualizeCaloHits(&orderedCaloHitList, sstr.str().c_str(), pClusterVectorElement, caloHitColor, pfoId);
 
         const pandora::ClusterHelper::ClusterFitResult &fit = pCluster->GetFitToAllHitsResult();
 
@@ -1285,7 +1313,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
 
             if (!trackList.empty())
             {
-                VisualizeTracks(&trackList, sstr.str().c_str(), pCaloHitsElement, color);
+                VisualizeTracks(&trackList, sstr.str().c_str(), pCaloHitsElement, clusterColor);
             }
         }
     }

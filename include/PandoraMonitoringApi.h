@@ -59,7 +59,8 @@ enum Color
     LIGHTPINK,
     LIGHTORANGE,
     LIGHTYELLOW,
-    AUTO // automatic choice of colors
+    AUTO,  // automatic choice of colors
+    AUTOID,  // automatic choice of colors depending on the particle ID
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

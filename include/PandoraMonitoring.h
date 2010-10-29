@@ -216,7 +216,7 @@ public:
      *  @return pointer to created TEveElement
      */
     TEveElement *VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, TEveElement* parent,
-        Color color);
+        Color color, Int_t pfoId = 0);
 
     /**
      *  @brief Add Particle flow objects to the Eve event-display
@@ -244,7 +244,7 @@ public:
      *  @return pointer to created TEveElement
      */
     TEveElement *VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, TEveElement* parent, Color color,
-        bool showAssociatedTracks, bool showFit);
+        bool showAssociatedTracks, bool showFit, Int_t pfoId = 0);
 
     /**
      *  @brief  Pause until user enters 'return'
