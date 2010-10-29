@@ -888,7 +888,7 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
     // pTEveTrackPropagator->SetStepper(TEveTrackPropagator::kRungeKutta);
 
     pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
-    const float magneticField(pGeometryHelper->GetBField());
+    const float magneticField(pGeometryHelper->GetBField(pandora::CartesianVector(0., 0., 0.)));
 
     // Initialize magnetic field for particle propagation, note strange ALICE charge sign convention,
     // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
@@ -1032,7 +1032,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
     // pTEveTrackPropagator->SetStepper(TEveTrackPropagator::kRungeKutta);
 
     pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
-    const float magneticField(pGeometryHelper->GetBField());
+    const float magneticField(pGeometryHelper->GetBField(pandora::CartesianVector(0., 0., 0.)));
 
     // Initialize magnetic field for particle propagation, note strange ALICE charge sign convention,
     // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
