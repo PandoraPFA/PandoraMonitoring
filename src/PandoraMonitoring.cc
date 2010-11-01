@@ -500,12 +500,12 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::SetEveDisplayParameters(Color backgroundColor, bool showDetectors)
+void PandoraMonitoring::SetEveDisplayParameters(const bool blackBackground, const bool showDetectors)
 {
     InitializeEve();
 
     TGLViewer *viewerGL = gEve->GetDefaultGLViewer();
-    viewerGL->ColorSet().Background().SetColor(GetROOTColor(backgroundColor));
+    viewerGL->ColorSet().Background().SetColor(blackBackground ? GetROOTColor(BLACK) : GetROOTColor(WHITE));
 
     gEve->GetGlobalScene()->SetRnrSelf(showDetectors);
     gEve->Redraw3D(kTRUE);

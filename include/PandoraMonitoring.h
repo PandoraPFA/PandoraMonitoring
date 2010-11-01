@@ -174,10 +174,10 @@ public:
     /**
      *  @brief  Set TEve display parameters
      * 
-     *  @param  color denotes the background color
+     *  @param  blackBackground whether to use a black background color, rather than white
      *  @param  showDetectors turns the visibility of the detector geometry on or off
      */
-    void SetEveDisplayParameters(Color backgroundColor, bool showDetectors);
+    void SetEveDisplayParameters(const bool blackBackground, const bool showDetectors);
 
     /**
      *  @brief Add MC particles to the Eve event-display

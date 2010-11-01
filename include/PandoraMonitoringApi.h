@@ -59,8 +59,8 @@ enum Color
     LIGHTPINK,
     LIGHTORANGE,
     LIGHTYELLOW,
-    AUTO,  // automatic choice of colors
-    AUTOID,  // automatic choice of colors depending on the particle ID
+    AUTO,   // automatic choice of colors
+    AUTOID, // automatic choice of colors depending on the particle ID
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -229,10 +229,10 @@ public:
     /**
      *  @brief  Set TEve display parameters
      * 
-     *  @param  color denotes the background color
+     *  @param  blackBackground whether to use a black background color, rather than white
      *  @param  showDetectors turns the visibility of the detector geometry on or off
      */
-    static void SetEveDisplayParameters(Color backgroundColor, bool showDetectors);
+    static void SetEveDisplayParameters(const bool blackBackground, const bool showDetectors);
 
     /**
      *  @brief Add MCParticles to the Eve event-display
