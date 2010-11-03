@@ -38,10 +38,6 @@ OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" ON )
 # project dependencies
 SET( ${PROJECT_NAME}_DEPENDS "ROOT" )
 
-IF( APPLE )
-    LIST(APPEND ${PROJECT_NAME}_DEPENDS "streamlog")
-ENDIF() 
-
 # set default cmake build type to RelWithDebInfo
 # possible options are: None Debug Release RelWithDebInfo MinSizeRel
 IF( NOT CMAKE_BUILD_TYPE )
