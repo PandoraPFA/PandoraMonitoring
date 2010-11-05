@@ -145,7 +145,10 @@ ELSE()
     MESSAGE( STATUS "ROOT Eve library not found" )
 ENDIF()
 
-
+# Add additional linker flag for Apple to defer linking against ROOT until PandoraPFANew build.
+IF ( APPLE ) 
+    SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup" )
+ENDIF()
 
 ##########################################################################################
 # End of User section: please try not to modify below this line
