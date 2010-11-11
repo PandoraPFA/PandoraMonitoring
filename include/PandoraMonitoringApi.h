@@ -60,7 +60,7 @@ enum Color
     LIGHTORANGE,
     LIGHTYELLOW,
     AUTO,   // automatic choice of colors
-    AUTOID, // automatic choice of colors depending on the particle ID
+    AUTOID  // automatic choice of colors depending on the particle ID
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
