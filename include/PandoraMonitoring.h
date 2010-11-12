@@ -176,8 +176,9 @@ public:
      * 
      *  @param  blackBackground whether to use a black background color, rather than white
      *  @param  showDetectors turns the visibility of the detector geometry on or off
+     *  @param  maximumHitEnergy sets the maximum hit energy. Below that value, the hit will be transparent, above the transparency is saturated to opaque
      */
-    void SetEveDisplayParameters(const bool blackBackground, const bool showDetectors);
+    void SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float maximumHitEnergy);
 
     /**
      *  @brief Add MC particles to the Eve event-display
@@ -367,6 +368,8 @@ private:
     static float                m_scalingFactor;        ///< TEve works with [cm], Pandora works with [mm]
     static bool                 m_openEveEvent;         ///< is set if an Event is open to store objects (hits, clusters,...) in it.
     static int                  m_eventDisplayCounter;  ///< counter for the event displays
+
+    float                       m_maximumHitEnergy;    ///< The cell energy where the transparency is saturated (0%, fully opaque)
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -411,6 +414,7 @@ inline PandoraMonitoring::PandoraMonitoring()
     d(DARKYELLOW,      EColor(TColor::GetColorDark(kYellow)))               \
     d(LIGHTGREEN,      EColor(TColor::GetColorBright(kGreen)))              \
     d(LIGHTBLUE,       EColor(TColor::GetColorBright(kBlue)))               \
+    d(LIGHTRED,        EColor(TColor::GetColorBright(kRed)))                \
     d(LIGHTMAGENTA,    EColor(TColor::GetColorBright(kMagenta)))            \
     d(LIGHTCYAN,       EColor(TColor::GetColorBright(kCyan)))               \
     d(LIGHTVIOLET,     EColor(TColor::GetColorBright(kViolet)))             \

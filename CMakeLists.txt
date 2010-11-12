@@ -148,6 +148,10 @@ ENDIF()
 # Add additional linker flag for Apple to defer linking against ROOT until PandoraPFANew build.
 IF ( APPLE ) 
     SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup" )
+    # Add Unix compiler definition.  Already happens automatically on Linux.
+    IF ( UNIX )
+        ADD_DEFINITIONS(-D__unix__)
+    ENDIF()
 ENDIF()
 
 ##########################################################################################

@@ -142,9 +142,9 @@ void PandoraMonitoringApi::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::SetEveDisplayParameters(const bool blackBackground, const bool showDetectors)
+void PandoraMonitoringApi::SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float maximumHitEnergy)
 {
-    PandoraMonitoring::GetInstance()->SetEveDisplayParameters(blackBackground, showDetectors);
+    PandoraMonitoring::GetInstance()->SetEveDisplayParameters(blackBackground, showDetectors, maximumHitEnergy);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
