@@ -217,7 +217,7 @@ public:
      *  @return pointer to created TEveElement
      */
     TEveElement *VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, TEveElement* parent,
-        Color color, Int_t pfoId = 0);
+        Color color, int pfoId = 0);
 
     /**
      *  @brief Add Particle flow objects to the Eve event-display
@@ -245,7 +245,7 @@ public:
      *  @return pointer to created TEveElement
      */
     TEveElement *VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, TEveElement* parent, Color color,
-        bool showAssociatedTracks, bool showFit, Int_t pfoId = 0);
+        bool showAssociatedTracks, bool showFit, int pfoId = 0);
 
     /**
      *  @brief  Pause until user enters 'return'
@@ -263,7 +263,7 @@ public:
     void DeleteInstance();
 
 private:
-    typedef std::vector< std::pair< Double_t,Double_t > > DoublePairVector;
+    typedef std::vector< std::pair< double,double > > DoublePairVector;
 
     /**
      *  @brief  Default constructor
@@ -276,7 +276,7 @@ private:
      *  @param pCaloHit address of the calo hit
      *  @param corners will be filled with the x,y and z-coordinates of all 8 corners of the box
      */
-    void MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, Float_t corners[24]);
+    void MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, float corners[24]);
 
     /**
      *  @brief compute the polygon corners for the detector outline
@@ -286,7 +286,7 @@ private:
      *  @param phi0 reference angle where to start the polygon
      *  @param coordinates vector of double,double pairs which is filled with the x and y coordinates of the polygon corners
      */
-    void ComputePolygonCorners(int symmetryOrder, double closestDistanceToIp, double phi0, std::vector<std::pair<Double_t,Double_t> > &coordinates);
+    void ComputePolygonCorners(int symmetryOrder, double closestDistanceToIp, double phi0, std::vector<std::pair<double,double> > &coordinates);
 
     /**
      *  @brief Creates a "tube" volume with the given symmetry inside and outside. If a symmetryOrder <= 2 is chosen, a circle is

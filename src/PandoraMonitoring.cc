@@ -123,8 +123,8 @@ PandoraMonitoring *PandoraMonitoring::GetInstance()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::Create1DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp, 
-                                          const std::string xAxisTitle, const std::string yAxisTitle)
+void PandoraMonitoring::Create1DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp,
+    const std::string xAxisTitle, const std::string yAxisTitle)
 {
     if (m_histogramMap.end() != m_histogramMap.find(name))
     {
@@ -133,17 +133,20 @@ void PandoraMonitoring::Create1DHistogram(const std::string &name, const std::st
     }
 
     TH1F* pTH1F = new TH1F(name.c_str(), title.c_str(), nBinsX, xLow, xUp);
+
     if (!xAxisTitle.empty())
         pTH1F->GetXaxis()->SetTitle(xAxisTitle.c_str());
+
     if (!yAxisTitle.empty())
         pTH1F->GetYaxis()->SetTitle(yAxisTitle.c_str());
+
     m_histogramMap.insert(HistogramMap::value_type(name, pTH1F));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PandoraMonitoring::Create2DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp, int nBinsY,
-                                          double yLow, double yUp, const std::string xAxisTitle, const std::string yAxisTitle)
+    double yLow, double yUp, const std::string xAxisTitle, const std::string yAxisTitle)
 {
     if (m_histogramMap.end() != m_histogramMap.find(name))
     {
@@ -152,10 +155,13 @@ void PandoraMonitoring::Create2DHistogram(const std::string &name, const std::st
     }
 
     TH2F* pTH2F = new TH2F(name.c_str(), title.c_str(), nBinsX, xLow, xUp, nBinsY, yLow, yUp);
+
     if (!xAxisTitle.empty())
         pTH2F->GetXaxis()->SetTitle(xAxisTitle.c_str());
+
     if (!yAxisTitle.empty())
         pTH2F->GetYaxis()->SetTitle(yAxisTitle.c_str());
+
     m_histogramMap.insert(HistogramMap::value_type(name, pTH2F));
 }
 
@@ -196,9 +202,8 @@ void PandoraMonitoring::Fill2DHistogram(const std::string &name, float xValue, f
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::AddMultiplyOrDivideHistograms(const std::string &nameHisto0, const std::string &nameHisto1, 
-                                                      double coeff0, double coeff1,
-                                                      bool add, bool multiply )
+void PandoraMonitoring::AddMultiplyOrDivideHistograms(const std::string &nameHisto0, const std::string &nameHisto1, double coeff0,
+    double coeff1, bool add, bool multiply )
 {
     HistogramMap::iterator iter0 = m_histogramMap.find(nameHisto0);
     if (m_histogramMap.end() == iter0)
@@ -206,6 +211,7 @@ void PandoraMonitoring::AddMultiplyOrDivideHistograms(const std::string &nameHis
         std::cout << "PandoraMonitoring::Fill2DHistogram, error: No histogram with name '"<< nameHisto0 <<"' exists." << std::endl;
         throw std::exception();
     }
+
     HistogramMap::iterator iter1 = m_histogramMap.find(nameHisto1);
     if (m_histogramMap.end() == iter1)
     {
@@ -216,19 +222,21 @@ void PandoraMonitoring::AddMultiplyOrDivideHistograms(const std::string &nameHis
     TH1 *pHisto0 = iter0->second;
     TH1 *pHisto1 = iter1->second;
 
-    if (NULL == pHisto0)
-        throw std::exception();
-
-    if (NULL == pHisto1)
+    if ((NULL == pHisto0) || (NULL == pHisto1))
         throw std::exception();
 
     if (add)
+    {
         pHisto0->Add(pHisto0,pHisto1,coeff0,coeff1);
+    }
+    else if (multiply)
+    {
+        pHisto0->Multiply(pHisto0,pHisto1,coeff0,coeff1);
+    }
     else
-        if (multiply)
-            pHisto0->Multiply(pHisto0,pHisto1,coeff0,coeff1);
-        else
-            pHisto0->Divide(pHisto0,pHisto1,coeff0,coeff1);
+    {
+        pHisto0->Divide(pHisto0,pHisto1,coeff0,coeff1);
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -323,12 +331,10 @@ void PandoraMonitoring::FillTree(const std::string &treeName)
     catch(TTreeWrapper::TreeNotFoundError& excpt)
     {
         std::cout << "PandoraMonitoring::FillTree, error: No tree with name '" << treeName <<"' exists." << std::endl;
-//        throw;
     }
     catch(...)
     {
         std::cout << "PandoraMonitoring::FillTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
-//        throw;
     }
 }
 
@@ -343,12 +349,10 @@ void PandoraMonitoring::PrintTree(const std::string &treeName)
     catch(TTreeWrapper::TreeNotFoundError& excpt)
     {
         std::cout << "PandoraMonitoring::PrintTree, error: No tree with name '" << treeName <<"' exists." << std::endl;
-//        throw;
     }
     catch(...)
     {
         std::cout << "PandoraMonitoring::PrintTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
-//        throw;
     }
 }
 
@@ -363,12 +367,10 @@ void PandoraMonitoring::ScanTree(const std::string &treeName)
     catch(TTreeWrapper::TreeNotFoundError& excpt)
     {
         std::cout << "PandoraMonitoring::ScanTree, error: No tree with name '" << treeName <<"' exists." << std::endl;
-//        throw;
     }
     catch(...)
     {
         std::cout << "PandoraMonitoring::ScanTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
-//        throw;
     }
 }
 
@@ -394,12 +396,10 @@ void PandoraMonitoring::SaveTree(const std::string &treeName, const std::string 
     catch(TTreeWrapper::TreeNotFoundError& excpt)
     {
         std::cout << "PandoraMonitoring::SaveTree, error: No tree with name '" << treeName <<"' exists." << std::endl;
-//        throw;
     }
     catch(...)
     {
         std::cout << "PandoraMonitoring::SaveTree, unknown error for tree with name '" << treeName <<"'." << std::endl;
-//        throw;
     }
 }
 
@@ -486,9 +486,6 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
     gEve->AddGlobalElement(pEveGeoTopNode);
 
-//     gEve->GetDefaultViewer()->SetMainColor(kWhite);
-//     gEve->GetDefaultViewer()->SetCurrentBackgroundColor(kWhite);
-
     TGLViewer *viewerGL = gEve->GetDefaultGLViewer();
     viewerGL->ColorSet().Background().SetColor(kWhite);
 
@@ -559,7 +556,7 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
     coil->SetVisibility(kFALSE);
     pMainDetectorVolume->AddNode(coil, 0, new TGeoTranslation(0,0,0));
 
-    Int_t col = 2;
+    int col = 2;
     for (SubDetectorParametersList::const_iterator iter = subDetectorParametersList.begin(); iter != subDetectorParametersList.end(); ++iter)
     {
         bool left = true;
@@ -695,7 +692,7 @@ void PandoraMonitoring::ViewEvent()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name,
-    TEveElement *parent, Color color, Int_t pfoId )
+    TEveElement *parent, Color color, int pfoId )
 {
     InitializeEve();
 
@@ -714,7 +711,6 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
     hitsMarkers->SetOwnIds(kTRUE);
     hits->AddElement(hitsMarkers);
 #endif 
-    
 
     PandoraMonitoringApi::PdgCodeToEnergyMap pdgCodeToEnergyMap;
 
@@ -777,22 +773,26 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             }
 
             // Compute the corners of calohit calorimeter-cell, 8 corners x 3 dimensions
-            Float_t corners[24];
+            float corners[24];
             MakeCaloHitCell(pCaloHit, corners);
 
             // Supply hit marker details
             const pandora::CartesianVector position = pCaloHit->GetPositionVector() * m_scalingFactor;
 
             Color hitColor = color;
+
             if (color == AUTOID)
             {
-                if( pfoId == particleId )
+                if (pfoId == particleId)
+                {
                     hitColor = GRAY;
+                }
                 else
+                {
                     hitColor = GetColorForPdgCode(particleId);
+                }
             }
  
-
             if (color == AUTOTYPE)
             {
                 static TParticle particlePfo;
@@ -806,24 +806,21 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
 
                 hitColor = GetColorForPdgCode(particleId); // default 
 
-                if ((pfoId==11 || pfoId==-11) && (particleId==11 || particleId==-11)) // e-, e+
+                if (((pfoId == pandora::E_MINUS) || (pfoId == pandora::E_PLUS)) && ((particleId == pandora::E_MINUS) || (particleId == pandora::E_PLUS)))
                     hitColor = GRAY;
 
-                if ((pfoId==13 || pfoId==-13) && (particleId==13 || particleId==-13)) // mu+, mu-
+                if (((pfoId == pandora::MU_MINUS) || (pfoId == pandora::MU_PLUS)) && ((particleId == pandora::MU_MINUS) || (particleId == pandora::MU_PLUS)))
                     hitColor = GRAY;
 
-                if (pfoId==22 && particleId==22) // photon
+                if ((pfoId == pandora::PHOTON) && (particleId == pandora::PHOTON))
                     hitColor = GRAY;
 
-                if (abs(pfoId)>=100 && abs(particleId)>=100)
+                if ((std::abs(pfoId) >= 100) && (std::abs(particleId) >= 100))
                 {
-                    if (pParticlePfoPDG->Charge()!=0 && pParticleHitPDG->Charge()!=0)
-                        hitColor = GRAY;
-                    else if (pParticlePfoPDG->Charge()==0 && pParticleHitPDG->Charge()==0)
+                    if (pParticlePfoPDG->Charge() == pParticleHitPDG->Charge())
                         hitColor = GRAY;
                 }
             }
-
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(5,27,02)
             if (color < AUTOID)
@@ -835,11 +832,11 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
                 hitsMarkers->SetMarkerStyle(4);
             }
 #endif
-
             // Add calorimeter-cell for calo-hit
             hits->AddBox(corners);
-            
-            char transparency = static_cast<char>(255-255.f*(hitEnergy/m_maximumHitEnergy));
+
+            char transparency = static_cast<char>(255 - 255.f*(hitEnergy/m_maximumHitEnergy));
+
             if (hitEnergy > m_maximumHitEnergy)
                 transparency = 0;
 
@@ -1055,7 +1052,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
 {
     pandora::TrackVector *  pTrackVector = new pandora::TrackVector(pTrackList->begin(),pTrackList->end());
     std::sort(pTrackVector->begin(),pTrackVector->end(),pandora::Track::SortByMomentum);
-    
+
     InitializeEve();
 
     TEveTrackList *pTEveTrackList = new TEveTrackList();
@@ -1190,7 +1187,6 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
     pandora::ParticleFlowObjectVector *  pPfoVector = new pandora::ParticleFlowObjectVector(pPfoList->begin(),pPfoList->end());
     std::sort(pPfoVector->begin(),pPfoVector->end(),pandora::ParticleFlowObject::SortByEnergy);
 
-
     InitializeEve();
 
     TEveElement *pPfoVectorElement = new TEveElementList();
@@ -1216,7 +1212,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
         // Default color assignment
         Color pfoColor = color;
 
-        if (color >= AUTO)
+        if ((color == AUTO) || (color == AUTOID) || (color == AUTOTYPE))
         {
             pfoColor = GetColorForPdgCode(pPfo->GetParticleId());
         }
@@ -1231,10 +1227,9 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
         }
         else
         {
-            if (color == AUTOID)
-                pfoColor = AUTOID;
-            else if (color == AUTOTYPE)
-                pfoColor = AUTOTYPE;
+            if ((color == AUTOID) || (color == AUTOTYPE))
+                pfoColor = color;
+
             VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, showAssociatedTracks, showFit, pPfo->GetParticleId());
         }
     }
@@ -1255,11 +1250,10 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, TEveElement *parent,
-    Color color, bool showAssociatedTracks, bool showFit, Int_t pfoId)
+    Color color, bool showAssociatedTracks, bool showFit, int pfoId)
 {
     pandora::ClusterVector *  pClusterVector = new pandora::ClusterVector(pClusterList->begin(),pClusterList->end());
     std::sort(pClusterVector->begin(),pClusterVector->end(),pandora::Cluster::SortByHadronicEnergy);
-
 
     InitializeEve();
 
@@ -1320,10 +1314,10 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
         const pandora::OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
         Color caloHitColor = clusterColor;
-        if (color == AUTOID)
-            caloHitColor = AUTOID;
-        else if (color == AUTOTYPE)
-            caloHitColor = AUTOTYPE;
+
+        if ((color == AUTOID) || (color == AUTOTYPE))
+            caloHitColor = color;
+
         TEveElement *pCaloHitsElement = VisualizeCaloHits(&orderedCaloHitList, sstr.str().c_str(), pClusterVectorElement, caloHitColor, pfoId);
 
         const pandora::ClusterHelper::ClusterFitResult &fit = pCluster->GetFitToAllHitsResult();
@@ -1376,7 +1370,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, Float_t corners[24])
+void PandoraMonitoring::MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, float corners[24])
 {
     pandora::CartesianVector dirU((pandora::ENDCAP == pCaloHit->GetDetectorRegion()) ? pandora::CartesianVector(0, 1, 0) : pandora::CartesianVector(0, 0, 1));
     pandora::CartesianVector normal(pCaloHit->GetNormalVector());
@@ -1432,7 +1426,7 @@ void PandoraMonitoring::MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, 
     cornerVector[6] = position + dirU + dirV + normal;
     cornerVector[7] = position - dirU + dirV + normal;
 
-    // Assign corner positions to Float_t array
+    // Assign corner positions to float array
     corners[0] = cornerVector[0].GetX();
     corners[1] = cornerVector[0].GetY();
     corners[2] = cornerVector[0].GetZ();
@@ -1501,9 +1495,9 @@ TGeoShape *PandoraMonitoring::MakePolygonTube(int symmetryOrder, double closestD
     DoublePairVector vertices;
     ComputePolygonCorners(symmetryOrder, closestDistanceToIp, phi, vertices);
 
-    const Int_t nvertices(vertices.size());
-    Double_t *x = new Double_t[nvertices];
-    Double_t *y = new Double_t[nvertices];
+    const int nvertices(vertices.size());
+    double *x = new double[nvertices];
+    double *y = new double[nvertices];
 
     int index = 0;
     for (DoublePairVector::iterator itCoord = vertices.begin(), itCoordEnd = vertices.end(); itCoord != itCoordEnd; ++itCoord)
@@ -1516,10 +1510,10 @@ TGeoShape *PandoraMonitoring::MakePolygonTube(int symmetryOrder, double closestD
     TGeoXtru *pTGeoXtru = new TGeoXtru(2);
 
     pTGeoXtru->DefinePolygon(nvertices,x,y);
-    Double_t z0 = -halfLength, x0 = 0, y0 = 0;
-    Double_t z1 = halfLength, x1 = 0, y1 = 0;
+    double z0 = -halfLength, x0 = 0, y0 = 0;
+    double z1 = halfLength, x1 = 0, y1 = 0;
 
-    Double_t scale0 = 1.0;
+    double scale0 = 1.0;
     pTGeoXtru->DefineSection(0, z0, x0, y0, scale0); // Z position, offset and scale for first section
     pTGeoXtru->DefineSection(1, z1, x1, y1, scale0); // -''- go forward
 
@@ -1535,17 +1529,17 @@ void PandoraMonitoring::ComputePolygonCorners(int symmetryOrder, double closestD
 {
     if (symmetryOrder > 2)
     {
-        static const Double_t pi(std::acos(-1.));
-        const Double_t x0(-1. * closestDistanceToIp * tan(pi / Double_t(symmetryOrder)));
-        const Double_t y0(closestDistanceToIp);
+        static const double pi(std::acos(-1.));
+        const double x0(-1. * closestDistanceToIp * tan(pi / double(symmetryOrder)));
+        const double y0(closestDistanceToIp);
 
         for (int i = 0; i < symmetryOrder; ++i)
         {
-            Double_t theta = 0.f; 
-            theta = phi0 + (2 * pi * Double_t(i) / Double_t(symmetryOrder));
+            double theta = 0.f; 
+            theta = phi0 + (2 * pi * double(i) / double(symmetryOrder));
 
-            Double_t x = x0 * cos(theta) + y0 * sin(theta);
-            Double_t y = y0 * cos(theta) - x0 * sin(theta);
+            double x = x0 * cos(theta) + y0 * sin(theta);
+            double y = y0 * cos(theta) - x0 * sin(theta);
             coordinates.push_back(std::pair<double, double>(x, y));
         }
     }

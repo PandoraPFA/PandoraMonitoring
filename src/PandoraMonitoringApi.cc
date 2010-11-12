@@ -43,7 +43,7 @@ void PandoraMonitoringApi::Fill2DHistogram(const std::string &name, float xValue
 
 void PandoraMonitoringApi::AddHistograms(const std::string &nameHisto0, const std::string &nameHisto1, double coeff0, double coeff1)
 {
-    PandoraMonitoring::GetInstance()->AddMultiplyOrDivideHistograms(nameHisto0, nameHisto1, coeff0, coeff1, true, false );
+    PandoraMonitoring::GetInstance()->AddMultiplyOrDivideHistograms(nameHisto0, nameHisto1, coeff0, coeff1, true, false);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -157,21 +157,21 @@ void PandoraMonitoringApi::VisualizeMCParticles(const pandora::MCParticleList *c
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, Color color )
+void PandoraMonitoringApi::VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, Color color)
 {
     PandoraMonitoring::GetInstance()->VisualizeTracks(pTrackList, name, NULL, color);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, Color color )
+void PandoraMonitoringApi::VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, Color color)
 {
     PandoraMonitoring::GetInstance()->VisualizeCaloHits(pOrderedCaloHitList, name, NULL, color);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color, 
+void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color,
     bool showAssociatedTracks, bool showFit)
 {
     PandoraMonitoring::GetInstance()->VisualizeClusters(pClusterList, name, NULL, color, showAssociatedTracks, showFit);

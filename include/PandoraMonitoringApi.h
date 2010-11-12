@@ -59,7 +59,7 @@ enum Color
     LIGHTPINK,
     LIGHTORANGE,
     LIGHTYELLOW,
-    AUTO,   // automatic choice of colors
+    AUTO,    // automatic choice of colors
     AUTOID,  // automatic choice of colors depending on the particle ID
     AUTOTYPE // automatic choice of colors depending on the particle type 
 };
@@ -234,7 +234,7 @@ public:
      *  @param  showDetectors turns the visibility of the detector geometry on or off
      *  @param  maximumHitEnergy sets the maximum hit energy. Below that value, the hit will be transparent, above the transparency is saturated to opaque
      */
-    static void SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float maximumHitEnergy = -1.0);
+    static void SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float maximumHitEnergy = -1.f);
 
     /**
      *  @brief Add MCParticles to the Eve event-display
