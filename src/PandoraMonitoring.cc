@@ -439,21 +439,21 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
     if (PandoraMonitoring::m_eveInitialized)
     {
-        TEveEventManager* currEv = gEve->GetCurrentEvent();
+        TEveEventManager *pCurrentEvent = gEve->GetCurrentEvent();
 
-        if(currEv)
+        if (pCurrentEvent)
         {
-            currEv->SetElementNameTitle(sstr.str().c_str(),sstr.str().c_str());
+            pCurrentEvent->SetElementNameTitle(sstr.str().c_str(),sstr.str().c_str());
         }
 
         if (!m_openEveEvent)
         {
-            gEve->AddEvent( new TEveEventManager(sstr.str().c_str(),sstr.str().c_str()) );
+            gEve->AddEvent(new TEveEventManager(sstr.str().c_str(),sstr.str().c_str()));
             m_openEveEvent = true;
             m_eventDisplayCounter++;
         }
-        return;
 
+        return;
     }
 
     gSystem->Load("libGeom");
@@ -526,35 +526,58 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
         subDetectorParametersList.push_back(std::make_pair(iter->second, iter->first));
     }
 
-    subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalBarrelParameters(), "ECalBarrel") );
-    subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalEndCapParameters(), "ECalEndCap") );
-    subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalBarrelParameters(), "HCalBarrel") );
-    subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalEndCapParameters(), "HCalEndCap") );
-    subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetMuonBarrelParameters(), "MuonBarrel") );
-    subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetMuonEndCapParameters(), "MuonEndCap") );
+    try {subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalBarrelParameters(), "ECalBarrel"));}
+    catch (pandora::StatusCodeException &) {}
+
+    try {subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalEndCapParameters(), "ECalEndCap"));}
+    catch (pandora::StatusCodeException &) {}
+
+    try {subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalBarrelParameters(), "HCalBarrel"));}
+    catch (pandora::StatusCodeException &) {}
+
+    try {subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalEndCapParameters(), "HCalEndCap"));}
+    catch (pandora::StatusCodeException &) {}
+
+    try {subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetMuonBarrelParameters(), "MuonBarrel"));}
+    catch (pandora::StatusCodeException &) {}
+
+    try {subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetMuonEndCapParameters(), "MuonEndCap"));}
+    catch (pandora::StatusCodeException &) {}
 
     typedef std::set<std::string> StringSet;
     StringSet setInvisible;
     setInvisible.insert("MuonBarrel");
     setInvisible.insert("MuonEndCap");
 
-    TGeoVolume* mainTracker = NULL;
-    mainTracker = MakePolygonTube("Tracker", 0, 0, pGeometryHelper->GetMainTrackerInnerRadius() * m_scalingFactor,
-        pGeometryHelper->GetMainTrackerOuterRadius() * m_scalingFactor, 0., 0., pGeometryHelper->GetMainTrackerZExtent() * m_scalingFactor, pSubDetectorMedium);
+    try
+    {
+        TGeoVolume *pMainTracker = NULL;
+        pMainTracker = MakePolygonTube("Tracker", 0, 0, pGeometryHelper->GetMainTrackerInnerRadius() * m_scalingFactor,
+            pGeometryHelper->GetMainTrackerOuterRadius() * m_scalingFactor, 0., 0., pGeometryHelper->GetMainTrackerZExtent() * m_scalingFactor, pSubDetectorMedium);
 
-    mainTracker->SetLineColor(kGreen);
-    mainTracker->SetTransparency(transparency);
-    mainTracker->SetVisibility(kFALSE);
-    pMainDetectorVolume->AddNode(mainTracker, 0, new TGeoTranslation(0, 0, 0));
+        pMainTracker->SetLineColor(kGreen);
+        pMainTracker->SetTransparency(transparency);
+        pMainTracker->SetVisibility(kFALSE);
+        pMainDetectorVolume->AddNode(pMainTracker, 0, new TGeoTranslation(0, 0, 0));
+    }
+    catch (pandora::StatusCodeException &)
+    {
+    }
 
-    TGeoVolume* coil = NULL;
-    coil = MakePolygonTube("Coil", 0, 0, pGeometryHelper->GetCoilInnerRadius() * m_scalingFactor,
-        pGeometryHelper->GetCoilOuterRadius() * m_scalingFactor, 0., 0., pGeometryHelper->GetCoilZExtent() * m_scalingFactor, pSubDetectorMedium);
+    try
+    {
+        TGeoVolume *pCoil = NULL;
+        pCoil = MakePolygonTube("Coil", 0, 0, pGeometryHelper->GetCoilInnerRadius() * m_scalingFactor,
+            pGeometryHelper->GetCoilOuterRadius() * m_scalingFactor, 0., 0., pGeometryHelper->GetCoilZExtent() * m_scalingFactor, pSubDetectorMedium);
 
-    coil->SetLineColor(kBlue);
-    coil->SetTransparency(transparency);
-    coil->SetVisibility(kFALSE);
-    pMainDetectorVolume->AddNode(coil, 0, new TGeoTranslation(0,0,0));
+        pCoil->SetLineColor(kBlue);
+        pCoil->SetTransparency(transparency);
+        pCoil->SetVisibility(kFALSE);
+        pMainDetectorVolume->AddNode(pCoil, 0, new TGeoTranslation(0,0,0));
+    }
+    catch (pandora::StatusCodeException &)
+    {
+    }
 
     int col = 2;
     for (SubDetectorParametersList::const_iterator iter = subDetectorParametersList.begin(); iter != subDetectorParametersList.end(); ++iter)
@@ -562,25 +585,25 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
         bool left = true;
         for (int lr = 0; lr <= 1; ++lr)
         {
-            const pandora::GeometryHelper::SubDetectorParameters& detPar = (*iter).first;
+            const pandora::GeometryHelper::SubDetectorParameters &detPar = (*iter).first;
             std::string name = (*iter).second;
 
             StringSet::iterator itSetInvisible = setInvisible.find(name);
-            bool drawInvisible = (itSetInvisible != setInvisible.end() ? true : false );
+            bool drawInvisible = (itSetInvisible != setInvisible.end() ? true : false);
 
             std::stringstream sstr;
             sstr << name;
-            sstr << (left? "_left" : "_right" );
+            sstr << (left? "_left" : "_right");
 
             TGeoVolume* subDetVol = NULL;
 
-            int sign = (left? -1 : 1 );
-            double zMin = detPar.GetInnerZCoordinate()*m_scalingFactor;
-            double zMax = detPar.GetOuterZCoordinate()*m_scalingFactor;
-            double zThick = zMax-zMin;
+            int sign = (left? -1 : 1);
+            double zMin = detPar.GetInnerZCoordinate() * m_scalingFactor;
+            double zMax = detPar.GetOuterZCoordinate() * m_scalingFactor;
+            double zThick = zMax - zMin;
             zMin *= sign;
             zMax *= sign;
-            double zPosition = zMin+sign*(zThick/2.0);
+            double zPosition = zMin + sign * (zThick / 2.0);
 
             subDetVol = MakePolygonTube(sstr.str().c_str(), detPar.GetInnerSymmetryOrder(), detPar.GetOuterSymmetryOrder(),
                 detPar.GetInnerRCoordinate() * m_scalingFactor, detPar.GetOuterRCoordinate() * m_scalingFactor,
@@ -624,14 +647,22 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
 
             TGeoVolume *pGapVol = new TGeoVolume(gapName.c_str(), pGapShape, pGapMedium);
 
-            const float vertexZ(pBoxGap->m_vertex.GetZ());
-            static const float hcalEndCapInnerZ(pGeometryHelper->GetHCalEndCapParameters().GetInnerZCoordinate());
-
-            // TODO Remove ILD-specific correction, required for endcap box gaps that do not point back to origin in xy plane.
-            //      Pandora gaps are self-describing (four vectors), but this does not map cleanly to TGeoBBox class.
-            //      Best solution may be to move to different root TGeoShape.
             static const float pi(std::acos(-1.));
-            const float correction((std::fabs(vertexZ) < hcalEndCapInnerZ) ? 0 : ((vertexZ > 0) ? pi / 4.f : -pi / 4.f));
+            float correction(0.f);
+
+            try
+            {
+                // TODO Remove ILD-specific correction, required for endcap box gaps that do not point back to origin in xy plane.
+                //      Pandora gaps are self-describing (four vectors), but this does not map cleanly to TGeoBBox class.
+                //      Best solution may be to move to different root TGeoShape.
+                const float vertexZ(pBoxGap->m_vertex.GetZ());
+                static const float hcalEndCapInnerZ(pGeometryHelper->GetHCalEndCapParameters().GetInnerZCoordinate());
+                correction = ((std::fabs(vertexZ) < hcalEndCapInnerZ) ? 0 : ((vertexZ > 0) ? pi / 4.f : -pi / 4.f));
+            }
+            catch (pandora::StatusCodeException &)
+            {
+            }
+
             const float phi(correction + std::atan2(pBoxGap->m_vertex.GetX(), pBoxGap->m_vertex.GetY()));
 
             const TGeoTranslation trans("trans",
@@ -920,19 +951,19 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
     pTEveTrackList->SetElementNameTitle( mcParticleListName.c_str(), mcParticleListTitle.c_str() );
     pTEveTrackList->SetMainColor(GetROOTColor(TEAL));
 
-    TEveTrackPropagator *pTEveTrackPropagator = pTEveTrackList->GetPropagator();
-    // pTEveTrackPropagator->SetStepper(TEveTrackPropagator::kRungeKutta);
-
-    pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
-    const float magneticField(pGeometryHelper->GetBField(pandora::CartesianVector(0., 0., 0.)));
-
     // Initialize magnetic field for particle propagation, note strange ALICE charge sign convention,
     // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
-    pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -magneticField));
+    pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
 
-    pTEveTrackPropagator->SetMaxR(pGeometryHelper->GetHCalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);
-    pTEveTrackPropagator->SetMaxZ(pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate() * m_scalingFactor);
+    TEveTrackPropagator *pTEveTrackPropagator = pTEveTrackList->GetPropagator();
+    pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -pGeometryHelper->GetBField(pandora::CartesianVector(0., 0., 0.))));
     pTEveTrackPropagator->SetMaxOrbs(5);
+
+    try {pTEveTrackPropagator->SetMaxR(pGeometryHelper->GetHCalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);}
+    catch (pandora::StatusCodeException &) {}
+
+    try {pTEveTrackPropagator->SetMaxZ(pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate() * m_scalingFactor);}
+    catch (pandora::StatusCodeException &) {}
 
     for (pandora::MCParticleVector::const_iterator mcParticleIter = pMCParticleVector->begin(), mcParticleIterEnd = pMCParticleVector->end();
          mcParticleIter != mcParticleIterEnd; ++mcParticleIter)
@@ -1064,18 +1095,19 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
     pTEveTrackList->SetElementNameTitle( trackListName.c_str(), trackListTitle.c_str() );
     pTEveTrackList->SetMainColor(GetROOTColor(TEAL));
 
-    TEveTrackPropagator *pTEveTrackPropagator = pTEveTrackList->GetPropagator();
-    // pTEveTrackPropagator->SetStepper(TEveTrackPropagator::kRungeKutta);
-
-    pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
-    const float magneticField(pGeometryHelper->GetBField(pandora::CartesianVector(0., 0., 0.)));
-
     // Initialize magnetic field for particle propagation, note strange ALICE charge sign convention,
     // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
-    pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -magneticField));
-    pTEveTrackPropagator->SetMaxR(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);
-    pTEveTrackPropagator->SetMaxZ(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate() * m_scalingFactor);
+    pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
+
+    TEveTrackPropagator *pTEveTrackPropagator = pTEveTrackList->GetPropagator();
+    pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -pGeometryHelper->GetBField(pandora::CartesianVector(0., 0., 0.))));
     pTEveTrackPropagator->SetMaxOrbs(5);
+
+    try {pTEveTrackPropagator->SetMaxR(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);}
+    catch (pandora::StatusCodeException &) {}
+
+    try {pTEveTrackPropagator->SetMaxZ(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate() * m_scalingFactor);}
+    catch (pandora::StatusCodeException &) {}
 
     for (pandora::TrackVector::const_iterator trackIter = pTrackVector->begin(), trackIterEnd = pTrackVector->end();
         trackIter != trackIterEnd; ++trackIter)
@@ -1280,7 +1312,10 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
         {
             const pandora::TrackList &trackList(pCluster->GetAssociatedTrackList());
             bool clusterHasTracks = !(trackList.empty());
-            bool clusterIsPhoton  = pCluster->IsPhotonFast();
+            bool clusterIsPhoton = false;
+
+            try {clusterIsPhoton = pCluster->IsPhotonFast();}
+            catch (pandora::StatusCodeException &) {}
 
             if (clusterIsPhoton)
             {
