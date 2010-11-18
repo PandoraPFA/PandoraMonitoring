@@ -751,8 +751,8 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
 
     firstLayer = pOrderedCaloHitList->begin()->first;
 
-    float minInteractionLengthsFromIp = std::numeric_limits<float>::max();
-    float maxInteractionLengthsFromIp = std::numeric_limits<float>::min();
+    float minRadiationLengthsFromIp = std::numeric_limits<float>::max(), maxRadiationLengthsFromIp = std::numeric_limits<float>::min();
+    float minInteractionLengthsFromIp = std::numeric_limits<float>::max(), maxInteractionLengthsFromIp = std::numeric_limits<float>::min();
 
     float energySumElectromagnetic = 0.f;
     float energySumHadronic = 0.f;
@@ -768,6 +768,15 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             const pandora::CaloHit *pCaloHit = (*caloHitIter);
             ++numberHits;
 
+            // Path length properties
+            const float radiationLengthsFromIp(pCaloHit->GetNRadiationLengthsFromIp());
+
+            if (radiationLengthsFromIp < minRadiationLengthsFromIp)
+                minRadiationLengthsFromIp = radiationLengthsFromIp;
+
+            if (radiationLengthsFromIp > maxRadiationLengthsFromIp)
+                maxRadiationLengthsFromIp = radiationLengthsFromIp;
+
             const float interactionLengthsFromIp(pCaloHit->GetNInteractionLengthsFromIp());
 
             if (interactionLengthsFromIp < minInteractionLengthsFromIp)
@@ -776,14 +785,16 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             if (interactionLengthsFromIp > maxInteractionLengthsFromIp)
                 maxInteractionLengthsFromIp = interactionLengthsFromIp;
 
-            const pandora::MCParticle *pMCParticle = NULL;
-            pCaloHit->GetMCParticle(pMCParticle);
-
+            // Energy properties
             const float hitEnergy(pCaloHit->GetElectromagneticEnergy());
             energySumElectromagnetic += hitEnergy;
 
             const float hitEnergyHadronic(pCaloHit->GetHadronicEnergy());
             energySumHadronic += hitEnergyHadronic;
+
+            // MC particle id
+            const pandora::MCParticle *pMCParticle = NULL;
+            pCaloHit->GetMCParticle(pMCParticle);
 
             int particleId = 0;
             if (pMCParticle)
@@ -886,6 +897,8 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
          << "\nEhad=" << energySumHadronic
          << "\nfirst pseudo-layer=" << firstLayer
          << "\nlast  pseudo-layer=" << lastLayer
+         << "\nmin radLenFromIP=" << minRadiationLengthsFromIp
+         << "\nmax radLenFromIP=" << maxRadiationLengthsFromIp
          << "\nmin intLenFromIP=" << minInteractionLengthsFromIp
          << "\nmax intLenFromIP=" << maxInteractionLengthsFromIp;
 
@@ -894,6 +907,8 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
              << "/Ehad=" << energySumHadronic
              << "/first pseudo-layer=" << firstLayer
              << "/last  pseudo-layer=" << lastLayer
+             << "/min radLenFromIP=" << minRadiationLengthsFromIp
+             << "/max radLenFromIP=" << maxRadiationLengthsFromIp
              << "/min intLenFromIP=" << minInteractionLengthsFromIp
              << "/max intLenFromIP=" << maxInteractionLengthsFromIp;
     
@@ -1408,7 +1423,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
 void PandoraMonitoring::MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, float corners[24])
 {
     pandora::CartesianVector dirU((pandora::ENDCAP == pCaloHit->GetDetectorRegion()) ? pandora::CartesianVector(0, 1, 0) : pandora::CartesianVector(0, 0, 1));
-    pandora::CartesianVector normal(pCaloHit->GetNormalVector());
+    pandora::CartesianVector normal(pCaloHit->GetCellNormalVector());
 
     pandora::CartesianVector dirV(normal.GetCrossProduct(dirU));
     const float magnitudeV(dirV.GetMagnitude());
