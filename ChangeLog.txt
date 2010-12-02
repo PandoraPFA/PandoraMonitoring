@@ -1,3 +1,19 @@
+Display maximum and minimum radiation and interaction lengths from the ip for all calo hit lists.
+Reduced geometry dependence, adding try/catch blocks around queries for any specific geometry information.
+
+************************************************************************
+CREATE CLIC_CDR BRANCH
+************************************************************************
+Added transparency for calorimeter hits (option)
+Added color scheme AUTOTYPE, which highlights confusion between neutral hadrons, charged hadrons, electrons, muons or photons.
+Added color-scheme AUTOID, which highlights particle ID issues.
+Updated calls to GetBField function, which now take a position vector as an argument.
+Sort lists of MCParticles, Tracks, Clusters and Pfos by energy.
+Added ability to set the TEve display background color (black or white) and to choose whether to draw detector elements.
+Changed default background color to white
+Improved tool-tip information (add MC particle info for calohitclusters)
+Provided a gnu makefile.
+
 ************************************************************************
 TAG V00-02 FOR ILCSOFT USAGE
 ************************************************************************
