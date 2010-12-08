@@ -25,6 +25,7 @@
 #include "TFile.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TROOT.h"
 #include "TStyle.h"
 #include "TTree.h"
 
@@ -477,7 +478,27 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
     //--- close the geometry
     pGeoManager->CloseGeometry();
 
-    TEveManager::Create();
+    try
+    {
+        std::cout << "PandoraMonitoring::InitializeEve(): DISPLAY environment variable set to " << ::getenv("DISPLAY") << std::endl;
+        TEveManager::Create();
+    }
+    catch (TEveException &tEveException)
+    {
+        std::cout << "PandoraMonitoring::InitializeEve(): Caught TEveException: " << tEveException.what() << std::endl;
+
+        try
+        {
+            std::cout << "PandoraMonitoring::InitializeEve(): Attempt to release ROOT from batch mode." << std::endl;
+            gROOT->SetBatch(kFALSE);
+            TEveManager::Create();
+        }
+        catch (TEveException &tEveException)
+        {
+            std::cout << "PandoraMonitoring::InitializeEve(): Caught TEveException: " << tEveException.what() << std::endl;
+            throw std::exception();
+        }
+    }
 
     TGeoNode* pGeoNode = gGeoManager->GetTopNode();
     TEveGeoTopNode* pEveGeoTopNode = new TEveGeoTopNode(gGeoManager, pGeoNode);
