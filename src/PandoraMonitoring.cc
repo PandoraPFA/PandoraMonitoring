@@ -1159,8 +1159,8 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
         const pandora::CartesianVector &momentumAtEnd(trackStateAtEnd.GetMomentum());
         const pandora::CartesianVector positionAtEnd(trackStateAtEnd.GetPosition() * m_scalingFactor);
 
-        const pandora::TrackState &trackStateAtECal(pPandoraTrack->GetTrackStateAtECal());
-        const pandora::CartesianVector positionAtECal(trackStateAtECal.GetPosition() * m_scalingFactor);
+        const pandora::TrackState &trackStateAtCalorimeter(pPandoraTrack->GetTrackStateAtCalorimeter());
+        const pandora::CartesianVector positionAtCalorimeter(trackStateAtCalorimeter.GetPosition() * m_scalingFactor);
 
         // Color assignment
         const int charge(pPandoraTrack->GetCharge());
@@ -1225,10 +1225,10 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
         pEndPositionMark->fP.Set(momentumAtEnd.GetX(), momentumAtEnd.GetY(), momentumAtEnd.GetZ());
         pTEveTrack->AddPathMark(*pEndPositionMark);
 
-        // Create mark at track projection to ecal
-        TEvePathMark *pECalPositionMark = new TEvePathMark(TEvePathMark::kDecay);
-        pECalPositionMark->fV.Set(positionAtECal.GetX(), positionAtECal.GetY(), positionAtECal.GetZ());
-        pTEveTrack->AddPathMark(*pECalPositionMark);
+        // Create mark at track projection to calorimeter
+        TEvePathMark *pCalorimeterPositionMark = new TEvePathMark(TEvePathMark::kDecay);
+        pCalorimeterPositionMark->fV.Set(positionAtCalorimeter.GetX(), positionAtCalorimeter.GetY(), positionAtCalorimeter.GetZ());
+        pTEveTrack->AddPathMark(*pCalorimeterPositionMark);
 
         pTEveTrackList->AddElement(pTEveTrack);
         pTEveTrack->MakeTrack();
