@@ -547,23 +547,29 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
         subDetectorParametersList.push_back(std::make_pair(iter->second, iter->first));
     }
 
-    try {subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalBarrelParameters(), "ECalBarrel"));}
-    catch (pandora::StatusCodeException &) {}
+    if (pGeometryHelper->GetInDetBarrelParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetInDetBarrelParameters(), "InDetBarrel"));
 
-    try {subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalEndCapParameters(), "ECalEndCap"));}
-    catch (pandora::StatusCodeException &) {}
+    if (pGeometryHelper->GetInDetEndCapParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetInDetEndCapParameters(), "InDetEndCap"));
 
-    try {subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalBarrelParameters(), "HCalBarrel"));}
-    catch (pandora::StatusCodeException &) {}
+    if (pGeometryHelper->GetECalBarrelParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalBarrelParameters(), "ECalBarrel"));
 
-    try {subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalEndCapParameters(), "HCalEndCap"));}
-    catch (pandora::StatusCodeException &) {}
+    if (pGeometryHelper->GetECalEndCapParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalEndCapParameters(), "ECalEndCap"));
 
-    try {subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetMuonBarrelParameters(), "MuonBarrel"));}
-    catch (pandora::StatusCodeException &) {}
+    if (pGeometryHelper->GetHCalBarrelParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalBarrelParameters(), "HCalBarrel"));
 
-    try {subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetMuonEndCapParameters(), "MuonEndCap"));}
-    catch (pandora::StatusCodeException &) {}
+    if (pGeometryHelper->GetHCalEndCapParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalEndCapParameters(), "HCalEndCap"));
+
+    if (pGeometryHelper->GetMuonBarrelParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetMuonBarrelParameters(), "MuonBarrel"));
+
+    if (pGeometryHelper->GetMuonEndCapParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetMuonEndCapParameters(), "MuonEndCap"));
 
     typedef std::set<std::string> StringSet;
     StringSet setInvisible;
