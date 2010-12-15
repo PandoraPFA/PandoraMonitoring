@@ -125,7 +125,7 @@ PandoraMonitoring *PandoraMonitoring::GetInstance()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PandoraMonitoring::Create1DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp,
-    const std::string xAxisTitle, const std::string yAxisTitle)
+    const std::string &xAxisTitle, const std::string &yAxisTitle)
 {
     if (m_histogramMap.end() != m_histogramMap.find(name))
     {
@@ -147,7 +147,7 @@ void PandoraMonitoring::Create1DHistogram(const std::string &name, const std::st
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PandoraMonitoring::Create2DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp, int nBinsY,
-    double yLow, double yUp, const std::string xAxisTitle, const std::string yAxisTitle)
+    double yLow, double yUp, const std::string &xAxisTitle, const std::string &yAxisTitle)
 {
     if (m_histogramMap.end() != m_histogramMap.find(name))
     {
@@ -772,7 +772,6 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
 
     PandoraMonitoringApi::PdgCodeToEnergyMap pdgCodeToEnergyMap;
 
-    int numberHits = 0;
     pandora::PseudoLayer firstLayer = 0;
     pandora::PseudoLayer lastLayer = 0;
 
@@ -793,7 +792,6 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
              caloHitIter != caloHitIterEnd; ++caloHitIter)
         {
             const pandora::CaloHit *pCaloHit = (*caloHitIter);
-            ++numberHits;
 
             // Path length properties
             const float radiationLengthsFromIp(pCaloHit->GetNRadiationLengthsFromIp());
