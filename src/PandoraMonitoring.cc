@@ -613,8 +613,11 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
         for (int lr = 0; lr <= 1; ++lr)
         {
             const pandora::GeometryHelper::SubDetectorParameters &detPar = (*iter).first;
-            std::string name = (*iter).second;
 
+            if (left && detPar.IsMirroredInZ())
+                continue;
+
+            const std::string name = (*iter).second;
             StringSet::iterator itSetInvisible = setInvisible.find(name);
             bool drawInvisible = (itSetInvisible != setInvisible.end() ? true : false);
 
@@ -683,7 +686,7 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
                 //      Pandora gaps are self-describing (four vectors), but this does not map cleanly to TGeoBBox class.
                 //      Best solution may be to move to different root TGeoShape.
                 const float vertexZ(pBoxGap->m_vertex.GetZ());
-                static const float hcalEndCapInnerZ(pGeometryHelper->GetHCalEndCapParameters().GetInnerZCoordinate());
+                static const float hcalEndCapInnerZ(std::fabs(pGeometryHelper->GetHCalEndCapParameters().GetInnerZCoordinate()));
                 correction = ((std::fabs(vertexZ) < hcalEndCapInnerZ) ? 0 : ((vertexZ > 0) ? pi / 4.f : -pi / 4.f));
             }
             catch (pandora::StatusCodeException &)
@@ -1002,7 +1005,7 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
     try {pTEveTrackPropagator->SetMaxR(pGeometryHelper->GetHCalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);}
     catch (pandora::StatusCodeException &) {}
 
-    try {pTEveTrackPropagator->SetMaxZ(pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate() * m_scalingFactor);}
+    try {pTEveTrackPropagator->SetMaxZ(std::fabs(pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate()) * m_scalingFactor);}
     catch (pandora::StatusCodeException &) {}
 
     for (pandora::MCParticleVector::const_iterator mcParticleIter = pMCParticleVector->begin(), mcParticleIterEnd = pMCParticleVector->end();
@@ -1146,7 +1149,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
     try {pTEveTrackPropagator->SetMaxR(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);}
     catch (pandora::StatusCodeException &) {}
 
-    try {pTEveTrackPropagator->SetMaxZ(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate() * m_scalingFactor);}
+    try {pTEveTrackPropagator->SetMaxZ(std::fabs(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate()) * m_scalingFactor);}
     catch (pandora::StatusCodeException &) {}
 
     for (pandora::TrackVector::const_iterator trackIter = pTrackVector->begin(), trackIterEnd = pTrackVector->end();
