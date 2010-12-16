@@ -614,8 +614,11 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
         {
             const pandora::GeometryHelper::SubDetectorParameters &detPar = (*iter).first;
 
-            if (left && detPar.IsMirroredInZ())
+            if (left && !detPar.IsMirroredInZ())
+            {
+                left = false;
                 continue;
+            }
 
             const std::string name = (*iter).second;
             StringSet::iterator itSetInvisible = setInvisible.find(name);
