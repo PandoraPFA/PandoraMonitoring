@@ -78,7 +78,7 @@ ENDIF()
 
 #include directories
 INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include")
-INCLUDE_DIRECTORIES( "${PandoraPFANew_HOME}/include")
+INCLUDE_DIRECTORIES( "${PandoraPFANew_HOME}/Framework/include")
 
 # install include files
 INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/include"
