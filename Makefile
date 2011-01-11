@@ -12,7 +12,7 @@ PROJECT_LIBRARY_DIR = $(PROJECT_DIR)/lib/
 
 INCLUDES  = -I$(PROJECT_INCLUDE_DIR)
 INCLUDES += -I$(shell $(ROOTSYS)/bin/root-config --incdir)
-INCLUDES += -I$(PANDORAPFANEW_DIR)/include/
+INCLUDES += -I$(PANDORAPFANEW_DIR)/Framework/include/
 
 CC = gcc
 CFLAGS = -c -Wall -g -w -fPIC
