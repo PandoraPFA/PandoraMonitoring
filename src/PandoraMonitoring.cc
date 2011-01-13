@@ -73,6 +73,8 @@
 #include <limits>
 #include <algorithm>
 
+using namespace pandora;
+
 namespace pandora_monitoring
 {
 
@@ -500,8 +502,8 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
         }
     }
 
-    TGeoNode* pGeoNode = gGeoManager->GetTopNode();
-    TEveGeoTopNode* pEveGeoTopNode = new TEveGeoTopNode(gGeoManager, pGeoNode);
+    TGeoNode *pGeoNode = gGeoManager->GetTopNode();
+    TEveGeoTopNode *pEveGeoTopNode = new TEveGeoTopNode(gGeoManager, pGeoNode);
     pEveGeoTopNode->SetVisLevel(1);
     pEveGeoTopNode->GetNode()->GetVolume()->SetVisibility(kFALSE);
 
@@ -535,41 +537,39 @@ void PandoraMonitoring::SetEveDisplayParameters(const bool blackBackground, cons
 
 void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, TGeoMedium *pSubDetectorMedium, Char_t transparency)
 {
-    pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
-
-    typedef std::vector<std::pair<pandora::GeometryHelper::SubDetectorParameters, std::string> > SubDetectorParametersList;
+    typedef std::vector<std::pair<GeometryHelper::SubDetectorParameters, std::string> > SubDetectorParametersList;
     SubDetectorParametersList subDetectorParametersList;
 
-    const pandora::GeometryHelper::SubDetectorParametersMap &subDetectorParametersMap(pGeometryHelper->GetAdditionalSubDetectors());
+    const GeometryHelper::SubDetectorParametersMap &subDetectorParametersMap(GeometryHelper::GetAdditionalSubDetectors());
 
-    for (pandora::GeometryHelper::SubDetectorParametersMap::const_iterator iter = subDetectorParametersMap.begin(); iter != subDetectorParametersMap.end(); ++iter)
+    for (GeometryHelper::SubDetectorParametersMap::const_iterator iter = subDetectorParametersMap.begin(); iter != subDetectorParametersMap.end(); ++iter)
     {
         subDetectorParametersList.push_back(std::make_pair(iter->second, iter->first));
     }
 
-    if (pGeometryHelper->GetInDetBarrelParameters().IsInitialized())
-        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetInDetBarrelParameters(), "InDetBarrel"));
+    if (GeometryHelper::GetInDetBarrelParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(GeometryHelper::GetInDetBarrelParameters(), "InDetBarrel"));
 
-    if (pGeometryHelper->GetInDetEndCapParameters().IsInitialized())
-        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetInDetEndCapParameters(), "InDetEndCap"));
+    if (GeometryHelper::GetInDetEndCapParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(GeometryHelper::GetInDetEndCapParameters(), "InDetEndCap"));
 
-    if (pGeometryHelper->GetECalBarrelParameters().IsInitialized())
-        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalBarrelParameters(), "ECalBarrel"));
+    if (GeometryHelper::GetECalBarrelParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(GeometryHelper::GetECalBarrelParameters(), "ECalBarrel"));
 
-    if (pGeometryHelper->GetECalEndCapParameters().IsInitialized())
-        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetECalEndCapParameters(), "ECalEndCap"));
+    if (GeometryHelper::GetECalEndCapParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(GeometryHelper::GetECalEndCapParameters(), "ECalEndCap"));
 
-    if (pGeometryHelper->GetHCalBarrelParameters().IsInitialized())
-        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalBarrelParameters(), "HCalBarrel"));
+    if (GeometryHelper::GetHCalBarrelParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(GeometryHelper::GetHCalBarrelParameters(), "HCalBarrel"));
 
-    if (pGeometryHelper->GetHCalEndCapParameters().IsInitialized())
-        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetHCalEndCapParameters(), "HCalEndCap"));
+    if (GeometryHelper::GetHCalEndCapParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(GeometryHelper::GetHCalEndCapParameters(), "HCalEndCap"));
 
-    if (pGeometryHelper->GetMuonBarrelParameters().IsInitialized())
-        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetMuonBarrelParameters(), "MuonBarrel"));
+    if (GeometryHelper::GetMuonBarrelParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(GeometryHelper::GetMuonBarrelParameters(), "MuonBarrel"));
 
-    if (pGeometryHelper->GetMuonEndCapParameters().IsInitialized())
-        subDetectorParametersList.push_back(std::make_pair(pGeometryHelper->GetMuonEndCapParameters(), "MuonEndCap"));
+    if (GeometryHelper::GetMuonEndCapParameters().IsInitialized())
+        subDetectorParametersList.push_back(std::make_pair(GeometryHelper::GetMuonEndCapParameters(), "MuonEndCap"));
 
     typedef std::set<std::string> StringSet;
     StringSet setInvisible;
@@ -579,30 +579,32 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
     try
     {
         TGeoVolume *pMainTracker = NULL;
-        pMainTracker = MakePolygonTube("Tracker", 0, 0, pGeometryHelper->GetMainTrackerInnerRadius() * m_scalingFactor,
-            pGeometryHelper->GetMainTrackerOuterRadius() * m_scalingFactor, 0., 0., pGeometryHelper->GetMainTrackerZExtent() * m_scalingFactor, pSubDetectorMedium);
+        pMainTracker = MakePolygonTube("Tracker", 0, 0, GeometryHelper::GetMainTrackerInnerRadius() * m_scalingFactor,
+            GeometryHelper::GetMainTrackerOuterRadius() * m_scalingFactor, 0., 0., GeometryHelper::GetMainTrackerZExtent() * m_scalingFactor,
+            pSubDetectorMedium);
 
         pMainTracker->SetLineColor(kGreen);
         pMainTracker->SetTransparency(transparency);
         pMainTracker->SetVisibility(kFALSE);
         pMainDetectorVolume->AddNode(pMainTracker, 0, new TGeoTranslation(0, 0, 0));
     }
-    catch (pandora::StatusCodeException &)
+    catch (StatusCodeException &)
     {
     }
 
     try
     {
         TGeoVolume *pCoil = NULL;
-        pCoil = MakePolygonTube("Coil", 0, 0, pGeometryHelper->GetCoilInnerRadius() * m_scalingFactor,
-            pGeometryHelper->GetCoilOuterRadius() * m_scalingFactor, 0., 0., pGeometryHelper->GetCoilZExtent() * m_scalingFactor, pSubDetectorMedium);
+        pCoil = MakePolygonTube("Coil", 0, 0, GeometryHelper::GetCoilInnerRadius() * m_scalingFactor,
+            GeometryHelper::GetCoilOuterRadius() * m_scalingFactor, 0., 0., GeometryHelper::GetCoilZExtent() * m_scalingFactor,
+            pSubDetectorMedium);
 
         pCoil->SetLineColor(kBlue);
         pCoil->SetTransparency(transparency);
         pCoil->SetVisibility(kFALSE);
         pMainDetectorVolume->AddNode(pCoil, 0, new TGeoTranslation(0,0,0));
     }
-    catch (pandora::StatusCodeException &)
+    catch (StatusCodeException &)
     {
     }
 
@@ -612,7 +614,7 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
         bool left = true;
         for (int lr = 0; lr <= 1; ++lr)
         {
-            const pandora::GeometryHelper::SubDetectorParameters &detPar = (*iter).first;
+            const GeometryHelper::SubDetectorParameters &detPar = (*iter).first;
 
             if (left && !detPar.IsMirroredInZ())
             {
@@ -661,17 +663,15 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
 
 void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedium *pGapMedium, Char_t transparency)
 {
-    pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
-
-    const pandora::GeometryHelper::DetectorGapList &detectorGapList(pGeometryHelper->GetDetectorGapList());
+    const GeometryHelper::DetectorGapList &detectorGapList(GeometryHelper::GetDetectorGapList());
     unsigned int gapCounter(0);
 
-    for (pandora::GeometryHelper::DetectorGapList::const_iterator iter = detectorGapList.begin(), iterEnd = detectorGapList.end(); iter != iterEnd; ++iter)
+    for (GeometryHelper::DetectorGapList::const_iterator iter = detectorGapList.begin(), iterEnd = detectorGapList.end(); iter != iterEnd; ++iter)
     {
-        std::string gapName("gap" + pandora::TypeToString(gapCounter++));
+        std::string gapName("gap" + TypeToString(gapCounter++));
 
-        pandora::BoxGap *pBoxGap = NULL;
-        pBoxGap = dynamic_cast<pandora::BoxGap *>(*iter);
+        BoxGap *pBoxGap = NULL;
+        pBoxGap = dynamic_cast<BoxGap *>(*iter);
 
         if (NULL != pBoxGap)
         {
@@ -689,10 +689,10 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
                 //      Pandora gaps are self-describing (four vectors), but this does not map cleanly to TGeoBBox class.
                 //      Best solution may be to move to different root TGeoShape.
                 const float vertexZ(pBoxGap->m_vertex.GetZ());
-                static const float hcalEndCapInnerZ(std::fabs(pGeometryHelper->GetHCalEndCapParameters().GetInnerZCoordinate()));
+                static const float hcalEndCapInnerZ(std::fabs(GeometryHelper::GetHCalEndCapParameters().GetInnerZCoordinate()));
                 correction = ((std::fabs(vertexZ) < hcalEndCapInnerZ) ? 0 : ((vertexZ > 0) ? pi / 4.f : -pi / 4.f));
             }
-            catch (pandora::StatusCodeException &)
+            catch (StatusCodeException &)
             {
             }
 
@@ -713,8 +713,8 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
             continue;
         }
 
-        pandora::ConcentricGap *pConcentricGap = NULL;
-        pConcentricGap = dynamic_cast<pandora::ConcentricGap *>(*iter);
+        ConcentricGap *pConcentricGap = NULL;
+        pConcentricGap = dynamic_cast<ConcentricGap *>(*iter);
 
         if (NULL != pConcentricGap)
         {
@@ -755,7 +755,7 @@ void PandoraMonitoring::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name,
+TEveElement *PandoraMonitoring::VisualizeCaloHits(const OrderedCaloHitList *const pOrderedCaloHitList, std::string name,
     TEveElement *parent, Color color, int pfoId )
 {
     InitializeEve();
@@ -778,8 +778,8 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
 
     PandoraMonitoringApi::PdgCodeToEnergyMap pdgCodeToEnergyMap;
 
-    pandora::PseudoLayer firstLayer = 0;
-    pandora::PseudoLayer lastLayer = 0;
+    PseudoLayer firstLayer = 0;
+    PseudoLayer lastLayer = 0;
 
     firstLayer = pOrderedCaloHitList->begin()->first;
 
@@ -789,15 +789,15 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
     float energySumElectromagnetic = 0.f;
     float energySumHadronic = 0.f;
 
-    for (pandora::OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end();
+    for (OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end();
          iter != iterEnd; ++iter)
     {
         lastLayer = iter->first;
 
-        for (pandora::CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end();
+        for (CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end();
              caloHitIter != caloHitIterEnd; ++caloHitIter)
         {
-            const pandora::CaloHit *pCaloHit = (*caloHitIter);
+            const CaloHit *pCaloHit = (*caloHitIter);
 
             // Path length properties
             const float radiationLengthsFromIp(pCaloHit->GetNRadiationLengthsFromIp());
@@ -824,7 +824,7 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             energySumHadronic += hitEnergyHadronic;
 
             // MC particle id
-            const pandora::MCParticle *pMCParticle = NULL;
+            const MCParticle *pMCParticle = NULL;
             pCaloHit->GetMCParticle(pMCParticle);
 
             int particleId = 0;
@@ -850,7 +850,7 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
             MakeCaloHitCell(pCaloHit, corners);
 
             // Supply hit marker details
-            const pandora::CartesianVector position = pCaloHit->GetPositionVector() * m_scalingFactor;
+            const CartesianVector position = pCaloHit->GetPositionVector() * m_scalingFactor;
 
             Color hitColor = color;
 
@@ -879,13 +879,13 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
 
                 hitColor = GetColorForPdgCode(particleId); // default 
 
-                if (((pfoId == pandora::E_MINUS) || (pfoId == pandora::E_PLUS)) && ((particleId == pandora::E_MINUS) || (particleId == pandora::E_PLUS)))
+                if (((pfoId == E_MINUS) || (pfoId == E_PLUS)) && ((particleId == E_MINUS) || (particleId == E_PLUS)))
                     hitColor = GRAY;
 
-                if (((pfoId == pandora::MU_MINUS) || (pfoId == pandora::MU_PLUS)) && ((particleId == pandora::MU_MINUS) || (particleId == pandora::MU_PLUS)))
+                if (((pfoId == MU_MINUS) || (pfoId == MU_PLUS)) && ((particleId == MU_MINUS) || (particleId == MU_PLUS)))
                     hitColor = GRAY;
 
-                if ((pfoId == pandora::PHOTON) && (particleId == pandora::PHOTON))
+                if ((pfoId == PHOTON) && (particleId == PHOTON))
                     hitColor = GRAY;
 
                 if ((std::abs(pfoId) >= 100) && (std::abs(particleId) >= 100))
@@ -979,12 +979,11 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const pandora::OrderedCaloHitL
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name,
+TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const pMCParticleList, std::string name,
     TEveElement *parent, Color color, const PandoraMonitoringApi::PdgCodeToEnergyMap *pParticleSuppressionMap)
 {
-    pandora::MCParticleVector * pMCParticleVector = new pandora::MCParticleVector(pMCParticleList->begin(),pMCParticleList->end());
-
-    std::sort(pMCParticleVector->begin(),pMCParticleVector->end(),pandora::MCParticle::SortByEnergy);
+    MCParticleVector mcParticleVector(pMCParticleList->begin(), pMCParticleList->end());
+    std::sort(mcParticleVector.begin(), mcParticleVector.end(), MCParticle::SortByEnergy);
 
     InitializeEve();
 
@@ -999,32 +998,30 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
 
     // Initialize magnetic field for particle propagation, note strange ALICE charge sign convention,
     // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
-    pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
-
     TEveTrackPropagator *pTEveTrackPropagator = pTEveTrackList->GetPropagator();
-    pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -pGeometryHelper->GetBField(pandora::CartesianVector(0., 0., 0.))));
+    pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -GeometryHelper::GetBField(CartesianVector(0., 0., 0.))));
     pTEveTrackPropagator->SetMaxOrbs(5);
 
-    try {pTEveTrackPropagator->SetMaxR(pGeometryHelper->GetHCalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);}
-    catch (pandora::StatusCodeException &) {}
+    try {pTEveTrackPropagator->SetMaxR(GeometryHelper::GetHCalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);}
+    catch (StatusCodeException &) {}
 
-    try {pTEveTrackPropagator->SetMaxZ(std::fabs(pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate()) * m_scalingFactor);}
-    catch (pandora::StatusCodeException &) {}
+    try {pTEveTrackPropagator->SetMaxZ(std::fabs(GeometryHelper::GetHCalEndCapParameters().GetOuterZCoordinate()) * m_scalingFactor);}
+    catch (StatusCodeException &) {}
 
-    for (pandora::MCParticleVector::const_iterator mcParticleIter = pMCParticleVector->begin(), mcParticleIterEnd = pMCParticleVector->end();
+    for (MCParticleVector::const_iterator mcParticleIter = mcParticleVector.begin(), mcParticleIterEnd = mcParticleVector.end();
          mcParticleIter != mcParticleIterEnd; ++mcParticleIter)
     { 
-        pandora::MCParticle *pPandoraMCParticle = (*mcParticleIter);
+        MCParticle *pPandoraMCParticle = (*mcParticleIter);
 
         if (!pPandoraMCParticle->IsInitialized())
             continue;
 
         // Get mc particle position and momentum
-        const pandora::CartesianVector &momentum(pPandoraMCParticle->GetMomentum());
+        const CartesianVector &momentum(pPandoraMCParticle->GetMomentum());
         const float energy(pPandoraMCParticle->GetEnergy());
 
-        const pandora::CartesianVector position(pPandoraMCParticle->GetVertex() * m_scalingFactor);
-        const pandora::CartesianVector positionAtEnd(pPandoraMCParticle->GetEndpoint() * m_scalingFactor);
+        const CartesianVector position(pPandoraMCParticle->GetVertex() * m_scalingFactor);
+        const CartesianVector positionAtEnd(pPandoraMCParticle->GetEndpoint() * m_scalingFactor);
 
         // Does particle pass suppression conditions?
         const int particleId = pPandoraMCParticle->GetParticleId();
@@ -1125,10 +1122,10 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const pandora::MCParticleLi
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, TEveElement *parent, Color color)
+TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackList, std::string name, TEveElement *parent, Color color)
 {
-    pandora::TrackVector *  pTrackVector = new pandora::TrackVector(pTrackList->begin(),pTrackList->end());
-    std::sort(pTrackVector->begin(),pTrackVector->end(),pandora::Track::SortByMomentum);
+    TrackVector trackVector(pTrackList->begin(), pTrackList->end());
+    std::sort(trackVector.begin(), trackVector.end(), Track::SortByMomentum);
 
     InitializeEve();
 
@@ -1143,34 +1140,32 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
 
     // Initialize magnetic field for particle propagation, note strange ALICE charge sign convention,
     // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
-    pandora::GeometryHelper *pGeometryHelper = pandora::GeometryHelper::GetInstance();
-
     TEveTrackPropagator *pTEveTrackPropagator = pTEveTrackList->GetPropagator();
-    pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -pGeometryHelper->GetBField(pandora::CartesianVector(0., 0., 0.))));
+    pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -GeometryHelper::GetBField(CartesianVector(0., 0., 0.))));
     pTEveTrackPropagator->SetMaxOrbs(5);
 
-    try {pTEveTrackPropagator->SetMaxR(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);}
-    catch (pandora::StatusCodeException &) {}
+    try {pTEveTrackPropagator->SetMaxR(GeometryHelper::GetECalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);}
+    catch (StatusCodeException &) {}
 
-    try {pTEveTrackPropagator->SetMaxZ(std::fabs(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate()) * m_scalingFactor);}
-    catch (pandora::StatusCodeException &) {}
+    try {pTEveTrackPropagator->SetMaxZ(std::fabs(GeometryHelper::GetECalEndCapParameters().GetOuterZCoordinate()) * m_scalingFactor);}
+    catch (StatusCodeException &) {}
 
-    for (pandora::TrackVector::const_iterator trackIter = pTrackVector->begin(), trackIterEnd = pTrackVector->end();
+    for (TrackVector::const_iterator trackIter = trackVector.begin(), trackIterEnd = trackVector.end();
         trackIter != trackIterEnd; ++trackIter)
     { 
-        pandora::Track *pPandoraTrack = (*trackIter);
+        Track *pPandoraTrack = (*trackIter);
 
         // Extract pandora track states
-        const pandora::TrackState &trackState(pPandoraTrack->GetTrackStateAtStart());
-        const pandora::CartesianVector &momentum(trackState.GetMomentum());
-        const pandora::CartesianVector position(trackState.GetPosition() * m_scalingFactor);
+        const TrackState &trackState(pPandoraTrack->GetTrackStateAtStart());
+        const CartesianVector &momentum(trackState.GetMomentum());
+        const CartesianVector position(trackState.GetPosition() * m_scalingFactor);
 
-        const pandora::TrackState &trackStateAtEnd(pPandoraTrack->GetTrackStateAtEnd());
-        const pandora::CartesianVector &momentumAtEnd(trackStateAtEnd.GetMomentum());
-        const pandora::CartesianVector positionAtEnd(trackStateAtEnd.GetPosition() * m_scalingFactor);
+        const TrackState &trackStateAtEnd(pPandoraTrack->GetTrackStateAtEnd());
+        const CartesianVector &momentumAtEnd(trackStateAtEnd.GetMomentum());
+        const CartesianVector positionAtEnd(trackStateAtEnd.GetPosition() * m_scalingFactor);
 
-        const pandora::TrackState &trackStateAtCalorimeter(pPandoraTrack->GetTrackStateAtCalorimeter());
-        const pandora::CartesianVector positionAtCalorimeter(trackStateAtCalorimeter.GetPosition() * m_scalingFactor);
+        const TrackState &trackStateAtCalorimeter(pPandoraTrack->GetTrackStateAtCalorimeter());
+        const CartesianVector positionAtCalorimeter(trackStateAtCalorimeter.GetPosition() * m_scalingFactor);
 
         // Color assignment
         const int charge(pPandoraTrack->GetCharge());
@@ -1190,7 +1185,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
             }
         }
 
-        const pandora::MCParticle* pMCParticle = NULL;
+        const MCParticle* pMCParticle = NULL;
         pPandoraTrack->GetMCParticle(pMCParticle);
 
         // Build information string
@@ -1259,11 +1254,11 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const pandora::TrackList *const 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name,
+TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const ParticleFlowObjectList *const pPfoList, std::string name,
     TEveElement *parent, Color color, bool showAssociatedTracks, bool showFit)
 {
-    pandora::ParticleFlowObjectVector *  pPfoVector = new pandora::ParticleFlowObjectVector(pPfoList->begin(),pPfoList->end());
-    std::sort(pPfoVector->begin(),pPfoVector->end(),pandora::ParticleFlowObject::SortByEnergy);
+    ParticleFlowObjectVector pfoVector(pPfoList->begin(), pPfoList->end());
+    std::sort(pfoVector.begin(), pfoVector.end(), ParticleFlowObject::SortByEnergy);
 
     InitializeEve();
 
@@ -1275,10 +1270,10 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
 
     pPfoVectorElement->SetElementNameTitle(pfoListName.c_str(), pfoListTitle.c_str());
 
-    for (pandora::ParticleFlowObjectVector::const_iterator pfoIter = pPfoVector->begin(), pfoIterEnd = pPfoVector->end();
+    for (ParticleFlowObjectVector::const_iterator pfoIter = pfoVector.begin(), pfoIterEnd = pfoVector.end();
         pfoIter != pfoIterEnd; ++pfoIter)
     { 
-        pandora::ParticleFlowObject *pPfo = (*pfoIter);
+        ParticleFlowObject *pPfo = (*pfoIter);
 
         // Build information string
         std::stringstream sstr;
@@ -1296,8 +1291,8 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
         }
 
         // show clusters and tracks
-        const pandora::ClusterList &clusterList(pPfo->GetClusterList());
-        const pandora::TrackList &trackList(pPfo->GetTrackList());
+        const ClusterList &clusterList(pPfo->GetClusterList());
+        const TrackList &trackList(pPfo->GetTrackList());
 
         if (clusterList.empty())
         {
@@ -1327,11 +1322,11 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const pandora::Part
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, TEveElement *parent,
+TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClusterList, std::string name, TEveElement *parent,
     Color color, bool showAssociatedTracks, bool showFit, int pfoId)
 {
-    pandora::ClusterVector *  pClusterVector = new pandora::ClusterVector(pClusterList->begin(),pClusterList->end());
-    std::sort(pClusterVector->begin(),pClusterVector->end(),pandora::Cluster::SortByHadronicEnergy);
+    ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
+    std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByHadronicEnergy);
 
     InitializeEve();
 
@@ -1343,10 +1338,10 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
 
     pClusterVectorElement->SetElementNameTitle( clusterListName.c_str(), clusterListTitle.c_str());
 
-    for (pandora::ClusterVector::const_iterator clusterIter = pClusterVector->begin(), clusterIterEnd = pClusterVector->end();
+    for (ClusterVector::const_iterator clusterIter = clusterVector.begin(), clusterIterEnd = clusterVector.end();
         clusterIter != clusterIterEnd; ++clusterIter)
     {
-        pandora::Cluster *pCluster = (*clusterIter);
+        Cluster *pCluster = (*clusterIter);
 
         if (pCluster->GetNCaloHits() == 0)
             continue;
@@ -1356,12 +1351,12 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
 
         if (color == AUTO)
         {
-            const pandora::TrackList &trackList(pCluster->GetAssociatedTrackList());
+            const TrackList &trackList(pCluster->GetAssociatedTrackList());
             bool clusterHasTracks = !(trackList.empty());
             bool clusterIsPhoton = false;
 
             try {clusterIsPhoton = pCluster->IsPhotonFast();}
-            catch (pandora::StatusCodeException &) {}
+            catch (StatusCodeException &) {}
 
             if (clusterIsPhoton)
             {
@@ -1392,7 +1387,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
                  << "/NHits=" << pCluster->GetNCaloHits();
 
         // Display constituent calo hits
-        const pandora::OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+        const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
         Color caloHitColor = clusterColor;
 
@@ -1401,15 +1396,15 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
 
         TEveElement *pCaloHitsElement = VisualizeCaloHits(&orderedCaloHitList, sstr.str().c_str(), pClusterVectorElement, caloHitColor, pfoId);
 
-        const pandora::ClusterHelper::ClusterFitResult &fit = pCluster->GetFitToAllHitsResult();
+        const ClusterHelper::ClusterFitResult &fit = pCluster->GetFitToAllHitsResult();
 
         if (showFit && fit.IsFitSuccessful())
         {
-            const pandora::CartesianVector intercept = fit.GetIntercept() * m_scalingFactor;
-            pandora::CartesianVector direction = fit.GetDirection() * m_scalingFactor;
+            const CartesianVector intercept = fit.GetIntercept() * m_scalingFactor;
+            CartesianVector direction = fit.GetDirection() * m_scalingFactor;
 
             const double length = 100;
-            pandora::CartesianVector displacedStart = intercept - (direction * (length / 2));
+            CartesianVector displacedStart = intercept - (direction * (length / 2));
             direction *= length;
 
             TEveArrow *pClusterArrow = new TEveArrow(direction.GetX(), direction.GetY(), direction.GetZ(), displacedStart.GetX(),
@@ -1427,7 +1422,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
         // Show tracks associated with clusters
         if (showAssociatedTracks)
         {
-            const pandora::TrackList &trackList(pCluster->GetAssociatedTrackList());
+            const TrackList &trackList(pCluster->GetAssociatedTrackList());
 
             if (!trackList.empty())
             {
@@ -1451,24 +1446,24 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const pandora::ClusterList *co
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, float corners[24])
+void PandoraMonitoring::MakeCaloHitCell(const CaloHit *const pCaloHit, float corners[24])
 {
-    pandora::CartesianVector dirU((pandora::ENDCAP == pCaloHit->GetDetectorRegion()) ? pandora::CartesianVector(0, 1, 0) : pandora::CartesianVector(0, 0, 1));
-    pandora::CartesianVector normal(pCaloHit->GetCellNormalVector());
+    CartesianVector dirU((ENDCAP == pCaloHit->GetDetectorRegion()) ? CartesianVector(0, 1, 0) : CartesianVector(0, 0, 1));
+    CartesianVector normal(pCaloHit->GetCellNormalVector());
 
-    pandora::CartesianVector dirV(normal.GetCrossProduct(dirU));
+    CartesianVector dirV(normal.GetCrossProduct(dirU));
     const float magnitudeV(dirV.GetMagnitude());
 
-    const pandora::CartesianVector position(pCaloHit->GetPositionVector() * m_scalingFactor);
+    const CartesianVector position(pCaloHit->GetPositionVector() * m_scalingFactor);
     float u2(pCaloHit->GetCellSizeU() * m_scalingFactor / 2.0);
     float v2(pCaloHit->GetCellSizeV() * m_scalingFactor / 2.0);
     float t2(pCaloHit->GetCellThickness() * m_scalingFactor / 2.0);
 
     if (magnitudeV < 0.00001)
     {
-        const pandora::DetectorRegion dr(pCaloHit->GetDetectorRegion());
+        const DetectorRegion dr(pCaloHit->GetDetectorRegion());
 
-        std::string detectorRegion((dr == pandora::ENDCAP ? "ENDCAP" : (dr == pandora::BARREL ? "BARREL" : "UNKNOWN")));
+        std::string detectorRegion((dr == ENDCAP ? "ENDCAP" : (dr == BARREL ? "BARREL" : "UNKNOWN")));
 
         std::cout << "PandoraMonitoring::MakeCaloHitCell, ERROR: direction vectors U and V are parallel. "
                   << "Normal(" << normal.GetX() << ", " << normal.GetY() << ", " << normal.GetZ() << ") "
@@ -1496,7 +1491,7 @@ void PandoraMonitoring::MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, 
     normal *= t2;
 
     // Compute all 8 corners for the box
-    pandora::CartesianVector cornerVector[8];
+    CartesianVector cornerVector[8];
 
     cornerVector[0] = position - dirU - dirV - normal;
     cornerVector[1] = position + dirU - dirV - normal;
