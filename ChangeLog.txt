@@ -1,3 +1,17 @@
+Updated CMake files to reflect restructuring of PandoraPFANew.
+Updated standalone makefile to reflect restructuring of PandoraPFANew.
+Added checks on initialization of subdetector parameters before attempting to draw.
+Added ability to draw inner detector, if details have been provided.
+Changed all references to "track state at ecal" to "track state at calorimeter".
+Made use of IsMirroredInZ subdetector functionality.
+Updated to reflect changes to GeometryHelper.
+Improved exception handling when creating TEveManager.
+Improved memory management when sorting content by energy, etc.
+Addressed CppCheck (static analysis package) warnings.
+
+************************************************************************
+TAG V00-03 FOR ILCSOFT USAGE
+************************************************************************
 Display maximum and minimum radiation and interaction lengths from the ip for all calo hit lists.
 Reduced geometry dependence, adding try/catch blocks around queries for any specific geometry information.
 
