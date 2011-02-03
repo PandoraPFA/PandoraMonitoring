@@ -30,13 +30,11 @@ Installing PandoraMonitoring:
 cd PandoraMonitoring
 mkdir build
 cd build
-cp ../BuildSetup.cmake ./
 
-- open BuildSetup.cmake
-- set paths of PandoraPFANew, LCIO, ROOT and the CMakeModules according to your environment
+- set paths of PandoraPFANew ROOT and the CMakeModules according to your environment
 
 - cmake and make:
-cmake -C BuildSetup.cmake ..
+cmake -C ILCSoft.cmake ..
 make install
 
 
@@ -52,7 +50,7 @@ Recompilation of PandoraPFANew with PandoraMonitoring support:
 ==============================================================
 
 - tell PandoraPFANew the path to the monitoring directory
-cmake -C BuildSetup.cmake -DPandoraMonitoring_HOME=/<path_to_monitoring_directory> ..
+cmake -C BuildSetup.cmake -DPandoraMonitoring_DIR=/<path_to_monitoring_directory> ..
 make install
 
 
@@ -105,7 +103,7 @@ For in-depth debugging of algorithms, the visualisation can be fed directly from
 by using the Pandora monitoring API. An example is given in the following:
 
     PANDORA_MONITORING_API(VisualizeClusters(pClusterList, "currentList", AUTO, false, true  ) );
-    PANDORA_MONITORING_API(View() );
+    PANDORA_MONITORING_API(ViewEvent() );
 
 where pClusterList is a pointer to a cluster list (the current cluster list in the given example), 
 "currentList" is the name which will be displayed in TEve. With AUTO the automatic color scheme is 
@@ -113,17 +111,13 @@ selected (look into PandoraMonitoringAPI.h for the full list of available colors
 variables define if the arrow indicating the linear fit of the calo hits shall be drawn and if the 
 tracks associated to the clusters are drawn. 
 
-With "View()" the event display is redrawn. 
+With "ViewEvent()" the event display is redrawn. 
 
 The full list of available visualisation commands can be inspected in PandoraMonitoringApi.h.
 
 
 Q&A:
-- depending on the machine (in case problems arise), the 32 bit compatibility mode should be turned off:
-cmake -C BuildSetup.cmake -DBUILD_32BIT_COMPATIBLE=OFF
-gmake install
-
-- ROOT has to be compiled with TEve, check cmake output if ROOT Eve library is found (in case the TEve visualisation is wished)
+- ROOT has to be compiled with TEve, check cmake output if ROOT Eve library is found
 
 - ROOT version problems:
 check cmake output ROOT_HOME, compare it with $ROOTSYS

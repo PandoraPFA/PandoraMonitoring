@@ -1,3 +1,7 @@
+************************************************************************
+TAG V00-04 FOR ILCSOFT USAGE
+************************************************************************
+Updated CMake files to use new ILCUTIL package.
 Updated CMake files to reflect restructuring of PandoraPFANew.
 Updated standalone makefile to reflect restructuring of PandoraPFANew.
 Added checks on initialization of subdetector parameters before attempting to draw.
