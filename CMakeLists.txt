@@ -1,5 +1,5 @@
 ########################################################
-# cmake file for building Marlin example Package
+# cmake file for building PandoraMonitoring
 # @author Jan Engels, Desy IT
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 ########################################################
