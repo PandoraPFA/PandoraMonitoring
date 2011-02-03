@@ -40,11 +40,7 @@ ELSE()
 ENDIF()
 
 
-#FIND_PACKAGE( PandoraPFANew QUIET )
-
-IF( PandoraPFANew_FOUND )
-    INCLUDE_DIRECTORIES( ${PandoraPFANew_INCLUDE_DIRS} )
-ELSEIF( PandoraPFANew_DIR )
+IF( PandoraPFANew_DIR )
     INCLUDE_DIRECTORIES( "${PandoraPFANew_DIR}/Framework/include" )
 ELSE()
     MESSAGE( SEND_ERROR "Could not find PandoraPFANew required to build PandoraMonitoring. Please set PandoraPFANew_DIR" )
