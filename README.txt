@@ -12,30 +12,25 @@ Installation of PandoraMonitoring
 Requirements:
 -------------
 For the default installation of PandoraMonitoring using cmake the following software is needed:
-- ROOT (>=5.26 for the advanced visualisation features using ROOT TEve)
+- ROOT (>=5.26, built with ROOT TEve included)
 - LCIO 
 - CMakeModules (if cmake is used for compilation)
 - PandoraPFANew
 
-
 Getting PandoraMonitoring:
 --------------------------
 - checkout PandoraMonitoring-source from:
-svn co https://svnsrv.desy.de/basic/PandoraPFANew/PandoraMonitoring/trunk PandoraMonitoring
-
+svn co https://svnsrv.desy.de/public/PandoraPFANew/PandoraMonitoring/trunk PandoraMonitoring
 
 Installing PandoraMonitoring:
 --------------------------
-- make build-directory
 cd PandoraMonitoring
 mkdir build
 cd build
-
-- set paths of PandoraPFANew ROOT and the CMakeModules according to your environment
-
-- cmake and make:
 cmake -C ILCSoft.cmake ..
 make install
+
+(where ILCSoft.cmake contains locations of required packages PandoraPFANew, ROOT and CMakeModules)
 
 
 Installation of PandoraMonitoring without CMake
@@ -50,7 +45,7 @@ Recompilation of PandoraPFANew with PandoraMonitoring support:
 ==============================================================
 
 - tell PandoraPFANew the path to the monitoring directory
-cmake -C BuildSetup.cmake -DPandoraMonitoring_DIR=/<path_to_monitoring_directory> ..
+cmake -C ILCSoft.cmake -DPandoraMonitoring_DIR=/<path_to_monitoring_directory> ..
 make install
 
 
@@ -114,10 +109,3 @@ tracks associated to the clusters are drawn.
 With "ViewEvent()" the event display is redrawn. 
 
 The full list of available visualisation commands can be inspected in PandoraMonitoringApi.h.
-
-
-Q&A:
-- ROOT has to be compiled with TEve, check cmake output if ROOT Eve library is found
-
-- ROOT version problems:
-check cmake output ROOT_HOME, compare it with $ROOTSYS
