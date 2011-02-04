@@ -463,8 +463,8 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
     TGeoManager *pGeoManager = new TGeoManager("DetectorGeometry", "detector geometry");
 
     //--- define some materials
-    TGeoMaterial *pVacuumMaterial = new TGeoMaterial("Vacuum", 0, 0, 0);
-    TGeoMaterial *pAluminiumMaterial = new TGeoMaterial("Aluminium", 26.98, 13, 2.7);
+    TGeoMaterial *pVacuumMaterial = new TGeoMaterial("Vacuum", 0, 0, 0); // dummy material
+    TGeoMaterial *pAluminiumMaterial = new TGeoMaterial("Aluminium", 26.98, 13, 2.7); // dummy material
 
     //--- define some media
     TGeoMedium *pVacuum = new TGeoMedium("Vacuum",1, pVacuumMaterial);
@@ -574,7 +574,9 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
     typedef std::set<std::string> StringSet;
     StringSet setInvisible;
     setInvisible.insert("MuonBarrel");
-    setInvisible.insert("MuonEndCap");
+
+    if (GeometryHelper::GetMuonBarrelParameters().IsInitialized()) // set muon endcap invisible if barrel is initialized. In case of a test beam set up without barrel the muon endcap (=tail catcher) is then drawn
+        setInvisible.insert("MuonEndCap");
 
     try
     {
