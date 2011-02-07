@@ -1287,7 +1287,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const ParticleFlowO
         // Default color assignment
         Color pfoColor = color;
 
-        if ((color == AUTO) || (color == AUTOID) || (color == AUTOTYPE))
+        if ((color >= AUTO) || (color == AUTOID) || (color == AUTOTYPE))
         {
             pfoColor = GetColorForPdgCode(pPfo->GetParticleId());
         }
@@ -1304,6 +1304,18 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const ParticleFlowO
         {
             if ((color == AUTOID) || (color == AUTOTYPE))
                 pfoColor = color;
+
+
+            if (color == AUTOITER)
+            {
+                static int colorIter=RED;
+                if (colorIter>=AUTO)
+                    colorIter=RED;
+
+                pfoColor=Color(colorIter);
+
+                colorIter++;
+            }
 
             VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, showAssociatedTracks, showFit, pPfo->GetParticleId());
         }
@@ -1374,6 +1386,18 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
             }
         }
 
+        if (color == AUTOITER)
+        {
+            static int colorIter=RED;
+            if (colorIter>=AUTO)
+                colorIter=RED;
+
+            clusterColor=Color(colorIter);
+
+            colorIter++;
+        }
+
+
         // Build information string
         std::stringstream sstr, sstrName;
 
@@ -1393,8 +1417,10 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
         Color caloHitColor = clusterColor;
 
-        if ((color == AUTOID) || (color == AUTOTYPE))
+        if ((color == AUTOID) || (color == AUTOTYPE) )
             caloHitColor = color;
+
+
 
         TEveElement *pCaloHitsElement = VisualizeCaloHits(&orderedCaloHitList, sstr.str().c_str(), pClusterVectorElement, caloHitColor, pfoId);
 

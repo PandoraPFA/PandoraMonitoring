@@ -26,7 +26,7 @@ enum DetectorView
  */
 enum Color
 {
-    WHITE,
+    WHITE=0,
     BLACK,
     RED,
     GREEN,
@@ -61,7 +61,8 @@ enum Color
     LIGHTYELLOW,
     AUTO,    // automatic choice of colors
     AUTOID,  // automatic choice of colors depending on the particle ID
-    AUTOTYPE // automatic choice of colors depending on the particle type 
+    AUTOTYPE,// automatic choice of colors depending on the particle type 
+    AUTOITER // automatic choice of colors iterating through colors
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
