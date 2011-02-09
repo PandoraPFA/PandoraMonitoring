@@ -76,6 +76,30 @@ void PandoraMonitoringApi::DrawHistogram(const std::string &name, const std::str
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+template <typename T>
+void PandoraMonitoringApi::DrawPandoraHistogram(const T &t)
+{
+    PandoraMonitoring::GetInstance()->DrawPandoraHistogram(t, "");
+}
+
+// instantiations of this template member function for the permitted types
+template void PandoraMonitoringApi::DrawPandoraHistogram(const pandora::Histogram &histogram);
+template void PandoraMonitoringApi::DrawPandoraHistogram(const pandora::TwoDHistogram &twoDHistogram);
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+void PandoraMonitoringApi::DrawPandoraHistogram(const T &t, const std::string &options)
+{
+    PandoraMonitoring::GetInstance()->DrawPandoraHistogram(t, options);
+}
+
+// instantiations of this template member function for the permitted types
+template void PandoraMonitoringApi::DrawPandoraHistogram(const pandora::Histogram &histogram, const std::string &options);
+template void PandoraMonitoringApi::DrawPandoraHistogram(const pandora::TwoDHistogram &twoDHistogram, const std::string &options);
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoringApi::SaveAndCloseHistogram(const std::string &name, const std::string &fileName, const std::string &fileOptions)
 {
     PandoraMonitoring::GetInstance()->SaveAndCloseHistogram(name, fileName, fileOptions);

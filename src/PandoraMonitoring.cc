@@ -13,8 +13,9 @@
 #include "Objects/CartesianVector.h"
 #include "Objects/Cluster.h"
 #include "Objects/DetectorGap.h"
-#include "Objects/ParticleFlowObject.h"
+#include "Objects/Histograms.h"
 #include "Objects/OrderedCaloHitList.h"
+#include "Objects/ParticleFlowObject.h"
 #include "Objects/Track.h"
 #include "Objects/MCParticle.h"
 
@@ -135,7 +136,7 @@ void PandoraMonitoring::Create1DHistogram(const std::string &name, const std::st
         throw std::exception();
     }
 
-    TH1F* pTH1F = new TH1F(name.c_str(), title.c_str(), nBinsX, xLow, xUp);
+    TH1F *pTH1F = new TH1F(name.c_str(), title.c_str(), nBinsX, xLow, xUp);
 
     if (!xAxisTitle.empty())
         pTH1F->GetXaxis()->SetTitle(xAxisTitle.c_str());
@@ -157,7 +158,7 @@ void PandoraMonitoring::Create2DHistogram(const std::string &name, const std::st
         throw std::exception();
     }
 
-    TH2F* pTH2F = new TH2F(name.c_str(), title.c_str(), nBinsX, xLow, xUp, nBinsY, yLow, yUp);
+    TH2F *pTH2F = new TH2F(name.c_str(), title.c_str(), nBinsX, xLow, xUp, nBinsY, yLow, yUp);
 
     if (!xAxisTitle.empty())
         pTH2F->GetXaxis()->SetTitle(xAxisTitle.c_str());
@@ -263,6 +264,66 @@ void PandoraMonitoring::DrawHistogram(const std::string &name, const std::string
     this->Pause();
 
     delete pCanvas;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+void PandoraMonitoring::DrawPandoraHistogram(const T &t, const std::string &options)
+{
+    throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+}
+
+template <>
+void PandoraMonitoring::DrawPandoraHistogram(const pandora::Histogram &histogram, const std::string &options)
+{
+    const std::string histogramName("PandoraHistogram");
+    TH1F *pTH1F = new TH1F(histogramName.c_str(), histogramName.c_str(), histogram.GetNBinsX(), histogram.GetXLow(), histogram.GetXHigh());
+
+    for (int xBin = -1, xBinEnd = histogram.GetNBinsX(); xBin <= xBinEnd; ++xBin)
+    {
+        // Beware bin offset between ROOT and Pandora histograms
+        pTH1F->SetBinContent(xBin + 1, histogram.GetBinContent(xBin));
+    }
+
+    TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
+    pCanvas->SetFillColor(kWhite);
+    pCanvas->SetHighLightColor(kWhite);
+    pCanvas->Draw();
+
+    pTH1F->Draw(options.c_str());
+    this->Pause();
+
+    delete pCanvas;
+    delete pTH1F;
+}
+
+template <>
+void PandoraMonitoring::DrawPandoraHistogram(const pandora::TwoDHistogram &twoDHistogram, const std::string &options)
+{
+    const std::string histogramName("PandoraHistogram");
+    TH2F *pTH2F = new TH2F(histogramName.c_str(), histogramName.c_str(), twoDHistogram.GetNBinsX(), twoDHistogram.GetXLow(),
+        twoDHistogram.GetXHigh(), twoDHistogram.GetNBinsY(), twoDHistogram.GetYLow(), twoDHistogram.GetYHigh());
+
+    for (int xBin = -1, xBinEnd = twoDHistogram.GetNBinsX(); xBin <= xBinEnd; ++xBin)
+    {
+        for (int yBin = -1, yBinEnd = twoDHistogram.GetNBinsY(); yBin <= yBinEnd; ++yBin)
+        {
+            // Beware bin offset between ROOT and Pandora histograms
+            pTH2F->SetBinContent(xBin + 1, yBin + 1, twoDHistogram.GetBinContent(xBin, yBin));
+        }
+    }
+
+    TCanvas *pCanvas = new TCanvas("PandoraMonitoring", "PandoraMonitoring", 750, 750);
+    pCanvas->SetFillColor(kWhite);
+    pCanvas->SetHighLightColor(kWhite);
+    pCanvas->Draw();
+
+    pTH2F->Draw(options.c_str());
+    this->Pause();
+
+    delete pCanvas;
+    delete pTH2F;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

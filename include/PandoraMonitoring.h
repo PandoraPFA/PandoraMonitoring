@@ -151,6 +151,15 @@ public:
     void DrawHistogram(const std::string &name, const std::string &options) const;
 
     /**
+     *  @brief  Draw a pandora histogram
+     * 
+     *  @param  name the name associated with the histogram
+     *  @param  options the drawing options
+     */
+    template <typename T>
+    void DrawPandoraHistogram(const T &t, const std::string &options);
+
+    /**
      *  @brief  Save a histogram to a file and tidy up
      * 
      *  @param  name the name associated with the histogram
