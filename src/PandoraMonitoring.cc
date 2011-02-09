@@ -1195,7 +1195,10 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
     TEveTrackList *pTEveTrackList = new TEveTrackList();
     const std::string trackListTitle(name.empty() ? "Tracks" : name);
 
+    std::string starter="--- ";
     std::string trackListName(trackListTitle);
+    if (trackListName.find(starter)!=std::string::npos)
+        trackListName.replace(trackListName.find(starter),starter.length(),"Tracks//");
     std::replace_if(trackListName.begin(), trackListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
 
     pTEveTrackList->SetElementNameTitle( trackListName.c_str(), trackListTitle.c_str() );
@@ -1408,8 +1411,12 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
     TEveElement *pClusterVectorElement = new TEveElementList();
     const std::string clusterListTitle(name.empty() ? "Clusters" : name);
 
+    std::string starter="--- ";
     std::string clusterListName(clusterListTitle);
+    if (clusterListName.find(starter)!=std::string::npos)
+        clusterListName.replace(clusterListName.find(starter),starter.length(),"");
     std::replace_if(clusterListName.begin(), clusterListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
+
 
     pClusterVectorElement->SetElementNameTitle( clusterListName.c_str(), clusterListTitle.c_str());
 
