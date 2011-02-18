@@ -711,8 +711,8 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
             subDetVol->SetFillColor(GetROOTColor(Color(col)));
             subDetVol->SetTransparency(transparency);
 
-            size_t found=name.find("subDet_");
-            if (found!=std::string::npos || drawInvisible)
+            const size_t found(name.find("subDet_"));
+            if (found != std::string::npos || drawInvisible)
                 subDetVol->SetVisibility(kFALSE);
 
             pMainDetectorVolume->AddNode(subDetVol, 0, new TGeoTranslation(0, 0, zPosition));
@@ -1195,10 +1195,10 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
     TEveTrackList *pTEveTrackList = new TEveTrackList();
     const std::string trackListTitle(name.empty() ? "Tracks" : name);
 
-    std::string starter="--- ";
+    const std::string starter("--- ");
     std::string trackListName(trackListTitle);
-    if (trackListName.find(starter)!=std::string::npos)
-        trackListName.replace(trackListName.find(starter),starter.length(),"Tracks//");
+    if (trackListName.find(starter) != std::string::npos)
+        trackListName.replace(trackListName.find(starter), starter.length(), "Tracks//");
     std::replace_if(trackListName.begin(), trackListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
 
     pTEveTrackList->SetElementNameTitle( trackListName.c_str(), trackListTitle.c_str() );
@@ -1237,7 +1237,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
         const int charge(pPandoraTrack->GetCharge());
 
         Color trackColor = color;
-        if (color >= AUTO )
+        if (color >= AUTO)
         {
             trackColor = AZURE;
 
@@ -1351,7 +1351,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const ParticleFlowO
         // Default color assignment
         Color pfoColor = color;
 
-        if ((color >= AUTO) || (color == AUTOID) || (color == AUTOTYPE))
+        if (color >= AUTO)
         {
             pfoColor = GetColorForPdgCode(pPfo->GetParticleId());
         }
@@ -1369,15 +1369,13 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const ParticleFlowO
             if ((color == AUTOID) || (color == AUTOTYPE))
                 pfoColor = color;
 
-
             if (color == AUTOITER)
             {
-                static int colorIter=RED;
-                if (colorIter>=AUTO)
-                    colorIter=RED;
+                static int colorIter = RED;
+                if (colorIter >= AUTO)
+                    colorIter = RED;
 
-                pfoColor=Color(colorIter);
-
+                pfoColor = Color(colorIter);
                 colorIter++;
             }
 
@@ -1411,12 +1409,11 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
     TEveElement *pClusterVectorElement = new TEveElementList();
     const std::string clusterListTitle(name.empty() ? "Clusters" : name);
 
-    std::string starter="--- ";
+    const std::string starter("--- ");
     std::string clusterListName(clusterListTitle);
-    if (clusterListName.find(starter)!=std::string::npos)
-        clusterListName.replace(clusterListName.find(starter),starter.length(),"");
+    if (clusterListName.find(starter) != std::string::npos)
+        clusterListName.replace(clusterListName.find(starter), starter.length(), "");
     std::replace_if(clusterListName.begin(), clusterListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
-
 
     pClusterVectorElement->SetElementNameTitle( clusterListName.c_str(), clusterListTitle.c_str());
 
@@ -1456,15 +1453,13 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
         if (color == AUTOITER)
         {
-            static int colorIter=RED;
-            if (colorIter>=AUTO)
-                colorIter=RED;
+            static int colorIter = RED;
+            if (colorIter >= AUTO)
+                colorIter = RED;
 
-            clusterColor=Color(colorIter);
-
+            clusterColor = Color(colorIter);
             colorIter++;
         }
-
 
         // Build information string
         std::stringstream sstr, sstrName;
@@ -1487,8 +1482,6 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
         if ((color == AUTOID) || (color == AUTOTYPE) )
             caloHitColor = color;
-
-
 
         TEveElement *pCaloHitsElement = VisualizeCaloHits(&orderedCaloHitList, sstr.str().c_str(), pClusterVectorElement, caloHitColor, pfoId);
 
