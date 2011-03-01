@@ -29,6 +29,7 @@ INCLUDE_DIRECTORIES( ${ROOT_INCLUDE_DIRS} )
 LINK_LIBRARIES( ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} )
 
 IF( PandoraPFANew_DIR )
+    INCLUDE_DIRECTORIES( "${PandoraPFANew_DIR}/include" )
     INCLUDE_DIRECTORIES( "${PandoraPFANew_DIR}/Framework/include" )
 ELSE()
     MESSAGE( SEND_ERROR "Could not find PandoraPFANew required to build PandoraMonitoring. Please set PandoraPFANew_DIR" )
