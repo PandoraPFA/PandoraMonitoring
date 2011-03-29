@@ -543,7 +543,18 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
     try
     {
-        std::cout << "PandoraMonitoring::InitializeEve(): DISPLAY environment variable set to " << ::getenv("DISPLAY") << std::endl;
+        std::cout << "PandoraMonitoring::InitializeEve(): ";
+        const char *pDisplay(::getenv("DISPLAY"));
+
+        if (NULL == pDisplay)
+        {
+            std::cout << "DISPLAY environment not set" << std::endl;
+        }
+        else
+        {
+            std::cout << "DISPLAY environment set to " << pDisplay << std::endl;
+        }
+
         TEveManager::Create();
     }
     catch (TEveException &tEveException)
@@ -971,7 +982,7 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const OrderedCaloHitList *cons
             // Add calorimeter-cell for calo-hit
             hits->AddBox(corners);
 
-            char transparency = static_cast<char>(255 - 255.f*(hitEnergy/m_maximumHitEnergy));
+            char transparency = static_cast<char>(255 - 255.f * (hitEnergy / m_maximumHitEnergy));
 
             if (hitEnergy > m_maximumHitEnergy)
                 transparency = 0;
@@ -1162,9 +1173,9 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
         pTEveTrack->SetPickable(kTRUE);
 
         // Create mark at end position
-        TEvePathMark *pEndPositionMark = new TEvePathMark(TEvePathMark::kDecay);
-        pEndPositionMark->fV.Set(positionAtEnd.GetX(), positionAtEnd.GetY(), positionAtEnd.GetZ());
-        pTEveTrack->AddPathMark(*pEndPositionMark);
+        TEvePathMark endPositionMark(TEvePathMark::kDecay);
+        endPositionMark.fV.Set(positionAtEnd.GetX(), positionAtEnd.GetY(), positionAtEnd.GetZ());
+        pTEveTrack->AddPathMark(endPositionMark);
 
         pTEveTrackList->AddElement(pTEveTrack);
         pTEveTrack->MakeTrack();
@@ -1291,15 +1302,15 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
         pTEveTrack->SetPickable(kTRUE);
 
         // Create mark at track end
-        TEvePathMark *pEndPositionMark = new TEvePathMark(TEvePathMark::kReference);
-        pEndPositionMark->fV.Set(positionAtEnd.GetX(), positionAtEnd.GetY(), positionAtEnd.GetZ());
-        pEndPositionMark->fP.Set(momentumAtEnd.GetX(), momentumAtEnd.GetY(), momentumAtEnd.GetZ());
-        pTEveTrack->AddPathMark(*pEndPositionMark);
+        TEvePathMark endPositionMark(TEvePathMark::kReference);
+        endPositionMark.fV.Set(positionAtEnd.GetX(), positionAtEnd.GetY(), positionAtEnd.GetZ());
+        endPositionMark.fP.Set(momentumAtEnd.GetX(), momentumAtEnd.GetY(), momentumAtEnd.GetZ());
+        pTEveTrack->AddPathMark(endPositionMark);
 
         // Create mark at track projection to calorimeter
-        TEvePathMark *pCalorimeterPositionMark = new TEvePathMark(TEvePathMark::kDecay);
-        pCalorimeterPositionMark->fV.Set(positionAtCalorimeter.GetX(), positionAtCalorimeter.GetY(), positionAtCalorimeter.GetZ());
-        pTEveTrack->AddPathMark(*pCalorimeterPositionMark);
+        TEvePathMark calorimeterPositionMark(TEvePathMark::kDecay);
+        calorimeterPositionMark.fV.Set(positionAtCalorimeter.GetX(), positionAtCalorimeter.GetY(), positionAtCalorimeter.GetZ());
+        pTEveTrack->AddPathMark(calorimeterPositionMark);
 
         pTEveTrackList->AddElement(pTEveTrack);
         pTEveTrack->MakeTrack();

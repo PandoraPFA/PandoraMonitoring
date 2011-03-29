@@ -196,12 +196,11 @@ TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch(const std::string &tre
         throw;
     }
 
-    BranchMap* branchMap = treeIt->second.second;
-    BranchMap::iterator branchIt = branchMap->find(branchName);
+    BranchMap::iterator branchIt = treeIt->second.second->find(branchName);
 
     if (branchIt == treeIt->second.second->end())
     {
-        TTree* tree = treeIt->second.first;
+        TTree *tree = treeIt->second.first;
 
         // create a new BranchHandler 
         BranchHandler* branchHandler = new BranchHandler(tree, branchName);

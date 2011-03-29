@@ -378,12 +378,13 @@ private:
     static bool                 m_openEveEvent;         ///< is set if an Event is open to store objects (hits, clusters,...) in it.
     static int                  m_eventDisplayCounter;  ///< counter for the event displays
 
-    float                       m_maximumHitEnergy;    ///< The cell energy where the transparency is saturated (0%, fully opaque)
+    float                       m_maximumHitEnergy;     ///< The cell energy where the transparency is saturated (0%, fully opaque)
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline PandoraMonitoring::PandoraMonitoring()
+inline PandoraMonitoring::PandoraMonitoring() :
+    m_maximumHitEnergy(-1.f)
 {
     int argc = 0;
     char* argv = (char *)"";
