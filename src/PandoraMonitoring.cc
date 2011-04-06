@@ -1591,49 +1591,52 @@ void PandoraMonitoring::MakeCaloHitCell(const CaloHit *const pCaloHit, float cor
     normal *= t2;
 
     // Compute all 8 corners for the box
-    CartesianVector cornerVector[8];
+    CartesianVector *pCornerVectors[8];
 
-    cornerVector[0] = position - dirU - dirV - normal;
-    cornerVector[1] = position + dirU - dirV - normal;
-    cornerVector[2] = position + dirU + dirV - normal;
-    cornerVector[3] = position - dirU + dirV - normal;
-    cornerVector[4] = position - dirU - dirV + normal;
-    cornerVector[5] = position + dirU - dirV + normal;
-    cornerVector[6] = position + dirU + dirV + normal;
-    cornerVector[7] = position - dirU + dirV + normal;
+    pCornerVectors[0] = new CartesianVector(position - dirU - dirV - normal);
+    pCornerVectors[1] = new CartesianVector(position + dirU - dirV - normal);
+    pCornerVectors[2] = new CartesianVector(position + dirU + dirV - normal);
+    pCornerVectors[3] = new CartesianVector(position - dirU + dirV - normal);
+    pCornerVectors[4] = new CartesianVector(position - dirU - dirV + normal);
+    pCornerVectors[5] = new CartesianVector(position + dirU - dirV + normal);
+    pCornerVectors[6] = new CartesianVector(position + dirU + dirV + normal);
+    pCornerVectors[7] = new CartesianVector(position - dirU + dirV + normal);
 
     // Assign corner positions to float array
-    corners[0] = cornerVector[0].GetX();
-    corners[1] = cornerVector[0].GetY();
-    corners[2] = cornerVector[0].GetZ();
+    corners[0] = pCornerVectors[0]->GetX();
+    corners[1] = pCornerVectors[0]->GetY();
+    corners[2] = pCornerVectors[0]->GetZ();
 
-    corners[3] = cornerVector[1].GetX();
-    corners[4] = cornerVector[1].GetY();
-    corners[5] = cornerVector[1].GetZ();
+    corners[3] = pCornerVectors[1]->GetX();
+    corners[4] = pCornerVectors[1]->GetY();
+    corners[5] = pCornerVectors[1]->GetZ();
 
-    corners[6] = cornerVector[2].GetX();
-    corners[7] = cornerVector[2].GetY();
-    corners[8] = cornerVector[2].GetZ();
+    corners[6] = pCornerVectors[2]->GetX();
+    corners[7] = pCornerVectors[2]->GetY();
+    corners[8] = pCornerVectors[2]->GetZ();
 
-    corners[9] = cornerVector[3].GetX();
-    corners[10] = cornerVector[3].GetY();
-    corners[11] = cornerVector[3].GetZ();
+    corners[9] = pCornerVectors[3]->GetX();
+    corners[10] = pCornerVectors[3]->GetY();
+    corners[11] = pCornerVectors[3]->GetZ();
 
-    corners[12] = cornerVector[4].GetX();
-    corners[13] = cornerVector[4].GetY();
-    corners[14] = cornerVector[4].GetZ();
+    corners[12] = pCornerVectors[4]->GetX();
+    corners[13] = pCornerVectors[4]->GetY();
+    corners[14] = pCornerVectors[4]->GetZ();
 
-    corners[15] = cornerVector[5].GetX();
-    corners[16] = cornerVector[5].GetY();
-    corners[17] = cornerVector[5].GetZ();
+    corners[15] = pCornerVectors[5]->GetX();
+    corners[16] = pCornerVectors[5]->GetY();
+    corners[17] = pCornerVectors[5]->GetZ();
 
-    corners[18] = cornerVector[6].GetX();
-    corners[19] = cornerVector[6].GetY();
-    corners[20] = cornerVector[6].GetZ();
+    corners[18] = pCornerVectors[6]->GetX();
+    corners[19] = pCornerVectors[6]->GetY();
+    corners[20] = pCornerVectors[6]->GetZ();
 
-    corners[21] = cornerVector[7].GetX();
-    corners[22] = cornerVector[7].GetY();
-    corners[23] = cornerVector[7].GetZ();
+    corners[21] = pCornerVectors[7]->GetX();
+    corners[22] = pCornerVectors[7]->GetY();
+    corners[23] = pCornerVectors[7]->GetZ();
+
+    for (unsigned int i = 0; i < 8; ++i)
+        delete pCornerVectors[i];
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
