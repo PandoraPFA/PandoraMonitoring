@@ -14,8 +14,8 @@ INCLUDES  = -I$(PROJECT_INCLUDE_DIR)
 INCLUDES += -I$(shell $(ROOTSYS)/bin/root-config --incdir)
 INCLUDES += -I$(PANDORAPFANEW_DIR)/Framework/include/
 
-CC = gcc
-CFLAGS = -c -Wall -g -w -fPIC
+CC = g++
+CFLAGS = -c -Wall -g -w -fPIC -O2
 CFLAGS += $(INCLUDES)
 ifdef BUILD_32BIT_COMPATIBLE
     CFLAGS += -m32
