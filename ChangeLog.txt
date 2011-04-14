@@ -1,4 +1,15 @@
 ************************************************************************
+TAG V00-05 FOR ILCSOFT USAGE
+************************************************************************
+Added ability to draw pandora histograms.
+Added option for drawing each cluster/pfo with a different color (iterates through list of available colors).
+Updated to reflect changes to pandora::CartesianVector class.
+Addressed issues raised by Coverity.
+Removed dashes from TEveList names in tree menu of the TEve display for PFOs and for tracks
+Muon endcap is invisible by default only if muon barrel exists; helps with visualization of test beam set ups.
+Updated standalone Makefile: changed default compiler to g++ and added -O2 optimization flag.
+
+************************************************************************
 TAG V00-04 FOR ILCSOFT USAGE
 ************************************************************************
 Updated CMake files to use new ILCUTIL package.
