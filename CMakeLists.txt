@@ -24,13 +24,14 @@ FIND_PACKAGE( ILCUTIL REQUIRED COMPONENTS ILCSOFT_CMAKE_MODULES )
 INCLUDE( ilcsoft_default_settings )
 
 
-FIND_PACKAGE( ROOT 5.26.00 REQUIRED COMPONENTS Eve ) # minimum required ROOT version
+FIND_PACKAGE( ROOT 5.26.00 REQUIRED COMPONENTS Eve Geom RGL EG ) # minimum required ROOT version
 INCLUDE_DIRECTORIES( ${ROOT_INCLUDE_DIRS} )
 LINK_LIBRARIES( ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} )
 
 IF( PandoraPFANew_DIR )
     INCLUDE_DIRECTORIES( "${PandoraPFANew_DIR}/include" )
     INCLUDE_DIRECTORIES( "${PandoraPFANew_DIR}/Framework/include" )
+    #LINK_LIBRARIES( "${PandoraPFANew_DIR}/lib/libPandoraFramework.so" )
 ELSE()
     MESSAGE( SEND_ERROR "Could not find PandoraPFANew required to build PandoraMonitoring. Please set PandoraPFANew_DIR" )
 ENDIF()
