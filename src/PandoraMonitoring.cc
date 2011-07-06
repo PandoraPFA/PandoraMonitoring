@@ -857,9 +857,6 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const OrderedCaloHitList *cons
 
     firstLayer = pOrderedCaloHitList->begin()->first;
 
-    float minRadiationLengthsFromIp = std::numeric_limits<float>::max(), maxRadiationLengthsFromIp = std::numeric_limits<float>::min();
-    float minInteractionLengthsFromIp = std::numeric_limits<float>::max(), maxInteractionLengthsFromIp = std::numeric_limits<float>::min();
-
     float energySumElectromagnetic = 0.f;
     float energySumHadronic = 0.f;
 
@@ -872,23 +869,6 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const OrderedCaloHitList *cons
              caloHitIter != caloHitIterEnd; ++caloHitIter)
         {
             const CaloHit *pCaloHit = (*caloHitIter);
-
-            // Path length properties
-            const float radiationLengthsFromIp(pCaloHit->GetNRadiationLengthsFromIp());
-
-            if (radiationLengthsFromIp < minRadiationLengthsFromIp)
-                minRadiationLengthsFromIp = radiationLengthsFromIp;
-
-            if (radiationLengthsFromIp > maxRadiationLengthsFromIp)
-                maxRadiationLengthsFromIp = radiationLengthsFromIp;
-
-            const float interactionLengthsFromIp(pCaloHit->GetNInteractionLengthsFromIp());
-
-            if (interactionLengthsFromIp < minInteractionLengthsFromIp)
-                minInteractionLengthsFromIp = interactionLengthsFromIp;
-
-            if (interactionLengthsFromIp > maxInteractionLengthsFromIp)
-                maxInteractionLengthsFromIp = interactionLengthsFromIp;
 
             // Energy properties
             const float hitEnergy(pCaloHit->GetElectromagneticEnergy());
@@ -1001,21 +981,13 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const OrderedCaloHitList *cons
          << "\nEem=" << energySumElectromagnetic
          << "\nEhad=" << energySumHadronic
          << "\nfirst pseudo-layer=" << firstLayer
-         << "\nlast  pseudo-layer=" << lastLayer
-         << "\nmin radLenFromIP=" << minRadiationLengthsFromIp
-         << "\nmax radLenFromIP=" << maxRadiationLengthsFromIp
-         << "\nmin intLenFromIP=" << minInteractionLengthsFromIp
-         << "\nmax intLenFromIP=" << maxInteractionLengthsFromIp;
+         << "\nlast  pseudo-layer=" << lastLayer;
 
     sstrName << "calohits"
              << "/Eem=" << energySumElectromagnetic
              << "/Ehad=" << energySumHadronic
              << "/first pseudo-layer=" << firstLayer
-             << "/last  pseudo-layer=" << lastLayer
-             << "/min radLenFromIP=" << minRadiationLengthsFromIp
-             << "/max radLenFromIP=" << maxRadiationLengthsFromIp
-             << "/min intLenFromIP=" << minInteractionLengthsFromIp
-             << "/max intLenFromIP=" << maxInteractionLengthsFromIp;
+             << "/last  pseudo-layer=" << lastLayer;
     
     for (PandoraMonitoringApi::PdgCodeToEnergyMap::const_iterator it = pdgCodeToEnergyMap.begin(), itEnd = pdgCodeToEnergyMap.end();
         it != itEnd; ++it)
@@ -1548,20 +1520,26 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
 void PandoraMonitoring::MakeCaloHitCell(const CaloHit *const pCaloHit, float corners[24])
 {
-    CartesianVector dirU((ENDCAP == pCaloHit->GetDetectorRegion()) ? CartesianVector(0, 1, 0) : CartesianVector(0, 0, 1));
-    CartesianVector normal(pCaloHit->GetCellNormalVector());
+    const RectangularCaloHit *pRectangularCaloHit = NULL;
+    pRectangularCaloHit = dynamic_cast<const RectangularCaloHit *>(pCaloHit);
+
+    if (NULL == pRectangularCaloHit) // TODO deal with pointing calo hits too
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+    
+    CartesianVector dirU((ENDCAP == pRectangularCaloHit->GetDetectorRegion()) ? CartesianVector(0, 1, 0) : CartesianVector(0, 0, 1));
+    CartesianVector normal(pRectangularCaloHit->GetCellNormalVector());
 
     CartesianVector dirV(normal.GetCrossProduct(dirU));
     const float magnitudeV(dirV.GetMagnitude());
 
-    const CartesianVector position(pCaloHit->GetPositionVector() * m_scalingFactor);
-    float u2(pCaloHit->GetCellSizeU() * m_scalingFactor / 2.0);
-    float v2(pCaloHit->GetCellSizeV() * m_scalingFactor / 2.0);
-    float t2(pCaloHit->GetCellThickness() * m_scalingFactor / 2.0);
+    const CartesianVector position(pRectangularCaloHit->GetPositionVector() * m_scalingFactor);
+    float u2(pRectangularCaloHit->GetCellSizeU() * m_scalingFactor / 2.0);
+    float v2(pRectangularCaloHit->GetCellSizeV() * m_scalingFactor / 2.0);
+    float t2(pRectangularCaloHit->GetCellThickness() * m_scalingFactor / 2.0);
 
     if (magnitudeV < 0.00001)
     {
-        const DetectorRegion dr(pCaloHit->GetDetectorRegion());
+        const DetectorRegion dr(pRectangularCaloHit->GetDetectorRegion());
 
         std::string detectorRegion((dr == ENDCAP ? "ENDCAP" : (dr == BARREL ? "BARREL" : "UNKNOWN")));
 
