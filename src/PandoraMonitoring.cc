@@ -1520,101 +1520,22 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
 void PandoraMonitoring::MakeCaloHitCell(const CaloHit *const pCaloHit, float corners[24])
 {
-    const RectangularCaloHit *pRectangularCaloHit = NULL;
-    pRectangularCaloHit = dynamic_cast<const RectangularCaloHit *>(pCaloHit);
+    CartesianPointList cartesianPointList;
+    pCaloHit->GetCellCorners(cartesianPointList);
 
-    if (NULL == pRectangularCaloHit) // TODO deal with pointing calo hits too
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-    
-    CartesianVector dirU((ENDCAP == pRectangularCaloHit->GetDetectorRegion()) ? CartesianVector(0, 1, 0) : CartesianVector(0, 0, 1));
-    CartesianVector normal(pRectangularCaloHit->GetCellNormalVector());
+    if (8 != cartesianPointList.size())
+        throw StatusCodeException(STATUS_CODE_FAILURE);
 
-    CartesianVector dirV(normal.GetCrossProduct(dirU));
-    const float magnitudeV(dirV.GetMagnitude());
+    unsigned int counter(0);
 
-    const CartesianVector position(pRectangularCaloHit->GetPositionVector() * m_scalingFactor);
-    float u2(pRectangularCaloHit->GetCellSizeU() * m_scalingFactor / 2.0);
-    float v2(pRectangularCaloHit->GetCellSizeV() * m_scalingFactor / 2.0);
-    float t2(pRectangularCaloHit->GetCellThickness() * m_scalingFactor / 2.0);
-
-    if (magnitudeV < 0.00001)
+    for (CartesianPointList::iterator iter = cartesianPointList.begin(), iterEnd = cartesianPointList.end(); iter != iterEnd; ++iter)
     {
-        const DetectorRegion dr(pRectangularCaloHit->GetDetectorRegion());
-
-        std::string detectorRegion((dr == ENDCAP ? "ENDCAP" : (dr == BARREL ? "BARREL" : "UNKNOWN")));
-
-        std::cout << "PandoraMonitoring::MakeCaloHitCell, ERROR: direction vectors U and V are parallel. "
-                  << "Normal(" << normal.GetX() << ", " << normal.GetY() << ", " << normal.GetZ() << ") "
-                  << "U(" << dirU.GetX() << ", " << dirU.GetY() << ", " << dirU.GetZ() << ") "
-                  << "V(" << dirV.GetX() << ", " << dirV.GetY() << ", " << dirV.GetZ() << ") "
-                  << " in Detector-region: " << detectorRegion << "  caloHit-coordinates: "
-                  << position.GetX() << ", " << position.GetY() << ", " << position.GetZ() << std::endl;
-
-        normal.SetValues(1, 0, 0);
-        dirU.SetValues(0, 1, 0);
-        dirV.SetValues(0, 0, 1);
-
-        const float size = 0.1;
-        u2 = size * m_scalingFactor / 2.0;
-        v2 = size * m_scalingFactor / 2.0;
-        t2 = size * m_scalingFactor / 2.0;
+        CartesianVector &corner = *iter;
+        corner *= m_scalingFactor;
+        corners[counter++] = corner.GetX();
+        corners[counter++] = corner.GetY();
+        corners[counter++] = corner.GetZ();
     }
-    else
-    {
-        dirV *= 1. / magnitudeV;
-    }
-
-    dirU *= u2;
-    dirV *= v2;
-    normal *= t2;
-
-    // Compute all 8 corners for the box
-    CartesianVector *pCornerVectors[8];
-
-    pCornerVectors[0] = new CartesianVector(position - dirU - dirV - normal);
-    pCornerVectors[1] = new CartesianVector(position + dirU - dirV - normal);
-    pCornerVectors[2] = new CartesianVector(position + dirU + dirV - normal);
-    pCornerVectors[3] = new CartesianVector(position - dirU + dirV - normal);
-    pCornerVectors[4] = new CartesianVector(position - dirU - dirV + normal);
-    pCornerVectors[5] = new CartesianVector(position + dirU - dirV + normal);
-    pCornerVectors[6] = new CartesianVector(position + dirU + dirV + normal);
-    pCornerVectors[7] = new CartesianVector(position - dirU + dirV + normal);
-
-    // Assign corner positions to float array
-    corners[0] = pCornerVectors[0]->GetX();
-    corners[1] = pCornerVectors[0]->GetY();
-    corners[2] = pCornerVectors[0]->GetZ();
-
-    corners[3] = pCornerVectors[1]->GetX();
-    corners[4] = pCornerVectors[1]->GetY();
-    corners[5] = pCornerVectors[1]->GetZ();
-
-    corners[6] = pCornerVectors[2]->GetX();
-    corners[7] = pCornerVectors[2]->GetY();
-    corners[8] = pCornerVectors[2]->GetZ();
-
-    corners[9] = pCornerVectors[3]->GetX();
-    corners[10] = pCornerVectors[3]->GetY();
-    corners[11] = pCornerVectors[3]->GetZ();
-
-    corners[12] = pCornerVectors[4]->GetX();
-    corners[13] = pCornerVectors[4]->GetY();
-    corners[14] = pCornerVectors[4]->GetZ();
-
-    corners[15] = pCornerVectors[5]->GetX();
-    corners[16] = pCornerVectors[5]->GetY();
-    corners[17] = pCornerVectors[5]->GetZ();
-
-    corners[18] = pCornerVectors[6]->GetX();
-    corners[19] = pCornerVectors[6]->GetY();
-    corners[20] = pCornerVectors[6]->GetZ();
-
-    corners[21] = pCornerVectors[7]->GetX();
-    corners[22] = pCornerVectors[7]->GetY();
-    corners[23] = pCornerVectors[7]->GetZ();
-
-    for (unsigned int i = 0; i < 8; ++i)
-        delete pCornerVectors[i];
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
