@@ -166,9 +166,10 @@ void PandoraMonitoringApi::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float maximumHitEnergy)
+void PandoraMonitoringApi::SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float transparencyThresholdE,
+    const float energyScaleThresholdE)
 {
-    PandoraMonitoring::GetInstance()->SetEveDisplayParameters(blackBackground, showDetectors, maximumHitEnergy);
+    PandoraMonitoring::GetInstance()->SetEveDisplayParameters(blackBackground, showDetectors, transparencyThresholdE, energyScaleThresholdE);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -196,17 +197,17 @@ void PandoraMonitoringApi::VisualizeCaloHits(const pandora::OrderedCaloHitList *
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color,
-    bool showAssociatedTracks, bool showFit)
+    bool showAssociatedTracks)
 {
-    PandoraMonitoring::GetInstance()->VisualizeClusters(pClusterList, name, NULL, color, showAssociatedTracks, showFit);
+    PandoraMonitoring::GetInstance()->VisualizeClusters(pClusterList, name, NULL, color, showAssociatedTracks);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name,
-    Color color, bool showAssociatedTracks, bool showFit)
+    Color color, bool showAssociatedTracks)
 {
-    PandoraMonitoring::GetInstance()->VisualizeParticleFlowObjects(pPfoList, name, NULL, color, showAssociatedTracks, showFit);
+    PandoraMonitoring::GetInstance()->VisualizeParticleFlowObjects(pPfoList, name, NULL, color, showAssociatedTracks);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

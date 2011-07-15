@@ -59,10 +59,11 @@ enum Color
     LIGHTPINK,
     LIGHTORANGE,
     LIGHTYELLOW,
-    AUTO,    // automatic choice of colors
-    AUTOID,  // automatic choice of colors depending on the particle ID
-    AUTOTYPE,// automatic choice of colors depending on the particle type 
-    AUTOITER // automatic choice of colors iterating through colors
+    AUTO,       // automatic choice of colors
+    AUTOID,     // automatic choice of colors depending on the particle ID
+    AUTOTYPE,   // automatic choice of colors depending on the particle type 
+    AUTOITER,   // automatic choice of colors iterating through colors
+    AUTOENERGY  // continuous color palette indicating hit energies
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -244,15 +245,16 @@ public:
 
     typedef std::map<int, float> PdgCodeToEnergyMap;
 
-
     /**
      *  @brief  Set TEve display parameters
      * 
      *  @param  blackBackground whether to use a black background color, rather than white
      *  @param  showDetectors turns the visibility of the detector geometry on or off
-     *  @param  maximumHitEnergy sets the maximum hit energy. Below that value, the hit will be transparent, above the transparency is saturated to opaque
+     *  @param  transparencyThresholdE cell energy for which transparency is saturated (0%, fully opaque)
+     *  @param  energyScaleThresholdE cell energy for which color is at top end of continous color palette
      */
-    static void SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float maximumHitEnergy = -1.f);
+    static void SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float transparencyThresholdE = -1.f,
+        const float energyScaleThresholdE = -1.f);
 
     /**
      *  @brief Add MCParticles to the Eve event-display
@@ -291,10 +293,9 @@ public:
      *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
      *  @param color The color the cluster elements are drawn with
      *  @param showAssociatedTracks draw the tracks associated to the cluster
-     *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
-     */  
+     */
     static void VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name, Color color,
-        bool showAssociatedTracks = true, bool showFit = false);
+        bool showAssociatedTracks = true);
 
     /**
      *  @brief Add Clusters to the Eve event-display
@@ -303,10 +304,9 @@ public:
      *  @param name of the cluster list
      *  @param color The color the cluster elements are drawn with
      *  @param showAssociatedTracks draw the tracks associated to the cluster
-     *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
      */  
     static void VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color,
-        bool showAssociatedTracks = true, bool showFit = false);
+        bool showAssociatedTracks = true);
 
     /**
      *  @brief  Delete monitoring instance

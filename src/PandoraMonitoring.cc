@@ -592,7 +592,8 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float maximumHitEnergy)
+void PandoraMonitoring::SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float transparencyThresholdE,
+    const float energyScaleThresholdE)
 {
     InitializeEve();
 
@@ -602,7 +603,8 @@ void PandoraMonitoring::SetEveDisplayParameters(const bool blackBackground, cons
     gEve->GetGlobalScene()->SetRnrSelf(showDetectors);
     gEve->Redraw3D(kTRUE);
 
-    m_maximumHitEnergy = maximumHitEnergy;
+    m_transparencyThresholdE = transparencyThresholdE;
+    m_energyScaleThresholdE = energyScaleThresholdE;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -830,7 +832,7 @@ void PandoraMonitoring::ViewEvent()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TEveElement *PandoraMonitoring::VisualizeCaloHits(const OrderedCaloHitList *const pOrderedCaloHitList, std::string name,
-    TEveElement *parent, Color color, int pfoId )
+    TEveElement *parent, Color color, int pfoId)
 {
     InitializeEve();
 
@@ -849,6 +851,15 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const OrderedCaloHitList *cons
     hitsMarkers->SetOwnIds(kTRUE);
     hits->AddElement(hitsMarkers);
 #endif 
+
+    static Double_t r[] = {1., 1.}, g[] = {1., 0.}, b[] = {0., 0.}, stop[] = {0., 1.};
+    static const Int_t firstIndex(TColor::CreateGradientColorTable(2, stop, r, g, b, 256));
+
+    Int_t customPalette[256];
+    for (int index = 0; index < 256; ++index)
+    {
+        customPalette[index] = firstIndex + index;
+    }
 
     PandoraMonitoringApi::PdgCodeToEnergyMap pdgCodeToEnergyMap;
 
@@ -906,68 +917,71 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const OrderedCaloHitList *cons
             // Supply hit marker details
             const CartesianVector position = pCaloHit->GetPositionVector() * m_scalingFactor;
 
-            Color hitColor = color;
+            EColor hitColor = GetROOTColor(color);
 
             if (color == AUTOID)
             {
+                hitColor = GetROOTColor(GetColorForPdgCode(particleId));
+
                 if (pfoId == particleId)
+                    hitColor = kGray;
+            }
+            else if (color == AUTOTYPE)
+            {
+                hitColor = GetROOTColor(GetColorForPdgCode(particleId));
+
+                if (std::abs(pfoId) == std::abs(particleId))
                 {
-                    hitColor = GRAY;
+                    hitColor = kGray;
                 }
-                else
+                else if ((std::abs(pfoId) >= 100) && (std::abs(particleId) >= 100))
                 {
-                    hitColor = GetColorForPdgCode(particleId);
+                    static TParticle particlePfo;
+                    static TParticle particleHit;
+                    particlePfo.SetPdgCode(pfoId);
+                    particleHit.SetPdgCode(particleId);
+
+                    if (particlePfo.GetPDG()->Charge() == particleHit.GetPDG()->Charge())
+                        hitColor = kGray;
                 }
             }
- 
-            if (color == AUTOTYPE)
+            else if (color == AUTOITER)
             {
-                static TParticle particlePfo;
-                static TParticle particleHit;
+                static int colorIter = RED;
+                if (colorIter >= AUTO)
+                    colorIter = RED;
 
-                particlePfo.SetPdgCode(pfoId);
-                particleHit.SetPdgCode(particleId);
-            
-                TParticlePDG* pParticlePfoPDG = particlePfo.GetPDG();
-                TParticlePDG* pParticleHitPDG = particleHit.GetPDG();
+                hitColor = GetROOTColor(Color(colorIter++));
+            }
+            else if (color == AUTOENERGY)
+            {
+                unsigned int customColorIndex = 0;
 
-                hitColor = GetColorForPdgCode(particleId); // default 
+                if (m_energyScaleThresholdE > 0.f)
+                    customColorIndex = std::min(255, static_cast<int>(255.f * (hitEnergy / m_energyScaleThresholdE)));
 
-                if (((pfoId == E_MINUS) || (pfoId == E_PLUS)) && ((particleId == E_MINUS) || (particleId == E_PLUS)))
-                    hitColor = GRAY;
-
-                if (((pfoId == MU_MINUS) || (pfoId == MU_PLUS)) && ((particleId == MU_MINUS) || (particleId == MU_PLUS)))
-                    hitColor = GRAY;
-
-                if ((pfoId == PHOTON) && (particleId == PHOTON))
-                    hitColor = GRAY;
-
-                if ((std::abs(pfoId) >= 100) && (std::abs(particleId) >= 100))
-                {
-                    if (pParticlePfoPDG->Charge() == pParticleHitPDG->Charge())
-                        hitColor = GRAY;
-                }
+                hitColor = EColor(customPalette[customColorIndex]);
             }
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(5,27,02)
-            if (color < AUTOID)
-            {
-                const float markerSize(0.1);
-                hitsMarkers->SetNextPoint(position.GetX(), position.GetY(), position.GetZ());
-                hitsMarkers->SetMarkerColor(GetROOTColor(hitColor));
-                hitsMarkers->SetMarkerSize(markerSize);
-                hitsMarkers->SetMarkerStyle(4);
-            }
+            const float markerSize(0.1);
+            hitsMarkers->SetNextPoint(position.GetX(), position.GetY(), position.GetZ());
+            hitsMarkers->SetMarkerColor(hitColor);
+            hitsMarkers->SetMarkerSize(markerSize);
+            hitsMarkers->SetMarkerStyle(4);
 #endif
             // Add calorimeter-cell for calo-hit
             hits->AddBox(corners);
 
-            char transparency = static_cast<char>(255 - 255.f * (hitEnergy / m_maximumHitEnergy));
+            // Calculate transparency
+            char transparency = 0;
 
-            if (hitEnergy > m_maximumHitEnergy)
-                transparency = 0;
+            if (m_transparencyThresholdE > 0.f)
+            {
+                transparency = static_cast<char>(std::max(0, 255 - static_cast<int>(255.f * (hitEnergy / m_transparencyThresholdE))));
+            }
 
-            hits->DigitColor(GetROOTColor(hitColor),transparency);
+            hits->DigitColor(hitColor, transparency);
         }
     }
 
@@ -1304,7 +1318,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const ParticleFlowObjectList *const pPfoList, std::string name,
-    TEveElement *parent, Color color, bool showAssociatedTracks, bool showFit)
+    TEveElement *parent, Color color, bool showAssociatedTracks)
 {
     ParticleFlowObjectVector pfoVector(pPfoList->begin(), pPfoList->end());
     std::sort(pfoVector.begin(), pfoVector.end(), ParticleFlowObject::SortByEnergy);
@@ -1334,7 +1348,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const ParticleFlowO
         // Default color assignment
         Color pfoColor = color;
 
-        if (color >= AUTO)
+        if (color == AUTO)
         {
             pfoColor = GetColorForPdgCode(pPfo->GetParticleId());
         }
@@ -1349,20 +1363,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const ParticleFlowO
         }
         else
         {
-            if ((color == AUTOID) || (color == AUTOTYPE))
-                pfoColor = color;
-
-            if (color == AUTOITER)
-            {
-                static int colorIter = RED;
-                if (colorIter >= AUTO)
-                    colorIter = RED;
-
-                pfoColor = Color(colorIter);
-                colorIter++;
-            }
-
-            VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, showAssociatedTracks, showFit, pPfo->GetParticleId());
+            VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, showAssociatedTracks, pPfo->GetParticleId());
         }
     }
 
@@ -1382,7 +1383,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const ParticleFlowO
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClusterList, std::string name, TEveElement *parent,
-    Color color, bool showAssociatedTracks, bool showFit, int pfoId)
+    Color color, bool showAssociatedTracks, int pfoId)
 {
     ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByHadronicEnergy);
@@ -1434,16 +1435,6 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
             }
         }
 
-        if (color == AUTOITER)
-        {
-            static int colorIter = RED;
-            if (colorIter >= AUTO)
-                colorIter = RED;
-
-            clusterColor = Color(colorIter);
-            colorIter++;
-        }
-
         // Build information string
         std::stringstream sstr, sstrName;
 
@@ -1460,36 +1451,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
         // Display constituent calo hits
         const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-
-        Color caloHitColor = clusterColor;
-
-        if ((color == AUTOID) || (color == AUTOTYPE) )
-            caloHitColor = color;
-
-        TEveElement *pCaloHitsElement = VisualizeCaloHits(&orderedCaloHitList, sstr.str().c_str(), pClusterVectorElement, caloHitColor, pfoId);
-
-        const ClusterHelper::ClusterFitResult &fit = pCluster->GetFitToAllHitsResult();
-
-        if (showFit && fit.IsFitSuccessful())
-        {
-            const CartesianVector intercept = fit.GetIntercept() * m_scalingFactor;
-            CartesianVector direction = fit.GetDirection() * m_scalingFactor;
-
-            const double length = 100;
-            CartesianVector displacedStart = intercept - (direction * (length / 2));
-            direction *= length;
-
-            TEveArrow *pClusterArrow = new TEveArrow(direction.GetX(), direction.GetY(), direction.GetZ(), displacedStart.GetX(),
-                displacedStart.GetY(), displacedStart.GetZ());
-
-            pClusterArrow->SetConeR(0.03);
-            pClusterArrow->SetConeL(0.2);
-            pClusterArrow->SetMainColor(GetROOTColor(clusterColor));
-            pClusterArrow->SetPickable(kTRUE);
-            pClusterArrow->SetElementNameTitle(sstr.str().c_str(), sstrName.str().c_str());
-
-            pCaloHitsElement->AddElement(pClusterArrow);
-        }
+        TEveElement *pCaloHitsElement = VisualizeCaloHits(&orderedCaloHitList, sstr.str().c_str(), pClusterVectorElement, clusterColor, pfoId);
 
         // Show tracks associated with clusters
         if (showAssociatedTracks)

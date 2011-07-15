@@ -185,9 +185,11 @@ public:
      * 
      *  @param  blackBackground whether to use a black background color, rather than white
      *  @param  showDetectors turns the visibility of the detector geometry on or off
-     *  @param  maximumHitEnergy sets the maximum hit energy. Below that value, the hit will be transparent, above the transparency is saturated to opaque
+     *  @param  transparencyThresholdE cell energy for which transparency is saturated (0%, fully opaque)
+     *  @param  energyScaleThresholdE cell energy for which color is at top end of continous color palette
      */
-    void SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float maximumHitEnergy);
+    void SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float transparencyThresholdE,
+        const float energyScaleThresholdE);
 
     /**
      *  @brief Add MC particles to the Eve event-display
@@ -236,10 +238,9 @@ public:
      *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
      *  @param color The color the cluster elements are drawn with
      *  @param showAssociatedTracks draw the tracks associated to the cluster
-     *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
      */
     TEveElement *VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name, TEveElement* parent,
-        Color color, bool showAssociatedTracks, bool showFit);
+        Color color, bool showAssociatedTracks);
 
     /**
      *  @brief Add Clusters to the Eve event-display
@@ -249,12 +250,11 @@ public:
      *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
      *  @param color The color the cluster elements are drawn with
      *  @param showAssociatedTracks draw the tracks associated to the cluster
-     *  @param showFit draw an arrow representing the fit through the calorimeterhits (the fit is computed within pandora)
      *
      *  @return pointer to created TEveElement
      */
     TEveElement *VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, TEveElement* parent, Color color,
-        bool showAssociatedTracks, bool showFit, int pfoId = 0);
+        bool showAssociatedTracks, int pfoId = 0);
 
     /**
      *  @brief  Pause until user enters 'return'
@@ -366,25 +366,27 @@ private:
 
     typedef std::map<const std::string, TH1 *> HistogramMap;
 
-    static bool                 m_instanceFlag;         ///< The pandora monitoring instance flag
-    static PandoraMonitoring   *m_pPandoraMonitoring;   ///< The pandora monitoring instance
-    TApplication               *m_pApplication;         ///< The root application
+    static bool                 m_instanceFlag;             ///< The pandora monitoring instance flag
+    static PandoraMonitoring   *m_pPandoraMonitoring;       ///< The pandora monitoring instance
+    TApplication               *m_pApplication;             ///< The root application
 
-    HistogramMap                m_histogramMap;         ///< The histogram map
-    TTreeWrapper                m_treeWrapper;          ///< wrapper around TTree functionality
+    HistogramMap                m_histogramMap;             ///< The histogram map
+    TTreeWrapper                m_treeWrapper;              ///< wrapper around TTree functionality
 
-    static bool                 m_eveInitialized;       ///< is set if ROOT Eve is initialized
-    static float                m_scalingFactor;        ///< TEve works with [cm], Pandora works with [mm]
-    static bool                 m_openEveEvent;         ///< is set if an Event is open to store objects (hits, clusters,...) in it.
-    static int                  m_eventDisplayCounter;  ///< counter for the event displays
+    static bool                 m_eveInitialized;           ///< is set if ROOT Eve is initialized
+    static float                m_scalingFactor;            ///< TEve works with [cm], Pandora works with [mm]
+    static bool                 m_openEveEvent;             ///< is set if an Event is open to store objects (hits, clusters,...) in it.
+    static int                  m_eventDisplayCounter;      ///< counter for the event displays
 
-    float                       m_maximumHitEnergy;     ///< The cell energy where the transparency is saturated (0%, fully opaque)
+    float                       m_transparencyThresholdE;   ///< Cell energy for which transparency is saturated (0%, fully opaque)
+    float                       m_energyScaleThresholdE;    ///< Cell energy for which color is at top end of continous color palette
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline PandoraMonitoring::PandoraMonitoring() :
-    m_maximumHitEnergy(-1.f)
+    m_transparencyThresholdE(-1.f),
+    m_energyScaleThresholdE(-1.f)
 {
     int argc = 0;
     char* argv = (char *)"";
