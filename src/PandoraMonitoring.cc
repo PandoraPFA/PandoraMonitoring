@@ -831,8 +831,7 @@ void PandoraMonitoring::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeCaloHits(const OrderedCaloHitList *const pOrderedCaloHitList, std::string name,
-    TEveElement *parent, Color color, int pfoId)
+TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCaloHitList, std::string name, TEveElement *parent, Color color, int pfoId)
 {
     InitializeEve();
 
@@ -863,126 +862,126 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const OrderedCaloHitList *cons
 
     PandoraMonitoringApi::PdgCodeToEnergyMap pdgCodeToEnergyMap;
 
-    PseudoLayer firstLayer = 0;
+    PseudoLayer firstLayer = std::numeric_limits<unsigned int>::max();
     PseudoLayer lastLayer = 0;
-
-    firstLayer = pOrderedCaloHitList->begin()->first;
 
     float energySumElectromagnetic = 0.f;
     float energySumHadronic = 0.f;
 
-    for (OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end();
-         iter != iterEnd; ++iter)
+    for (CaloHitList::const_iterator hitIter = pCaloHitList->begin(), hitIterEnd = pCaloHitList->end(); hitIter != hitIterEnd; ++hitIter)
     {
-        lastLayer = iter->first;
+        const CaloHit *pCaloHit = (*hitIter);
 
-        for (CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end();
-             caloHitIter != caloHitIterEnd; ++caloHitIter)
+        // Determing extremal pseudolayers
+        const PseudoLayer pseudoLayer(pCaloHit->GetPseudoLayer());
+
+        if (pseudoLayer > lastLayer)
+            lastLayer = pseudoLayer;
+
+        if (pseudoLayer < firstLayer)
+            firstLayer = pseudoLayer;
+
+        // Energy properties
+        const float hitEnergy(pCaloHit->GetElectromagneticEnergy());
+        energySumElectromagnetic += hitEnergy;
+
+        const float hitEnergyHadronic(pCaloHit->GetHadronicEnergy());
+        energySumHadronic += hitEnergyHadronic;
+
+        // MC particle id
+        const MCParticle *pMCParticle = NULL;
+        pCaloHit->GetMCParticle(pMCParticle);
+
+        int particleId = 0;
+        if (pMCParticle)
         {
-            const CaloHit *pCaloHit = (*caloHitIter);
+            particleId = pMCParticle->GetParticleId();
+        }
 
-            // Energy properties
-            const float hitEnergy(pCaloHit->GetElectromagneticEnergy());
-            energySumElectromagnetic += hitEnergy;
+        PandoraMonitoringApi::PdgCodeToEnergyMap::iterator it = pdgCodeToEnergyMap.find(particleId);
 
-            const float hitEnergyHadronic(pCaloHit->GetHadronicEnergy());
-            energySumHadronic += hitEnergyHadronic;
+        if (pdgCodeToEnergyMap.end() == it)
+        {
+            pdgCodeToEnergyMap.insert(std::make_pair(particleId, hitEnergy));
+        }
+        else
+        {
+            float oldValue = it->second;
+            it->second = oldValue + hitEnergy;
+        }
 
-            // MC particle id
-            const MCParticle *pMCParticle = NULL;
-            pCaloHit->GetMCParticle(pMCParticle);
+        // Compute the corners of calohit calorimeter-cell, 8 corners x 3 dimensions
+        float corners[24];
+        MakeCaloHitCell(pCaloHit, corners);
 
-            int particleId = 0;
-            if (pMCParticle)
+        // Supply hit marker details
+        const CartesianVector position = pCaloHit->GetPositionVector() * m_scalingFactor;
+
+        EColor hitColor = GetROOTColor(color);
+
+        if (color == AUTOID)
+        {
+            hitColor = GetROOTColor(GetColorForPdgCode(particleId));
+
+            if (pfoId == particleId)
+                hitColor = kGray;
+        }
+        else if (color == AUTOTYPE)
+        {
+            hitColor = GetROOTColor(GetColorForPdgCode(particleId));
+
+            if (std::abs(pfoId) == std::abs(particleId))
             {
-                particleId = pMCParticle->GetParticleId();
+                hitColor = kGray;
             }
-
-            PandoraMonitoringApi::PdgCodeToEnergyMap::iterator it = pdgCodeToEnergyMap.find(particleId);
-
-            if (pdgCodeToEnergyMap.end() == it)
+            else if ((std::abs(pfoId) >= 100) && (std::abs(particleId) >= 100))
             {
-                pdgCodeToEnergyMap.insert(std::make_pair(particleId, hitEnergy));
-            }
-            else
-            {
-                float oldValue = it->second;
-                it->second = oldValue + hitEnergy;
-            }
+                static TParticle particlePfo;
+                static TParticle particleHit;
+                particlePfo.SetPdgCode(pfoId);
+                particleHit.SetPdgCode(particleId);
 
-            // Compute the corners of calohit calorimeter-cell, 8 corners x 3 dimensions
-            float corners[24];
-            MakeCaloHitCell(pCaloHit, corners);
-
-            // Supply hit marker details
-            const CartesianVector position = pCaloHit->GetPositionVector() * m_scalingFactor;
-
-            EColor hitColor = GetROOTColor(color);
-
-            if (color == AUTOID)
-            {
-                hitColor = GetROOTColor(GetColorForPdgCode(particleId));
-
-                if (pfoId == particleId)
+                if (particlePfo.GetPDG()->Charge() == particleHit.GetPDG()->Charge())
                     hitColor = kGray;
             }
-            else if (color == AUTOTYPE)
-            {
-                hitColor = GetROOTColor(GetColorForPdgCode(particleId));
+        }
+        else if (color == AUTOITER)
+        {
+            static int colorIter = RED;
+            if (colorIter >= AUTO)
+                colorIter = RED;
 
-                if (std::abs(pfoId) == std::abs(particleId))
-                {
-                    hitColor = kGray;
-                }
-                else if ((std::abs(pfoId) >= 100) && (std::abs(particleId) >= 100))
-                {
-                    static TParticle particlePfo;
-                    static TParticle particleHit;
-                    particlePfo.SetPdgCode(pfoId);
-                    particleHit.SetPdgCode(particleId);
+            hitColor = GetROOTColor(Color(colorIter++));
+        }
+        else if (color == AUTOENERGY)
+        {
+            unsigned int customColorIndex = 0;
 
-                    if (particlePfo.GetPDG()->Charge() == particleHit.GetPDG()->Charge())
-                        hitColor = kGray;
-                }
-            }
-            else if (color == AUTOITER)
-            {
-                static int colorIter = RED;
-                if (colorIter >= AUTO)
-                    colorIter = RED;
+            if (m_energyScaleThresholdE > 0.f)
+                customColorIndex = std::min(255, static_cast<int>(255.f * (hitEnergy / m_energyScaleThresholdE)));
 
-                hitColor = GetROOTColor(Color(colorIter++));
-            }
-            else if (color == AUTOENERGY)
-            {
-                unsigned int customColorIndex = 0;
-
-                if (m_energyScaleThresholdE > 0.f)
-                    customColorIndex = std::min(255, static_cast<int>(255.f * (hitEnergy / m_energyScaleThresholdE)));
-
-                hitColor = EColor(customPalette[customColorIndex]);
-            }
+            hitColor = EColor(customPalette[customColorIndex]);
+        }
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(5,27,02)
-            const float markerSize(0.1);
-            hitsMarkers->SetNextPoint(position.GetX(), position.GetY(), position.GetZ());
-            hitsMarkers->SetMarkerColor(hitColor);
-            hitsMarkers->SetMarkerSize(markerSize);
-            hitsMarkers->SetMarkerStyle(4);
+        const float markerSize(0.1);
+        hitsMarkers->SetNextPoint(position.GetX(), position.GetY(), position.GetZ());
+        hitsMarkers->SetMarkerColor(hitColor);
+        hitsMarkers->SetMarkerSize(markerSize);
+        hitsMarkers->SetMarkerStyle(4);
 #endif
-            // Add calorimeter-cell for calo-hit
-            hits->AddBox(corners);
+        // Add calorimeter-cell for calo-hit
+        hits->AddBox(corners);
 
-            // Calculate transparency
-            char transparency = 0;
+        // Calculate transparency
+        char transparency = 0;
 
-            if (m_transparencyThresholdE > 0.f)
-            {
-                transparency = static_cast<char>(std::max(0, 255 - static_cast<int>(255.f * (hitEnergy / m_transparencyThresholdE))));
-            }
-
-            hits->DigitColor(hitColor, transparency);
+        if (m_transparencyThresholdE > 0.f)
+        {
+            transparency = static_cast<char>(std::max(0, 255 - static_cast<int>(255.f * (hitEnergy / m_transparencyThresholdE))));
         }
+
+        hits->DigitColor(hitColor, transparency);
     }
 
     // Build information string
@@ -1451,7 +1450,11 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
         // Display constituent calo hits
         const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-        TEveElement *pCaloHitsElement = VisualizeCaloHits(&orderedCaloHitList, sstr.str().c_str(), pClusterVectorElement, clusterColor, pfoId);
+
+        CaloHitList caloHitList;
+        orderedCaloHitList.GetCaloHitList(caloHitList);
+
+        TEveElement *pCaloHitsElement = VisualizeCaloHits(&caloHitList, sstr.str().c_str(), pClusterVectorElement, clusterColor, pfoId);
 
         // Show tracks associated with clusters
         if (showAssociatedTracks)

@@ -279,11 +279,11 @@ public:
     /**
      *  @brief Add CaloHits to the Eve event-display
      * 
-     *  @param pOrderedCaloHitList list of calohits to be added to the event display
+     *  @param pCaloHitList list of calohits to be added to the event display
      *  @param name of the calohit list
      *  @param color The color the cluster elements are drawn with
      */  
-    static void VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, Color color);
+    static void VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, std::string name, Color color);
 
     /**
      *  @brief Add Particle flow objects to the Eve event-display

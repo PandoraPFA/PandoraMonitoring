@@ -220,15 +220,14 @@ public:
     /**
      *  @brief Add CaloHits to the Eve event-display
      * 
-     *  @param pOrderedCaloHitList list of calohits to be added to the event display
+     *  @param pCaloHitList list of calohits to be added to the event display
      *  @param parent name of the calohitlist
      *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
      *  @param color The color the cluster elements are drawn with
      *
      *  @return pointer to created TEveElement
      */
-    TEveElement *VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, TEveElement* parent,
-        Color color, int pfoId = 0);
+    TEveElement *VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, std::string name, TEveElement* parent, Color color, int pfoId = 0);
 
     /**
      *  @brief Add Particle flow objects to the Eve event-display

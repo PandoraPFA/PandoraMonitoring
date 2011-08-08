@@ -189,9 +189,9 @@ void PandoraMonitoringApi::VisualizeTracks(const pandora::TrackList *const pTrac
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeCaloHits(const pandora::OrderedCaloHitList *const pOrderedCaloHitList, std::string name, Color color)
+void PandoraMonitoringApi::VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, std::string name, Color color)
 {
-    PandoraMonitoring::GetInstance()->VisualizeCaloHits(pOrderedCaloHitList, name, NULL, color);
+    PandoraMonitoring::GetInstance()->VisualizeCaloHits(pCaloHitList, name, NULL, color);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
