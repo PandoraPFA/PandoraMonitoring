@@ -1316,10 +1316,10 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const ParticleFlowObjectList *const pPfoList, std::string name,
+TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *const pPfoList, std::string name,
     TEveElement *parent, Color color, bool showAssociatedTracks)
 {
-    ParticleFlowObjectVector pfoVector(pPfoList->begin(), pPfoList->end());
+    PfoVector pfoVector(pPfoList->begin(), pPfoList->end());
     std::sort(pfoVector.begin(), pfoVector.end(), ParticleFlowObject::SortByEnergy);
 
     InitializeEve();
@@ -1332,8 +1332,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const ParticleFlowO
 
     pPfoVectorElement->SetElementNameTitle(pfoListName.c_str(), pfoListTitle.c_str());
 
-    for (ParticleFlowObjectVector::const_iterator pfoIter = pfoVector.begin(), pfoIterEnd = pfoVector.end();
-        pfoIter != pfoIterEnd; ++pfoIter)
+    for (PfoVector::const_iterator pfoIter = pfoVector.begin(), pfoIterEnd = pfoVector.end(); pfoIter != pfoIterEnd; ++pfoIter)
     { 
         ParticleFlowObject *pPfo = (*pfoIter);
 

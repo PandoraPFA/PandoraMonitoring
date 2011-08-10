@@ -204,7 +204,7 @@ void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const p
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name,
+void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, std::string name,
     Color color, bool showAssociatedTracks)
 {
     PandoraMonitoring::GetInstance()->VisualizeParticleFlowObjects(pPfoList, name, NULL, color, showAssociatedTracks);

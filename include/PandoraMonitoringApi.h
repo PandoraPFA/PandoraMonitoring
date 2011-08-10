@@ -294,7 +294,7 @@ public:
      *  @param color The color the cluster elements are drawn with
      *  @param showAssociatedTracks draw the tracks associated to the cluster
      */
-    static void VisualizeParticleFlowObjects(const pandora::ParticleFlowObjectList *const pPfoList, std::string name, Color color,
+    static void VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, std::string name, Color color,
         bool showAssociatedTracks = true);
 
     /**
