@@ -868,6 +868,10 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
     float energySumElectromagnetic = 0.f;
     float energySumHadronic = 0.f;
 
+    static int colorIter = RED;
+    if (++colorIter >= AUTO)
+        colorIter = RED;
+
     for (CaloHitList::const_iterator hitIter = pCaloHitList->begin(), hitIterEnd = pCaloHitList->end(); hitIter != hitIterEnd; ++hitIter)
     {
         const CaloHit *pCaloHit = (*hitIter);
@@ -947,11 +951,7 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
         }
         else if (color == AUTOITER)
         {
-            static int colorIter = RED;
-            if (colorIter >= AUTO)
-                colorIter = RED;
-
-            hitColor = GetROOTColor(Color(colorIter++));
+            hitColor = GetROOTColor(Color(colorIter));
         }
         else if (color == AUTOENERGY)
         {
