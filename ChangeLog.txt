@@ -1,0 +1,88 @@
+Added Pause and Create APIs, allowing for easy creation of Monitoring TApplication and allowing access to reusable pause functionality.
+
+************************************************************************
+TAG V00-06 FOR ILCSOFT USAGE
+************************************************************************
+Moved PandoraMonitoring to PandoraPFANew repository.
+Updated to reflect recent changes to pandora APIs, including typedef changes and use of CaloHitLists, rather than OrderedCaloHitLists.
+Added ability to deal with pandora rectangular and pointing calo hits, via virtual function CaloHit::GetCellCorners.
+Added hit colour scheme that uses continuous palette to reflect energy of hits.
+Removed unused options to draw fit to clusters and pfos.
+
+************************************************************************
+TAG V00-05 FOR ILCSOFT USAGE
+************************************************************************
+Added ability to draw pandora histograms.
+Added option for drawing each cluster/pfo with a different color (iterates through list of available colors).
+Updated to reflect changes to pandora::CartesianVector class.
+Addressed issues raised by Coverity.
+Removed dashes from TEveList names in tree menu of the TEve display for PFOs and for tracks
+Muon endcap is invisible by default only if muon barrel exists; helps with visualization of test beam set ups.
+Updated standalone Makefile: changed default compiler to g++ and added -O2 optimization flag.
+
+************************************************************************
+TAG V00-04 FOR ILCSOFT USAGE
+************************************************************************
+Updated CMake files to use new ILCUTIL package.
+Updated CMake files to reflect restructuring of PandoraPFANew.
+Updated standalone makefile to reflect restructuring of PandoraPFANew.
+Added checks on initialization of subdetector parameters before attempting to draw.
+Added ability to draw inner detector, if details have been provided.
+Changed all references to "track state at ecal" to "track state at calorimeter".
+Made use of IsMirroredInZ subdetector functionality.
+Updated to reflect changes to GeometryHelper.
+Improved exception handling when creating TEveManager.
+Improved memory management when sorting content by energy, etc.
+Addressed CppCheck (static analysis package) warnings.
+
+************************************************************************
+TAG V00-03 FOR ILCSOFT USAGE
+************************************************************************
+Display maximum and minimum radiation and interaction lengths from the ip for all calo hit lists.
+Reduced geometry dependence, adding try/catch blocks around queries for any specific geometry information.
+
+************************************************************************
+CREATE CLIC_CDR BRANCH
+************************************************************************
+Added transparency for calorimeter hits (option)
+Added color scheme AUTOTYPE, which highlights confusion between neutral hadrons, charged hadrons, electrons, muons or photons.
+Added color-scheme AUTOID, which highlights particle ID issues.
+Updated calls to GetBField function, which now take a position vector as an argument.
+Sort lists of MCParticles, Tracks, Clusters and Pfos by energy.
+Added ability to set the TEve display background color (black or white) and to choose whether to draw detector elements.
+Changed default background color to white
+Improved tool-tip information (add MC particle info for calohitclusters)
+Provided a gnu makefile.
+
+************************************************************************
+TAG V00-02 FOR ILCSOFT USAGE
+************************************************************************
+Added axis title parameters for histograms.
+Added functionality to add, multiply or divide histograms.
+Updated to reflect changes to pandora GeometryHelper.
+Set BUILD_32BIT_COMPATIBLE to OFF by default.
+
+************************************************************************
+LCD_WG2_VALIDATION_3 TAG
+************************************************************************
+Flip sign of magnetic field, rather than individual track charges, in order to match ALICE sign convention.
+Cluster fit arrow now turned off by default.
+Added visualization of MCParticles.
+Only draw MC particles up to their specified "EndPoint"
+Added suppression of MC particles, with given PDG codes, below specified energy thresholds.
+Added output showing the division of energy between MC particles for a calo hit list.
+Added visualization of specified detector gaps.
+Added muon system to the visualized detector geometry (by default invisible)
+Added calo hit title information (interaction lengths, pseudolayers)
+Draw charged PFOs even if they contain no associated clusters.
+
+************************************************************************
+LCD_WG2_VALIDATION_2 TAG
+************************************************************************
+Add checks for incorrect calo hit normal vectors
+Tidied entire package, aggressively removing outdated features and support for old root versions (pre ~5.25.00).
+Removed lcio dependency.
+
+************************************************************************
+LCD_WG2_VALIDATION TAG
+************************************************************************
