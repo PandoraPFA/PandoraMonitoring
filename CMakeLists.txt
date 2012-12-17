@@ -24,7 +24,7 @@ ADD_DEFINITIONS( "-Wno-long-long -Wno-sign-compare -fno-strict-aliasing" )
 
 # add library
 ADD_SHARED_LIBRARY( PandoraMonitoring ${Monitoring_SRCS} )
-TARGET_LINK_LIBRARIES( PandoraMonitoring PandoraFramework )
+TARGET_LINK_LIBRARIES( PandoraMonitoring PandoraSDK )
 
 # install library
 INSTALL_SHARED_LIBRARY( PandoraMonitoring DESTINATION lib )
