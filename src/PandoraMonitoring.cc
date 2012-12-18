@@ -583,7 +583,7 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
     TGLViewer *viewerGL = gEve->GetDefaultGLViewer();
     viewerGL->ColorSet().Background().SetColor(kWhite);
-    viewerGL->SetCurrentCamera(TGLViewer::kCameraOrthoXOZ);
+    //viewerGL->SetCurrentCamera(TGLViewer::kCameraOrthoXOZ);
 
     gEve->Redraw3D(kTRUE);
 
