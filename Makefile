@@ -39,7 +39,7 @@ $(LIBRARY): $(OBJECTS)
 
 install:
 ifdef INCLUDE_TARGET
-	cp -r $(PANDORA_DIR)/Monitoring/include/* ${INCLUDE_TARGET}
+	rsync -r --exclude=.svn $(PANDORA_DIR)/Monitoring/include/ ${INCLUDE_TARGET} ${INCLUDE_TARGET}
 endif
 ifdef LIB_TARGET
 	cp $(PANDORA_DIR)/lib/libPandoraMonitoring.so ${LIB_TARGET}
