@@ -17,6 +17,7 @@ SET( Monitoring_VERSION_PATCH 0 )
 
 
 ### DEPENDENCIES ############################################################
+FIND_PACKAGE( ILCUTIL COMPONENTS ILCSOFT_CMAKE_MODULES REQUIRED )
 
 # load default settings from ILCSOFT_CMAKE_MODULES
 INCLUDE( ilcsoft_default_settings )
