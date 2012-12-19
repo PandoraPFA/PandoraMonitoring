@@ -24,7 +24,7 @@ endif
 LDFLAGS  = $(shell $(ROOTSYS)/bin/root-config --auxcflags)
 LDFLAGS += $(LIBS) -Wl,-rpath
 
-LIBRARY = $(PANDORA_DIR)/lib/libPandoraMonitoring.so
+LIBRARY = $(PANDORA_DIR)/lib/libMonitoring.so
 
 all: $(SOURCES) $(OBJECTS)
 	$(CC) $(OBJECTS) $(LIBS) -shared -o $(LIBRARY)
@@ -42,7 +42,7 @@ ifdef INCLUDE_TARGET
 	rsync -r --exclude=.svn $(PANDORA_DIR)/Monitoring/include/ ${INCLUDE_TARGET} ${INCLUDE_TARGET}
 endif
 ifdef LIB_TARGET
-	cp $(PANDORA_DIR)/lib/libPandoraMonitoring.so ${LIB_TARGET}
+	cp $(PANDORA_DIR)/lib/libMonitoring.so ${LIB_TARGET}
 endif
 
 clean:
