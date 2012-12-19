@@ -1,8 +1,25 @@
-Added Pause and Create APIs, allowing for easy creation of Monitoring TApplication and allowing access to reusable pause functionality.
+************************************************************************
+TAG V00-11 FOLLOWING REPOSITORY RESTRUCTURING
+************************************************************************
+Between V00-06 (first direct inclusion in Ilcsoft) and V00-11, PandoraMonitoring was part of the PandoraPFANew parent package.
+PandoraPFANew is now a "metadata" package containing only Makefiles for downloading and building relevant Pandora libraries.
+The PandoraMonitoring library is now maintained and released separately.
+
+GENERAL INFO:
+Pandora consists of the PandoraSDK (Software Development Kit), which comprises a single library and header files with flexible APIs.
+There is also an optional PandoraMonitoring library, which contains event display and tree/histogram-writing functionality.
+The PandoraMonitoring library depends on the PandoraSDK and ROOT.
+Pandora algorithms will necessarily depend upon the PandoraSDK (and also PandoraMonitoring, if desired).
+The algorithms can be built as part of a Pandora client application, such as MarlinPandora, or the standalone TestPandora binary.
+Algorithms declared to be suitably generic may be designed for use by multiple client applications.
+Such re-usable algorithms are best bundled together into a Pandora "content" library.
+Algorithms are always registered via the client application, using the PandoraAPIs, but the client app can link against as many content libraries as required.
+
 
 ************************************************************************
 TAG V00-06 FOR ILCSOFT USAGE
 ************************************************************************
+Added Pause and Create APIs, allowing for easy creation of Monitoring TApplication and allowing access to reusable pause functionality.
 Moved PandoraMonitoring to PandoraPFANew repository.
 Updated to reflect recent changes to pandora APIs, including typedef changes and use of CaloHitLists, rather than OrderedCaloHitLists.
 Added ability to deal with pandora rectangular and pointing calo hits, via virtual function CaloHit::GetCellCorners.
