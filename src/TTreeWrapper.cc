@@ -163,6 +163,7 @@ TTreeWrapper::TreeMap::iterator TTreeWrapper::AddTree(const std::string &treeNam
         return treeIt;
 
     TTree* tree = new TTree(treeName.c_str(), treeName.c_str());
+    tree->SetDirectory(0);
 
     BranchMap* branchMap = new BranchMap();
     std::pair<TreeMap::iterator, bool> itInfo = m_treeMap.insert(TreeMap::value_type(treeName, TreeInfo(tree, branchMap)));
