@@ -1,4 +1,10 @@
 ************************************************************************
+TAG V00-12 FOR ILCSOFT USAGE
+************************************************************************
+Specified tree directory immediately after creation.
+Ensured local include directory is first in include path.
+
+************************************************************************
 TAG V00-11 FOLLOWING REPOSITORY RESTRUCTURING
 ************************************************************************
 Between V00-06 (first direct inclusion in Ilcsoft) and V00-11, PandoraMonitoring was part of the PandoraPFANew parent package.
