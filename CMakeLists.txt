@@ -11,7 +11,7 @@ PROJECT( PandoraMonitoring )
 
 # project version
 SET( PandoraMonitoring_VERSION_MAJOR 0 )
-SET( PandoraMonitoring_VERSION_MINOR 11 )
+SET( PandoraMonitoring_VERSION_MINOR 12 )
 SET( PandoraMonitoring_VERSION_PATCH 0 )
 
 
@@ -53,7 +53,7 @@ ADD_DEFINITIONS( "-Wno-long-long -Wno-sign-compare -fno-strict-aliasing" )
 
 FIND_PACKAGE( ILCUTIL COMPONENTS ILCSOFT_CMAKE_MODULES REQUIRED )
 
-FIND_PACKAGE( PandoraSDK 0.11 REQUIRED )
+FIND_PACKAGE( PandoraSDK 0.12 REQUIRED )
 FOREACH( pkg PandoraSDK )
     IF( ${pkg}_FOUND )
         INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
