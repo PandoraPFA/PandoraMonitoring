@@ -895,7 +895,14 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
 
         // MC particle id
         const MCParticle *pMCParticle = NULL;
-        pCaloHit->GetMCParticle(pMCParticle);
+
+        try
+        {
+            pMCParticle = pCaloHit->GetMainMCParticle();
+        }
+        catch (StatusCodeException &)
+        {
+        }
 
         int particleId = 0;
         if (pMCParticle)
@@ -1245,8 +1252,15 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
             }
         }
 
-        const MCParticle* pMCParticle = NULL;
-        pPandoraTrack->GetMCParticle(pMCParticle);
+        const MCParticle *pMCParticle = NULL;
+
+        try
+        {
+            pMCParticle = pPandoraTrack->GetMainMCParticle();
+        }
+        catch (StatusCodeException &)
+        {
+        }
 
         // Build information string
         std::stringstream sstr, sstrName;
