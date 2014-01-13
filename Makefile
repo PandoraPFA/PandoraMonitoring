@@ -3,7 +3,7 @@ DEFINES += -DROOT_EVE=1
 
 INCLUDES  = -I$(PANDORA_DIR)/PandoraMonitoring/include
 INCLUDES += -I$(PANDORA_DIR)/PandoraSDK/include
-INCLUDES += -I$(shell $(ROOTSYS)/bin/root-config --incdir)
+INCLUDES += -I$(shell root-config --incdir)
 
 CC = g++
 CFLAGS = -c -Wall -g -w -fPIC -O2
@@ -16,12 +16,12 @@ SOURCES = $(wildcard $(PANDORA_DIR)/PandoraMonitoring/src/*.cc)
 OBJECTS = $(SOURCES:.cc=.o)
 DEPENDS = $(OBJECTS:.o=.d)
 
-LIBS = -L$(PANDORA_DIR)/lib -lPandoraSDK $(shell $(ROOTSYS)/bin/root-config --glibs) -lEve
+LIBS = -L$(PANDORA_DIR)/lib -lPandoraSDK $(shell root-config --glibs --evelibs)
 ifdef BUILD_32BIT_COMPATIBLE
     LIBS += -m32
 endif
 
-LDFLAGS  = $(shell $(ROOTSYS)/bin/root-config --auxcflags)
+LDFLAGS  = $(shell root-config --auxcflags)
 LDFLAGS += $(LIBS) -Wl,-rpath
 
 LIBRARY = $(PANDORA_DIR)/lib/libPandoraMonitoring.so

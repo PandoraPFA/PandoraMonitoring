@@ -471,7 +471,6 @@ void PandoraMonitoring::SaveTree(const std::string &treeName, const std::string 
 
 void PandoraMonitoring::Pause() const
 {
-#ifdef __unix__
     std::cout << "Press return to continue ..." << std::endl;
     int flag = fcntl(1, F_GETFL, 0);
 
@@ -489,9 +488,6 @@ void PandoraMonitoring::Pause() const
     }
 
     fcntl(1, F_SETFL, flag);
-#else
-    std::cout << "PandoraMonitoring::Pause() is only implemented for unix operating systems." << std::endl;
-#endif
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
