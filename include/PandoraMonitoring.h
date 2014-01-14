@@ -401,7 +401,7 @@ inline PandoraMonitoring::PandoraMonitoring() :
     int argc = 0;
     char* argv = (char *)"";
 
-    if (gApplication)
+    if (gApplication && !gApplication->TestBit(TApplication::kDefaultApplication))
     {
         m_pApplication = gApplication;
     }
