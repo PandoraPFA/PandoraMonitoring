@@ -401,8 +401,15 @@ inline PandoraMonitoring::PandoraMonitoring() :
     int argc = 0;
     char* argv = (char *)"";
 
-    m_pApplication = new TApplication("PandoraMonitoring", &argc, &argv);
-    m_pApplication->SetReturnFromRun(kTRUE);
+    if (gApplication)
+    {
+        m_pApplication = gApplication;
+    }
+    else
+    {
+        m_pApplication = new TApplication("PandoraMonitoring", &argc, &argv);
+        m_pApplication->SetReturnFromRun(kTRUE);
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
