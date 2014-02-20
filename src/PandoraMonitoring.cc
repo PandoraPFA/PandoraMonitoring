@@ -843,7 +843,7 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(5,27,02)
     const std::string hitListName(name.empty() ? "Hits" : name);
-    TEvePointSet *hitsMarkers = new TEvePointSet((hitListName+"_markers").c_str());
+    TEvePointSet *hitsMarkers = new TEvePointSet((hitListName + "_markers").c_str());
     hitsMarkers->SetOwnIds(kTRUE);
     hits->AddElement(hitsMarkers);
 #endif 
@@ -1195,7 +1195,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
     const std::string starter("--- ");
     std::string trackListName(trackListTitle);
     if (trackListName.find(starter) != std::string::npos)
-        trackListName.replace(trackListName.find(starter), starter.length(), "Tracks//");
+        trackListName.replace(trackListName.find(starter), starter.length(), "tracks/");
     std::replace_if(trackListName.begin(), trackListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
 
     pTEveTrackList->SetElementNameTitle( trackListName.c_str(), trackListTitle.c_str() );
@@ -1348,11 +1348,17 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
             continue;
 
         // Build information string
-        std::stringstream sstr;
+        std::stringstream sstr, sstrName;
+
         sstr << "--- PFO"
              << "\nE=" << pPfo->GetEnergy() 
              << "\nm=" << pPfo->GetMass()
              << "\nPDG=" << pPfo->GetParticleId();
+
+        sstrName << "PFO"
+                 << "/E=" << pPfo->GetEnergy() 
+                 << "/m=" << pPfo->GetMass()
+                 << "/PDG=" << pPfo->GetParticleId();
 
         // Default color assignment
         Color pfoColor = color;
@@ -1370,7 +1376,10 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
 
         if (!trackList.empty() && clusterList.empty())
         {
-            pPfoElement = VisualizeTracks(&trackList, sstr.str().c_str(), pPfoVectorElement, pfoColor);
+            pPfoElement = new TEveElementList();
+            pPfoElement->SetElementNameTitle(sstrName.str().c_str(), sstrName.str().c_str());
+            (void) VisualizeTracks(&trackList, sstr.str().c_str(), pPfoElement, pfoColor);
+            pPfoVectorElement->AddElement(pPfoElement);
         }
         else if (!clusterList.empty())
         {
@@ -1379,8 +1388,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
         else
         {
             pPfoElement = new TEveElementList();
-            const std::string elementName("ContainerPfo");
-            pPfoElement->SetElementNameTitle(elementName.c_str(), elementName.c_str());
+            pPfoElement->SetElementNameTitle(sstr.str().c_str(), sstr.str().c_str());
         }
 
         if (showVertices)
