@@ -251,10 +251,11 @@ public:
      *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
      *  @param color The color the cluster elements are drawn with
      *  @param showAssociatedTracks draw the tracks associated to the cluster
+     *  @param showVertices whether to draw markers to represent the pfo vertices
      *  @param displayPfoHierarchy whether to draw daughter particles (only) within parent elements
      */
     TEveElement *VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, std::string name, TEveElement* parent,
-        Color color, bool showAssociatedTracks, bool displayPfoHierarchy);
+        Color color, bool showAssociatedTracks, bool showVertices, bool displayPfoHierarchy);
 
     /**
      *  @brief Add marker to visualization
@@ -264,8 +265,8 @@ public:
      *  @param color the marker color
      *  @param showAssociatedTracks draw the tracks associated to the cluster
      */
-    void AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, std::string name, Color color,
-        const unsigned int markerSize);
+    TEveElement *AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, std::string name, TEveElement* parent,
+        Color color, const unsigned int markerSize);
 
     /**
      *  @brief  Pause thread until user enters 'return'

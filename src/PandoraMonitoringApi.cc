@@ -205,9 +205,9 @@ void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const p
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, std::string name,
-    Color color, bool showAssociatedTracks, bool displayPfoHierarchy)
+    Color color, bool showAssociatedTracks, bool showVertices, bool displayPfoHierarchy)
 {
-    PandoraMonitoring::GetInstance()->VisualizeParticleFlowObjects(pPfoList, name, NULL, color, showAssociatedTracks, displayPfoHierarchy);
+    PandoraMonitoring::GetInstance()->VisualizeParticleFlowObjects(pPfoList, name, NULL, color, showAssociatedTracks, showVertices, displayPfoHierarchy);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -215,7 +215,7 @@ void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::PfoList *
 void PandoraMonitoringApi::AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, std::string name, Color color,
     const unsigned int markerSize)
 {
-    PandoraMonitoring::GetInstance()->AddMarkerToVisualization(pMarkerPoint, name, color, markerSize);
+    PandoraMonitoring::GetInstance()->AddMarkerToVisualization(pMarkerPoint, name, NULL, color, markerSize);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

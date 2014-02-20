@@ -1325,7 +1325,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *const pPfoList, std::string name,
-    TEveElement *parent, Color color, bool showAssociatedTracks, bool displayPfoHierarchy)
+    TEveElement *parent, Color color, bool showAssociatedTracks, bool showVertices, bool displayPfoHierarchy)
 {
     PfoVector pfoVector(pPfoList->begin(), pPfoList->end());
     std::sort(pfoVector.begin(), pfoVector.end(), ParticleFlowObject::SortByEnergy);
@@ -1383,11 +1383,16 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
             pPfoElement->SetElementNameTitle(elementName.c_str(), elementName.c_str());
         }
 
+        if (showVertices)
+        {
+            AddMarkerToVisualization(&(pPfo->GetVertex()), "Vertex", pPfoElement, pfoColor, 1.0);
+        }
+
         const PfoList &daughterPfoList(pPfo->GetDaughterPfoList());
 
         if (displayPfoHierarchy && !daughterPfoList.empty())
         {
-            VisualizeParticleFlowObjects(&daughterPfoList, "DaughterPfo", pPfoElement, pfoColor, showAssociatedTracks, displayPfoHierarchy);
+            VisualizeParticleFlowObjects(&daughterPfoList, "DaughterPfo", pPfoElement, pfoColor, showAssociatedTracks, showVertices, displayPfoHierarchy);
         }
     }
 
@@ -1508,12 +1513,13 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::AddMarkerToVisualization(const CartesianVector *const pMarkerPoint, std::string name, Color color,
-    const unsigned int markerSize)
+TEveElement *PandoraMonitoring::AddMarkerToVisualization(const CartesianVector *const pMarkerPoint, std::string name, TEveElement* parent,
+    Color color, const unsigned int markerSize)
 {
     InitializeEve();
 
     const std::string markerTitle(name.empty() ? "Marker" : name);
+
     TEvePointSet *pTEvePointSet = new TEvePointSet(markerTitle.c_str(), 1);
     pTEvePointSet->SetOwnIds(kTRUE);
 
@@ -1530,8 +1536,18 @@ void PandoraMonitoring::AddMarkerToVisualization(const CartesianVector *const pM
     pTEvePointSet->SetMarkerSize(markerSize);
     pTEvePointSet->SetMarkerStyle(20);
 
-    gEve->AddElement(pTEvePointSet);
-    gEve->Redraw3D();
+
+    if (parent)
+    {
+        parent->AddElement(pTEvePointSet);
+    }
+    else
+    {
+        gEve->AddElement(pTEvePointSet);
+        gEve->Redraw3D();
+    }
+
+    return pTEvePointSet;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
