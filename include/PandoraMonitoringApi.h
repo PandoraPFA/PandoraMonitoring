@@ -304,9 +304,10 @@ public:
      *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
      *  @param color The color the cluster elements are drawn with
      *  @param showAssociatedTracks draw the tracks associated to the cluster
+     *  @param displayPfoHierarchy whether to draw daughter particles (only) within parent elements
      */
     static void VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, std::string name, Color color,
-        bool showAssociatedTracks = true);
+        bool showAssociatedTracks = true, bool displayPfoHierarchy = true);
 
     /**
      *  @brief Add marker to visualization

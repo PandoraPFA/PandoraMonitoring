@@ -1325,7 +1325,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *const pPfoList, std::string name,
-    TEveElement *parent, Color color, bool showAssociatedTracks)
+    TEveElement *parent, Color color, bool showAssociatedTracks, bool displayPfoHierarchy)
 {
     PfoVector pfoVector(pPfoList->begin(), pPfoList->end());
     std::sort(pfoVector.begin(), pfoVector.end(), ParticleFlowObject::SortByEnergy);
@@ -1341,8 +1341,11 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
     pPfoVectorElement->SetElementNameTitle(pfoListName.c_str(), pfoListTitle.c_str());
 
     for (PfoVector::const_iterator pfoIter = pfoVector.begin(), pfoIterEnd = pfoVector.end(); pfoIter != pfoIterEnd; ++pfoIter)
-    { 
+    {
         ParticleFlowObject *pPfo = (*pfoIter);
+
+        if (displayPfoHierarchy && !parent && (pPfo->GetNParentPfos() != 0))
+            continue;
 
         // Build information string
         std::stringstream sstr;
@@ -1363,13 +1366,28 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
         const ClusterList &clusterList(pPfo->GetClusterList());
         const TrackList &trackList(pPfo->GetTrackList());
 
-        if (clusterList.empty())
+        TEveElement *pPfoElement = NULL;
+
+        if (!trackList.empty() && clusterList.empty())
         {
-            VisualizeTracks(&trackList, sstr.str().c_str(), pPfoVectorElement, pfoColor);
+            pPfoElement = VisualizeTracks(&trackList, sstr.str().c_str(), pPfoVectorElement, pfoColor);
+        }
+        else if (!clusterList.empty())
+        {
+            pPfoElement = VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, showAssociatedTracks, pPfo->GetParticleId());
         }
         else
         {
-            VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, showAssociatedTracks, pPfo->GetParticleId());
+            pPfoElement = new TEveElementList();
+            const std::string elementName("ContainerPfo");
+            pPfoElement->SetElementNameTitle(elementName.c_str(), elementName.c_str());
+        }
+
+        const PfoList &daughterPfoList(pPfo->GetDaughterPfoList());
+
+        if (displayPfoHierarchy && !daughterPfoList.empty())
+        {
+            VisualizeParticleFlowObjects(&daughterPfoList, "DaughterPfo", pPfoElement, pfoColor, showAssociatedTracks, displayPfoHierarchy);
         }
     }
 
