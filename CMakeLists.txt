@@ -11,7 +11,7 @@ PROJECT( PandoraMonitoring )
 
 # project version
 SET( PandoraMonitoring_VERSION_MAJOR 0 )
-SET( PandoraMonitoring_VERSION_MINOR 13 )
+SET( PandoraMonitoring_VERSION_MINOR 14 )
 SET( PandoraMonitoring_VERSION_PATCH 0 )
 
 
