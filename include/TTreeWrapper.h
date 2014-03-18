@@ -5,8 +5,8 @@
  *
  *  $Log: $
  */
-#ifndef TTREE_WRAPPER_H
-#define TTREE_WRAPPER_H 1
+#ifndef PANDORA_MONITORING_TTREE_WRAPPER_H
+#define PANDORA_MONITORING_TTREE_WRAPPER_H 1
 
 #include <iostream>
 #include <map>
@@ -123,4 +123,4 @@ private:
 
 } // namespace pandora_monitoring
 
-#endif // #ifndef TTREE_WRAPPER_H
+#endif // #ifndef PANDORA_MONITORING_TTREE_WRAPPER_H
