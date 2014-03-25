@@ -100,7 +100,7 @@ public:
      *  @param  multiply if "add" is false, multiply the histograms (if multiply is true), else divide
      */
     void AddMultiplyOrDivideHistograms(const std::string &nameHisto0, const std::string &nameHisto1, double coeff0, double coeff1,
-        bool add, bool multiply );
+        bool add, bool multiply);
 
     /**
      *  @brief  Set a variable in a tree (create the tree and the branch if not yet existing)
@@ -110,7 +110,7 @@ public:
      *  @param  variable sets value of the variable (permitted types are float/double/int and std::vector<float>*,std::vector<double>*,std::vector<int>*
      */
     template <typename VariableType>
-    void SetTreeVariable(const std::string &treeName, const std::string &variableName, VariableType  variable);
+    void SetTreeVariable(const std::string &treeName, const std::string &variableName, VariableType variable);
 
     /**
      *  @brief  Fill the tree with the variables which have been set before with SetTreeVariable
@@ -183,12 +183,12 @@ public:
     /**
      *  @brief  Set TEve display parameters
      * 
-     *  @param  blackBackground whether to use a black background color, rather than white
      *  @param  showDetectors turns the visibility of the detector geometry on or off
+     *  @param  detectorView the detector view
      *  @param  transparencyThresholdE cell energy for which transparency is saturated (0%, fully opaque)
      *  @param  energyScaleThresholdE cell energy for which color is at top end of continous color palette
      */
-    void SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float transparencyThresholdE,
+    void SetEveDisplayParameters(const bool showDetectors, const DetectorView detectorView, const float transparencyThresholdE,
         const float energyScaleThresholdE);
 
     /**
@@ -202,8 +202,8 @@ public:
      *
      *  @return pointer to created TEveElement
      */
-    TEveElement *VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, TEveElement *parent, Color color, 
-        const PandoraMonitoringApi::PdgCodeToEnergyMap *pParticleSuppressionMap);
+    TEveElement *VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, const std::string &name, TEveElement *parent,
+        const Color color, const PandoraMonitoringApi::PdgCodeToEnergyMap *pParticleSuppressionMap);
 
     /**
      *  @brief Add Tracks to the Eve event-display
@@ -215,7 +215,7 @@ public:
      *
      *  @return pointer to created TEveElement
      */
-    TEveElement *VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, TEveElement* parent, Color color);
+    TEveElement *VisualizeTracks(const pandora::TrackList *const pTrackList, const std::string &name, TEveElement *parent, const Color color);
 
     /**
      *  @brief Add CaloHits to the Eve event-display
@@ -227,7 +227,7 @@ public:
      *
      *  @return pointer to created TEveElement
      */
-    TEveElement *VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, std::string name, TEveElement* parent, Color color, int pfoId = 0);
+    TEveElement *VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, const std::string &name, TEveElement *parent, const Color color);
 
     /**
      *  @brief Add Clusters to the Eve event-display
@@ -240,8 +240,8 @@ public:
      *
      *  @return pointer to created TEveElement
      */
-    TEveElement *VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, TEveElement* parent, Color color,
-        bool showAssociatedTracks, int pfoId = 0);
+    TEveElement *VisualizeClusters(const pandora::ClusterList *const pClusterList, const std::string &name, TEveElement *parent, const Color color,
+        bool showAssociatedTracks);
 
     /**
      *  @brief Add Particle flow objects to the Eve event-display
@@ -254,8 +254,20 @@ public:
      *  @param showVertices whether to draw markers to represent the pfo vertices
      *  @param displayPfoHierarchy whether to draw daughter particles (only) within parent elements
      */
-    TEveElement *VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, std::string name, TEveElement* parent,
-        Color color, bool showAssociatedTracks, bool showVertices, bool displayPfoHierarchy);
+    TEveElement *VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, const std::string &name, TEveElement *parent, const Color color,
+        bool showVertices, bool displayPfoHierarchy);
+
+    /**
+     *  @brief Add vertices to the Eve event-display
+     * 
+     *  @param pVertexList list of vertices to be added to the event display
+     *  @param parent name of the vertexlist
+     *  @param parent pointer to the parent TEveElement. If NULL, the vertex will be parent element
+     *  @param color The color the vertex elements are drawn with
+     *
+     *  @return pointer to created TEveElement
+     */
+    TEveElement *VisualizeVertices(const pandora::VertexList *const pVertexList, const std::string &name, TEveElement *parent, const Color color);
 
     /**
      *  @brief Add marker to visualization
@@ -265,8 +277,8 @@ public:
      *  @param color the marker color
      *  @param showAssociatedTracks draw the tracks associated to the cluster
      */
-    TEveElement *AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, std::string name, TEveElement* parent,
-        Color color, const unsigned int markerSize);
+    TEveElement *AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, const std::string &name, TEveElement *parent,
+        const Color color, const unsigned int markerSize);
 
     /**
      *  @brief  Pause thread until user enters 'return'
@@ -284,7 +296,7 @@ public:
     void DeleteInstance();
 
 private:
-    typedef std::vector< std::pair< double,double > > DoublePairVector;
+    typedef std::vector< std::pair<double, double> > DoublePairVector;
 
     /**
      *  @brief  Default constructor
@@ -307,7 +319,7 @@ private:
      *  @param phi0 reference angle where to start the polygon
      *  @param coordinates vector of double,double pairs which is filled with the x and y coordinates of the polygon corners
      */
-    void ComputePolygonCorners(int symmetryOrder, double closestDistanceToIp, double phi0, std::vector<std::pair<double,double> > &coordinates);
+    void ComputePolygonCorners(int symmetryOrder, double closestDistanceToIp, double phi0, DoublePairVector &coordinates);
 
     /**
      *  @brief Creates a "tube" volume with the given symmetry inside and outside. If a symmetryOrder <= 2 is chosen, a circle is
@@ -392,27 +404,9 @@ private:
 
     float                       m_transparencyThresholdE;   ///< Cell energy for which transparency is saturated (0%, fully opaque)
     float                       m_energyScaleThresholdE;    ///< Cell energy for which color is at top end of continous color palette
+    bool                        m_showDetectors;            ///< Turns the visibility of the detector geometry on or off
+    DetectorView                m_detectorView;             ///< The detector view
 };
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline PandoraMonitoring::PandoraMonitoring() :
-    m_transparencyThresholdE(-1.f),
-    m_energyScaleThresholdE(-1.f)
-{
-    int argc = 0;
-    char* argv = (char *)"";
-
-    if (gApplication && !gApplication->TestBit(TApplication::kDefaultApplication))
-    {
-        m_pApplication = gApplication;
-    }
-    else
-    {
-        m_pApplication = new TApplication("PandoraMonitoring", &argc, &argv);
-        m_pApplication->SetReturnFromRun(kTRUE);
-    }
-}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------

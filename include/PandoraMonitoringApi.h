@@ -15,6 +15,7 @@
  */
 enum DetectorView
 {
+    DETECTOR_VIEW_DEFAULT,
     DETECTOR_VIEW_XY,
     DETECTOR_VIEW_XZ
 };
@@ -26,7 +27,7 @@ enum DetectorView
  */
 enum Color
 {
-    WHITE=0,
+    WHITE = 0,
     BLACK,
     RED,
     GREEN,
@@ -61,7 +62,6 @@ enum Color
     LIGHTYELLOW,
     AUTO,       // automatic choice of colors
     AUTOID,     // automatic choice of colors depending on the particle ID
-    AUTOTYPE,   // automatic choice of colors depending on the particle type 
     AUTOITER,   // automatic choice of colors iterating through colors
     AUTOENERGY  // continuous color palette indicating hit energies
 };
@@ -248,33 +248,33 @@ public:
     /**
      *  @brief  Set TEve display parameters
      * 
-     *  @param  blackBackground whether to use a black background color, rather than white
      *  @param  showDetectors turns the visibility of the detector geometry on or off
+     *  @param  detectorView the detector view
      *  @param  transparencyThresholdE cell energy for which transparency is saturated (0%, fully opaque)
      *  @param  energyScaleThresholdE cell energy for which color is at top end of continous color palette
      */
-    static void SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float transparencyThresholdE = -1.f,
-        const float energyScaleThresholdE = -1.f);
+    static void SetEveDisplayParameters(const bool showDetectors = true, const DetectorView detectorView = DETECTOR_VIEW_DEFAULT,
+        const float transparencyThresholdE = -1.f, const float energyScaleThresholdE = -1.f);
 
     /**
-     *  @brief Add MCParticles to the Eve event-display
+     *  @brief  Add MCParticles to the Eve event-display
      * 
-     *  @param pMCParticleList list of MC particles to be added to the event display
-     *  @param name of the MC particle list
-     *  @param color The color the track elements are drawn with
-     *  @param pParticleSuppressionMap map from pdg-codes to energy for suppression of particles types below specific energies
-     */  
-    static void VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, Color color,
+     *  @param  pMCParticleList list of MC particles to be added to the event display
+     *  @param  name of the MC particle list
+     *  @param  color The color the track elements are drawn with
+     *  @param  pParticleSuppressionMap map from pdg-codes to energy for suppression of particles types below specific energies
+     */
+    static void VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, const std::string &name, const Color color,
         const PdgCodeToEnergyMap *pParticleSuppressionMap = NULL);
 
     /**
-     *  @brief Add Tracks to the Eve event-display
+     *  @brief  Add Tracks to the Eve event-display
      * 
-     *  @param pTrackList list of tracks to be added to the event display
-     *  @param name of the track list
-     *  @param color The color the track elements are drawn with
-     */  
-    static void VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, Color color);
+     *  @param  pTrackList list of tracks to be added to the event display
+     *  @param  name of the track list
+     *  @param  color The color the track elements are drawn with
+     */
+    static void VisualizeTracks(const pandora::TrackList *const pTrackList, const std::string &name, const Color color);
 
     /**
      *  @brief Add CaloHits to the Eve event-display
@@ -283,32 +283,41 @@ public:
      *  @param name of the calohit list
      *  @param color The color the cluster elements are drawn with
      */  
-    static void VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, std::string name, Color color);
+    static void VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, const std::string &name, const Color color);
 
     /**
-     *  @brief Add Clusters to the Eve event-display
+     *  @brief  Add Clusters to the Eve event-display
      * 
-     *  @param pClusterList list of clusters to be added to the event display
-     *  @param name of the cluster list
-     *  @param color The color the cluster elements are drawn with
-     *  @param showAssociatedTracks draw the tracks associated to the cluster
+     *  @param  pClusterList list of clusters to be added to the event display
+     *  @param  name of the cluster list
+     *  @param  color The color the cluster elements are drawn with
+     *  @param  showAssociatedTracks draw the tracks associated to the cluster
      */
-    static void VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color,
+    static void VisualizeClusters(const pandora::ClusterList *const pClusterList, const std::string &name, const Color color,
         bool showAssociatedTracks = true);
 
     /**
-     *  @brief Add Particle flow objects to the Eve event-display
+     *  @brief  Add Particle flow objects to the Eve event-display
      * 
-     *  @param pPfoList list of particle flow objects to be added to the event display
-     *  @param name of the pfo list
-     *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
-     *  @param color The color the cluster elements are drawn with
-     *  @param showAssociatedTracks draw the tracks associated to the cluster
-     *  @param showVertices whether to draw markers to represent the pfo vertices
-     *  @param displayPfoHierarchy whether to draw daughter particles (only) within parent elements
+     *  @param  pPfoList list of particle flow objects to be added to the event display
+     *  @param  name of the pfo list
+     *  @param  parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
+     *  @param  color The color the cluster elements are drawn with
+     *  @param  showAssociatedTracks draw the tracks associated to the cluster
+     *  @param  showVertices whether to draw markers to represent the pfo vertices
+     *  @param  displayPfoHierarchy whether to draw daughter particles (only) within parent elements
      */
-    static void VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, std::string name, Color color,
-        bool showAssociatedTracks = true, bool showVertices = true, bool displayPfoHierarchy = true);
+    static void VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, const std::string &name, const Color color,
+        bool showVertices = true, bool displayPfoHierarchy = true);
+
+    /**
+     *  @brief  Add Vertices to the Eve event-display
+     * 
+     *  @param  pVertexList list of vertices to be added to the event display
+     *  @param  name of the vertex list
+     *  @param  color The color the cluster elements are drawn with
+     */
+    static void VisualizeVertices(const pandora::VertexList *const pVertexList, const std::string &name, const Color color);
 
     /**
      *  @brief Add marker to visualization
@@ -318,7 +327,7 @@ public:
      *  @param color the marker color
      *  @param showAssociatedTracks draw the tracks associated to the cluster
      */
-    static void AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, std::string name, Color color,
+    static void AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, const std::string &name, const Color color,
         const unsigned int markerSize);
 
     /**

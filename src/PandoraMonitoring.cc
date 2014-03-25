@@ -18,6 +18,7 @@
 #include "Objects/ParticleFlowObject.h"
 #include "Objects/Track.h"
 #include "Objects/MCParticle.h"
+#include "Objects/Vertex.h"
 
 #include "Pandora/PdgTable.h"
 
@@ -579,8 +580,17 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
     TGLViewer *viewerGL = gEve->GetDefaultGLViewer();
     viewerGL->ColorSet().Background().SetColor(kWhite);
-    //viewerGL->SetCurrentCamera(TGLViewer::kCameraOrthoXOZ);
 
+    if (DETECTOR_VIEW_XZ == m_detectorView)
+    {
+        viewerGL->SetCurrentCamera(TGLViewer::kCameraOrthoXOZ);
+    }
+    else if (DETECTOR_VIEW_XY == m_detectorView)
+    {
+        viewerGL->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);
+    }
+
+    gEve->GetGlobalScene()->SetRnrSelf(m_showDetectors);
     gEve->Redraw3D(kTRUE);
 
     m_eveInitialized = true;
@@ -589,17 +599,11 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float transparencyThresholdE,
+void PandoraMonitoring::SetEveDisplayParameters(const bool showDetectors, const DetectorView detectorView, const float transparencyThresholdE,
     const float energyScaleThresholdE)
 {
-    InitializeEve();
-
-    TGLViewer *viewerGL = gEve->GetDefaultGLViewer();
-    viewerGL->ColorSet().Background().SetColor(blackBackground ? GetROOTColor(BLACK) : GetROOTColor(WHITE));
-
-    gEve->GetGlobalScene()->SetRnrSelf(showDetectors);
-    gEve->Redraw3D(kTRUE);
-
+    m_showDetectors = showDetectors;
+    m_detectorView = detectorView;
     m_transparencyThresholdE = transparencyThresholdE;
     m_energyScaleThresholdE = energyScaleThresholdE;
 }
@@ -828,7 +832,7 @@ void PandoraMonitoring::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCaloHitList, std::string name, TEveElement *parent, Color color, int pfoId)
+TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCaloHitList, const std::string &name, TEveElement *parent, const Color color)
 {
     InitializeEve();
 
@@ -930,28 +934,6 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
         if (color == AUTOID)
         {
             hitColor = GetROOTColor(GetColorForPdgCode(particleId));
-
-            if (pfoId == particleId)
-                hitColor = kGray;
-        }
-        else if (color == AUTOTYPE)
-        {
-            hitColor = GetROOTColor(GetColorForPdgCode(particleId));
-
-            if (std::abs(pfoId) == std::abs(particleId))
-            {
-                hitColor = kGray;
-            }
-            else if ((std::abs(pfoId) >= 100) && (std::abs(particleId) >= 100))
-            {
-                static TParticle particlePfo;
-                static TParticle particleHit;
-                particlePfo.SetPdgCode(pfoId);
-                particleHit.SetPdgCode(particleId);
-
-                if (particlePfo.GetPDG()->Charge() == particleHit.GetPDG()->Charge())
-                    hitColor = kGray;
-            }
         }
         else if (color == AUTOITER)
         {
@@ -1042,8 +1024,8 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const pMCParticleList, std::string name,
-    TEveElement *parent, Color color, const PandoraMonitoringApi::PdgCodeToEnergyMap *pParticleSuppressionMap)
+TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const pMCParticleList, const std::string &name,
+    TEveElement *parent, const Color color, const PandoraMonitoringApi::PdgCodeToEnergyMap *pParticleSuppressionMap)
 {
     MCParticleVector mcParticleVector(pMCParticleList->begin(), pMCParticleList->end());
     std::sort(mcParticleVector.begin(), mcParticleVector.end(), MCParticle::SortByEnergy);
@@ -1182,7 +1164,7 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackList, std::string name, TEveElement *parent, Color color)
+TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackList, const std::string &name, TEveElement *parent, const Color color)
 {
     TrackVector trackVector(pTrackList->begin(), pTrackList->end());
     std::sort(trackVector.begin(), trackVector.end(), Track::SortByMomentum);
@@ -1324,8 +1306,8 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *const pPfoList, std::string name,
-    TEveElement *parent, Color color, bool showAssociatedTracks, bool showVertices, bool displayPfoHierarchy)
+TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *const pPfoList, const std::string &name, TEveElement *parent,
+    const Color color, bool showVertices, bool displayPfoHierarchy)
 {
     PfoVector pfoVector(pPfoList->begin(), pPfoList->end());
     std::sort(pfoVector.begin(), pfoVector.end(), ParticleFlowObject::SortByEnergy);
@@ -1383,7 +1365,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
         }
         else if (!clusterList.empty())
         {
-            pPfoElement = VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, showAssociatedTracks, pPfo->GetParticleId());
+            pPfoElement = VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, true);
         }
         else
         {
@@ -1391,16 +1373,16 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
             pPfoElement->SetElementNameTitle(sstr.str().c_str(), sstr.str().c_str());
         }
 
-        if (showVertices)
+        if (showVertices && pPfoElement && !pPfo->GetVertexList().empty())
         {
-            AddMarkerToVisualization(&(pPfo->GetVertex()), "Vertex", pPfoElement, pfoColor, 1.0);
+            (void) VisualizeVertices(&(pPfo->GetVertexList()), "VertexList", pPfoElement, pfoColor);
         }
 
         const PfoList &daughterPfoList(pPfo->GetDaughterPfoList());
 
         if (displayPfoHierarchy && !daughterPfoList.empty())
         {
-            VisualizeParticleFlowObjects(&daughterPfoList, "DaughterPfo", pPfoElement, pfoColor, showAssociatedTracks, showVertices, displayPfoHierarchy);
+            (void) VisualizeParticleFlowObjects(&daughterPfoList, "DaughterPfo", pPfoElement, pfoColor, showVertices, displayPfoHierarchy);
         }
     }
 
@@ -1419,8 +1401,8 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClusterList, std::string name, TEveElement *parent,
-    Color color, bool showAssociatedTracks, int pfoId)
+TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClusterList, const std::string &name, TEveElement *parent,
+    const Color color, bool showAssociatedTracks)
 {
     ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByHadronicEnergy);
@@ -1473,18 +1455,14 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
         }
 
         // Build information string
-        std::stringstream sstr, sstrName;
+        std::stringstream sstr;
 
         if (!name.empty())
             sstr << name << "\n";
 
-        sstr << "--- cluster\nEem(corr)=" << pCluster->GetElectromagneticEnergy() 
-             << "\nEhad(corr)=" << pCluster->GetHadronicEnergy() 
+        sstr << "--- cluster\nEem(corr)=" << pCluster->GetElectromagneticEnergy()
+             << "\nEhad(corr)=" << pCluster->GetHadronicEnergy()
              << "\nNHits=" << pCluster->GetNCaloHits();
-
-        sstrName << "cluster/Eem(corr)=" << pCluster->GetElectromagneticEnergy() 
-                 << "/Ehad(corr)=" << pCluster->GetHadronicEnergy() 
-                 << "/NHits=" << pCluster->GetNCaloHits();
 
         // Display constituent calo hits
         const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
@@ -1492,7 +1470,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
         CaloHitList caloHitList;
         orderedCaloHitList.GetCaloHitList(caloHitList);
 
-        TEveElement *pCaloHitsElement = VisualizeCaloHits(&caloHitList, sstr.str().c_str(), pClusterVectorElement, clusterColor, pfoId);
+        TEveElement *pCaloHitsElement = VisualizeCaloHits(&caloHitList, sstr.str().c_str(), pClusterVectorElement, clusterColor);
 
         // Show tracks associated with clusters
         if (showAssociatedTracks)
@@ -1501,7 +1479,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
             if (!trackList.empty())
             {
-                VisualizeTracks(&trackList, sstr.str().c_str(), pCaloHitsElement, clusterColor);
+                (void) VisualizeTracks(&trackList, sstr.str().c_str(), pCaloHitsElement, clusterColor);
             }
         }
     }
@@ -1521,29 +1499,24 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TEveElement *PandoraMonitoring::AddMarkerToVisualization(const CartesianVector *const pMarkerPoint, std::string name, TEveElement* parent,
-    Color color, const unsigned int markerSize)
+TEveElement *PandoraMonitoring::VisualizeVertices(const pandora::VertexList *const pVertexList, const std::string &name, TEveElement *parent,
+    const Color color)
 {
     InitializeEve();
 
-    const std::string markerTitle(name.empty() ? "Marker" : name);
-
-    TEvePointSet *pTEvePointSet = new TEvePointSet(markerTitle.c_str(), 1);
+    TEvePointSet *pTEvePointSet = new TEvePointSet(name.c_str(), 1);
     pTEvePointSet->SetOwnIds(kTRUE);
 
-    pTEvePointSet->SetPoint(0, pMarkerPoint->GetX() * m_scalingFactor,
-        pMarkerPoint->GetY() * m_scalingFactor,
-        pMarkerPoint->GetZ() * m_scalingFactor);
-
-    if (color >= AUTO)
+    for (VertexList::const_iterator iter = pVertexList->begin(), iterEnd = pVertexList->end(); iter != iterEnd; ++iter)
     {
-        color = ORANGE;
+        Vertex *pVertex = *iter;
+        const CartesianVector &vertexPosition(pVertex->GetPosition());
+
+        std::stringstream sstr;
+        sstr << "--- vertex\n" << vertexPosition;
+
+        (void) AddMarkerToVisualization(&vertexPosition, sstr.str(), pTEvePointSet, color, 1);
     }
-
-    pTEvePointSet->SetMarkerColor(GetROOTColor(color));
-    pTEvePointSet->SetMarkerSize(markerSize);
-    pTEvePointSet->SetMarkerStyle(20);
-
 
     if (parent)
     {
@@ -1556,6 +1529,59 @@ TEveElement *PandoraMonitoring::AddMarkerToVisualization(const CartesianVector *
     }
 
     return pTEvePointSet;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+TEveElement *PandoraMonitoring::AddMarkerToVisualization(const CartesianVector *const pMarkerPoint, const std::string &name, TEveElement *parent,
+    const Color color, const unsigned int markerSize)
+{
+    InitializeEve();
+
+    const std::string markerTitle(name.empty() ? "Marker" : name);
+
+    TEvePointSet *pTEvePointSet = new TEvePointSet(markerTitle.c_str(), 1);
+    pTEvePointSet->SetOwnIds(kTRUE);
+    pTEvePointSet->SetPoint(0, pMarkerPoint->GetX() * m_scalingFactor, pMarkerPoint->GetY() * m_scalingFactor, pMarkerPoint->GetZ() * m_scalingFactor);
+
+    const Color chosenColor((color < AUTO) ? color : ORANGE);
+    pTEvePointSet->SetMarkerColor(GetROOTColor(chosenColor));
+    pTEvePointSet->SetMarkerSize(markerSize);
+    pTEvePointSet->SetMarkerStyle(20);
+
+    if (parent)
+    {
+        parent->AddElement(pTEvePointSet);
+    }
+    else
+    {
+        gEve->AddElement(pTEvePointSet);
+        gEve->Redraw3D();
+    }
+
+    return pTEvePointSet;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PandoraMonitoring::PandoraMonitoring() :
+    m_transparencyThresholdE(-1.f),
+    m_energyScaleThresholdE(-1.f),
+    m_showDetectors(false),
+    m_detectorView(DETECTOR_VIEW_DEFAULT)
+{
+    int argc = 0;
+    char* argv = (char *)"";
+
+    if (gApplication && !gApplication->TestBit(TApplication::kDefaultApplication))
+    {
+        m_pApplication = gApplication;
+    }
+    else
+    {
+        m_pApplication = new TApplication("PandoraMonitoring", &argc, &argv);
+        m_pApplication->SetReturnFromRun(kTRUE);
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

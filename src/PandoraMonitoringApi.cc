@@ -166,15 +166,15 @@ void PandoraMonitoringApi::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::SetEveDisplayParameters(const bool blackBackground, const bool showDetectors, const float transparencyThresholdE,
+void PandoraMonitoringApi::SetEveDisplayParameters(const bool showDetectors, const DetectorView detectorView, const float transparencyThresholdE,
     const float energyScaleThresholdE)
 {
-    PandoraMonitoring::GetInstance()->SetEveDisplayParameters(blackBackground, showDetectors, transparencyThresholdE, energyScaleThresholdE);
+    PandoraMonitoring::GetInstance()->SetEveDisplayParameters(showDetectors, detectorView, transparencyThresholdE, energyScaleThresholdE);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, std::string name, Color color,
+void PandoraMonitoringApi::VisualizeMCParticles(const pandora::MCParticleList *const pMCParticleList, const std::string &name, const Color color,
     const PdgCodeToEnergyMap *pParticleSuppressionMap)
 {
     PandoraMonitoring::GetInstance()->VisualizeMCParticles(pMCParticleList, name, NULL, color, pParticleSuppressionMap);
@@ -182,21 +182,21 @@ void PandoraMonitoringApi::VisualizeMCParticles(const pandora::MCParticleList *c
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeTracks(const pandora::TrackList *const pTrackList, std::string name, Color color)
+void PandoraMonitoringApi::VisualizeTracks(const pandora::TrackList *const pTrackList, const std::string &name, const Color color)
 {
     PandoraMonitoring::GetInstance()->VisualizeTracks(pTrackList, name, NULL, color);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, std::string name, Color color)
+void PandoraMonitoringApi::VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, const std::string &name, const Color color)
 {
     PandoraMonitoring::GetInstance()->VisualizeCaloHits(pCaloHitList, name, NULL, color);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color,
+void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const pClusterList, const std::string &name, const Color color,
     bool showAssociatedTracks)
 {
     PandoraMonitoring::GetInstance()->VisualizeClusters(pClusterList, name, NULL, color, showAssociatedTracks);
@@ -204,15 +204,22 @@ void PandoraMonitoringApi::VisualizeClusters(const pandora::ClusterList *const p
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, std::string name,
-    Color color, bool showAssociatedTracks, bool showVertices, bool displayPfoHierarchy)
+void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, const std::string &name, const Color color,
+    bool showVertices, bool displayPfoHierarchy)
 {
-    PandoraMonitoring::GetInstance()->VisualizeParticleFlowObjects(pPfoList, name, NULL, color, showAssociatedTracks, showVertices, displayPfoHierarchy);
+    PandoraMonitoring::GetInstance()->VisualizeParticleFlowObjects(pPfoList, name, NULL, color, showVertices, displayPfoHierarchy);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, std::string name, Color color,
+void PandoraMonitoringApi::VisualizeVertices(const pandora::VertexList *const pVertexList, const std::string &name, const Color color)
+{
+    PandoraMonitoring::GetInstance()->VisualizeVertices(pVertexList, name, NULL, color);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, const std::string &name, const Color color,
     const unsigned int markerSize)
 {
     PandoraMonitoring::GetInstance()->AddMarkerToVisualization(pMarkerPoint, name, NULL, color, markerSize);
