@@ -532,8 +532,11 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
     TGeoVolume *pMainDetectorVolume = pGeoManager->MakeBox("Detector", pVacuum, 1000., 1000., 100.);
     pGeoManager->SetTopVolume(pMainDetectorVolume);
 
-    this->InitializeSubDetectors(pMainDetectorVolume, pAluminium, transparency);
-    this->InitializeGaps(pMainDetectorVolume, pVacuum, transparency);
+    if (GeometryHelper::IsInitialized())
+    {
+        this->InitializeSubDetectors(pMainDetectorVolume, pAluminium, transparency);
+        this->InitializeGaps(pMainDetectorVolume, pVacuum, transparency);
+    }
 
     //--- close the geometry
     pGeoManager->CloseGeometry();
@@ -1041,10 +1044,14 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
     pTEveTrackList->SetElementNameTitle( mcParticleListName.c_str(), mcParticleListTitle.c_str() );
     pTEveTrackList->SetMainColor(GetROOTColor(TEAL));
 
+    float bFieldZ(0.f);
+    try {bFieldZ = GeometryHelper::GetBField(CartesianVector(0., 0., 0.));}
+    catch (StatusCodeException &) {}
+
     // Initialize magnetic field for particle propagation, note strange ALICE charge sign convention,
     // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
     TEveTrackPropagator *pTEveTrackPropagator = pTEveTrackList->GetPropagator();
-    pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -GeometryHelper::GetBField(CartesianVector(0., 0., 0.))));
+    pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -bFieldZ));
     pTEveTrackPropagator->SetMaxOrbs(5);
 
     try {pTEveTrackPropagator->SetMaxR(GeometryHelper::GetHCalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);}
@@ -1183,10 +1190,14 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
     pTEveTrackList->SetElementNameTitle( trackListName.c_str(), trackListTitle.c_str() );
     pTEveTrackList->SetMainColor(GetROOTColor(TEAL));
 
+    float bFieldZ(0.f);
+    try {bFieldZ = GeometryHelper::GetBField(CartesianVector(0., 0., 0.));}
+    catch (StatusCodeException &) {}
+
     // Initialize magnetic field for particle propagation, note strange ALICE charge sign convention,
     // see http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9456&p=40325&hilit=teve+histogram#p40325
     TEveTrackPropagator *pTEveTrackPropagator = pTEveTrackList->GetPropagator();
-    pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -GeometryHelper::GetBField(CartesianVector(0., 0., 0.))));
+    pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -bFieldZ));
     pTEveTrackPropagator->SetMaxOrbs(5);
 
     try {pTEveTrackPropagator->SetMaxR(GeometryHelper::GetECalBarrelParameters().GetOuterRCoordinate() * m_scalingFactor);}
