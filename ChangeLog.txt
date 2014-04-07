@@ -1,4 +1,12 @@
 ************************************************************************
+TAG V00-15
+************************************************************************
+Add vertex visualization.
+Add detector view configuration options.
+Enable display in the case where the GeometryHelper is uninitialized.
+The ifndef statements in header files are now fully qualified.
+
+************************************************************************
 TAG V00-14
 ************************************************************************
 Enable visualization of pfo vertices.
