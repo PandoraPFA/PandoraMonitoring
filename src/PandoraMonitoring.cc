@@ -557,9 +557,9 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
         TEveManager::Create();
     }
-    catch (TEveException &tEveException)
+    catch (TEveException &tEveException1)
     {
-        std::cout << "PandoraMonitoring::InitializeEve(): Caught TEveException: " << tEveException.what() << std::endl;
+        std::cout << "PandoraMonitoring::InitializeEve(): Caught TEveException: " << tEveException1.what() << std::endl;
 
         try
         {
@@ -567,9 +567,9 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
             gROOT->SetBatch(kFALSE);
             TEveManager::Create();
         }
-        catch (TEveException &tEveException)
+        catch (TEveException &tEveException2)
         {
-            std::cout << "PandoraMonitoring::InitializeEve(): Caught TEveException: " << tEveException.what() << std::endl;
+            std::cout << "PandoraMonitoring::InitializeEve(): Caught TEveException: " << tEveException2.what() << std::endl;
             throw std::exception();
         }
     }
@@ -930,8 +930,6 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
         MakeCaloHitCell(pCaloHit, corners);
 
         // Supply hit marker details
-        const CartesianVector position = pCaloHit->GetPositionVector() * m_scalingFactor;
-
         EColor hitColor = GetROOTColor(color);
 
         if (color == AUTOID)
@@ -954,6 +952,7 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(5,27,02)
         const float markerSize(0.1);
+        const CartesianVector position = pCaloHit->GetPositionVector() * m_scalingFactor;
         hitsMarkers->SetNextPoint(position.GetX(), position.GetY(), position.GetZ());
         hitsMarkers->SetMarkerColor(hitColor);
         hitsMarkers->SetMarkerSize(markerSize);
