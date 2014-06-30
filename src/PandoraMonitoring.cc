@@ -269,12 +269,6 @@ void PandoraMonitoring::DrawHistogram(const std::string &name, const std::string
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-template <typename T>
-void PandoraMonitoring::DrawPandoraHistogram(const T &t, const std::string &options)
-{
-    throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
-}
-
 template <>
 void PandoraMonitoring::DrawPandoraHistogram(const pandora::Histogram &histogram, const std::string &options)
 {
@@ -377,13 +371,13 @@ void PandoraMonitoring::SetTreeVariable(const std::string &treeName, const std::
 }
 
 // instantiations of this template member function for the permitted types
-template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::string&, float  variable);
-template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::string&, int    variable);
-template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::string&, double variable);
+template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, float);
+template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, int);
+template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, double);
 
-template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::string&, std::vector<float>*  variable);
-template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::string&, std::vector<int>*    variable);
-template void PandoraMonitoring::SetTreeVariable(const std::string&, const std::string&, std::vector<double>* variable);
+template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, std::vector<float> *);
+template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, std::vector<int> *);
+template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, std::vector<double> *);
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1392,7 +1386,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
 
         if (displayPfoHierarchy && !daughterPfoList.empty())
         {
-            (void) VisualizeParticleFlowObjects(&daughterPfoList, "DaughterPfo", pPfoElement, pfoColor, showVertices, displayPfoHierarchy);
+            (void) VisualizeParticleFlowObjects(&daughterPfoList, "DaughterPfos", pPfoElement, pfoColor, showVertices, displayPfoHierarchy);
         }
     }
 
