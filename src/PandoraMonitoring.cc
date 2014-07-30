@@ -1360,34 +1360,27 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
 
         TEveElement *pPfoElement = NULL;
 
-        if (!trackList.empty() && clusterList.empty())
-        {
-            pPfoElement = new TEveElementList();
-            pPfoElement->SetElementNameTitle(sstrName.str().c_str(), sstrName.str().c_str());
-            (void) VisualizeTracks(&trackList, sstr.str().c_str(), pPfoElement, pfoColor);
-            pPfoVectorElement->AddElement(pPfoElement);
-        }
-        else if (!clusterList.empty())
+        if (!clusterList.empty())
         {
             pPfoElement = VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, true);
         }
         else
         {
             pPfoElement = new TEveElementList();
-            pPfoElement->SetElementNameTitle(sstr.str().c_str(), sstr.str().c_str());
+            pPfoElement->SetElementNameTitle(sstrName.str().c_str(), sstrName.str().c_str());
+            pPfoVectorElement->AddElement(pPfoElement);
+
+            if (!trackList.empty())
+                (void) VisualizeTracks(&trackList, sstr.str().c_str(), pPfoElement, pfoColor);
         }
 
-        if (showVertices && pPfoElement && !pPfo->GetVertexList().empty())
-        {
+        if (showVertices && !pPfo->GetVertexList().empty())
             (void) VisualizeVertices(&(pPfo->GetVertexList()), "VertexList", pPfoElement, pfoColor);
-        }
 
         const PfoList &daughterPfoList(pPfo->GetDaughterPfoList());
 
         if (displayPfoHierarchy && !daughterPfoList.empty())
-        {
             (void) VisualizeParticleFlowObjects(&daughterPfoList, "DaughterPfos", pPfoElement, pfoColor, showVertices, displayPfoHierarchy);
-        }
     }
 
     if (parent)
