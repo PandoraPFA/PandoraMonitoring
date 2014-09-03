@@ -44,7 +44,7 @@ public:
     void Print(const std::string &treeName) const ;
     void Scan(const std::string &treeName) const ;
 
-    TTree*& GetTree(const std::string& treeName);
+    TTree *&GetTree(const std::string &treeName);
 
     void Clear();  ///< clear tree with name 'treeName' in the TTreeWrapper
 
@@ -104,7 +104,7 @@ public:
         Branch<VectorDouble*>  *m_branchVectorDouble;       ///<
         Branch<VectorInt*>     *m_branchVectorInt;          ///<
 
-        TTree*                  m_tree;                     ///<
+        TTree                  *m_tree;                     ///<
         std::string             m_branchName;               ///<
     };
 

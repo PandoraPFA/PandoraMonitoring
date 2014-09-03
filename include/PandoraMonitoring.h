@@ -8,7 +8,6 @@
 #ifndef PANDORA_MONITORING_H
 #define PANDORA_MONITORING_H 1
 
-#include "TApplication.h"
 #include "TColor.h"
 
 #include "Pandora/PandoraInputTypes.h"
@@ -17,15 +16,13 @@
 #include "PandoraMonitoringApi.h"
 #include "TTreeWrapper.h"
 
-class TH1;
-class TH2F;
-
+class TApplication;
 class TEveElement;
 class TGeoShape;
 class TGeoVolume;
 class TGeoMedium;
 
-namespace pandora{class CartesianVector;}
+namespace pandora { class CartesianVector; class Pandora; }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -39,78 +36,28 @@ class PandoraMonitoring
 {
 public:
     /**
-     *  @brief  Get the pandora monitoring singleton
+     *  @brief  Get the relevant pandora monitoring instance
+     * 
+     *  @param  pandora the calling pandora instance
      */
-    static PandoraMonitoring *GetInstance();
+    static PandoraMonitoring *GetInstance(const pandora::Pandora &pandora);
 
     /**
-     *  @brief  Create a 1D histogram
+     *  @brief Delete instance of PandoraMonitoring
      * 
-     *  @param  name the name associated with the histogram
-     *  @param  title the histogram title
-     *  @param  nBinsX the number of x bins
-     *  @param  xLow the the lower bound for the x axis
-     *  @param  xUp the upper bound for the x axis
+     *  @param  pandora the calling pandora instance
      */
-    void Create1DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp,
-        const std::string &xAxisTitle, const std::string &yAxisTitle);
-
-    /**
-     *  @brief  Create a 2D histogram
-     * 
-     *  @param  name the name associated with the histogram
-     *  @param  title the histogram title
-     *  @param  nBinsX the number of x bins
-     *  @param  xLow the the lower bound for the x axis
-     *  @param  xUp the upper bound for the x axis
-     *  @param  nBinsY the number of y bins
-     *  @param  yLow the the lower bound for the y axis
-     *  @param  yUp the upper bound for the y axis
-     */
-    void Create2DHistogram(const std::string &name, const std::string &title, int nBinsX, float xLow, float xUp, int nBinsY,
-        double yLow, double yUp, const std::string &xAxisTitle, const std::string &yAxisTitle);
-
-    /**
-     *  @brief  Add a single entry to a 1D histogram
-     * 
-     *  @param  name the name associated with the histogram
-     *  @param  xValue the x value to add
-     *  @param  weight the weight to apply to the entry
-     */
-    void Fill1DHistogram(const std::string &name, float xValue, float weight);
-
-    /**
-     *  @brief  Add a single entry to a 2D histogram
-     * 
-     *  @param  name the name associated with the histogram
-     *  @param  xValue the x value to add
-     *  @param  yValue the y value to add
-     *  @param  weight the weight to apply to the entry
-     */
-    void Fill2DHistogram(const std::string &name, float xValue, float yValue, float weight);
-
-    /**
-     *  @brief  Add, multiply or divide two histograms
-     * 
-     *  @param  nameHisto0 the name associated with the first histogram
-     *  @param  nameHisto1 the name associated with the second histogram
-     *  @param  coeff0 coefficient for the first histogram
-     *  @param  coeff1 coefficient for the second histogram
-     *  @param  add add histograms
-     *  @param  multiply if "add" is false, multiply the histograms (if multiply is true), else divide
-     */
-    void AddMultiplyOrDivideHistograms(const std::string &nameHisto0, const std::string &nameHisto1, double coeff0, double coeff1,
-        bool add, bool multiply);
+    static void DeleteInstance(const pandora::Pandora &pandora);
 
     /**
      *  @brief  Set a variable in a tree (create the tree and the branch if not yet existing)
      * 
      *  @param  treeName name of the tree (is created if it does not exist yet)
      *  @param  variableName name of the branch in the tree (the branch is created if it does not exist yet)
-     *  @param  variable sets value of the variable (permitted types are float/double/int and std::vector<float>*,std::vector<double>*,std::vector<int>*
+     *  @param  t sets value of the variable (permitted types are float/double/int and std::vector<float>*,std::vector<double>*,std::vector<int>*
      */
-    template <typename VariableType>
-    void SetTreeVariable(const std::string &treeName, const std::string &variableName, VariableType variable);
+    template <typename T>
+    void SetTreeVariable(const std::string &treeName, const std::string &variableName, T t);
 
     /**
      *  @brief  Fill the tree with the variables which have been set before with SetTreeVariable
@@ -143,14 +90,6 @@ public:
     void SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions);
 
     /**
-     *  @brief  Draw a histogram
-     * 
-     *  @param  name the name associated with the histogram
-     *  @param  options the drawing options
-     */
-    void DrawHistogram(const std::string &name, const std::string &options) const;
-
-    /**
      *  @brief  Draw a pandora histogram
      * 
      *  @param  name the name associated with the histogram
@@ -158,27 +97,6 @@ public:
      */
     template <typename T>
     void DrawPandoraHistogram(const T &t, const std::string &options);
-
-    /**
-     *  @brief  Save a histogram to a file and tidy up
-     * 
-     *  @param  name the name associated with the histogram
-     *  @param  fileName the file name under which to save the histogram
-     *  @param  fileOptions the options associated with opening/recreating a file
-     */
-    void SaveAndCloseHistogram(const std::string &name, const std::string &fileName, const std::string &fileOptions);
-
-    /**
-     *  @brief  Delete a histogram
-     * 
-     *  @param  name the name associated with the histogram
-     */
-    void DeleteHistogram(const std::string &name);
-
-    /**
-     *  @brief Show the Eve Event-display and pause.
-     */
-    void ViewEvent();
 
     /**
      *  @brief  Set TEve display parameters
@@ -215,7 +133,8 @@ public:
      *
      *  @return pointer to created TEveElement
      */
-    TEveElement *VisualizeTracks(const pandora::TrackList *const pTrackList, const std::string &name, TEveElement *parent, const Color color);
+    TEveElement *VisualizeTracks(const pandora::TrackList *const pTrackList, const std::string &name, TEveElement *parent,
+        const Color color);
 
     /**
      *  @brief Add CaloHits to the Eve event-display
@@ -227,7 +146,8 @@ public:
      *
      *  @return pointer to created TEveElement
      */
-    TEveElement *VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, const std::string &name, TEveElement *parent, const Color color);
+    TEveElement *VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, const std::string &name, TEveElement *parent,
+        const Color color);
 
     /**
      *  @brief Add Clusters to the Eve event-display
@@ -240,8 +160,8 @@ public:
      *
      *  @return pointer to created TEveElement
      */
-    TEveElement *VisualizeClusters(const pandora::ClusterList *const pClusterList, const std::string &name, TEveElement *parent, const Color color,
-        bool showAssociatedTracks);
+    TEveElement *VisualizeClusters(const pandora::ClusterList *const pClusterList, const std::string &name, TEveElement *parent,
+        const Color color, bool showAssociatedTracks);
 
     /**
      *  @brief Add Particle flow objects to the Eve event-display
@@ -254,8 +174,8 @@ public:
      *  @param showVertices whether to draw markers to represent the pfo vertices
      *  @param displayPfoHierarchy whether to draw daughter particles (only) within parent elements
      */
-    TEveElement *VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, const std::string &name, TEveElement *parent, const Color color,
-        bool showVertices, bool displayPfoHierarchy);
+    TEveElement *VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, const std::string &name, TEveElement *parent,
+        const Color color, bool showVertices, bool displayPfoHierarchy);
 
     /**
      *  @brief Add vertices to the Eve event-display
@@ -267,7 +187,8 @@ public:
      *
      *  @return pointer to created TEveElement
      */
-    TEveElement *VisualizeVertices(const pandora::VertexList *const pVertexList, const std::string &name, TEveElement *parent, const Color color);
+    TEveElement *VisualizeVertices(const pandora::VertexList *const pVertexList, const std::string &name, TEveElement *parent,
+        const Color color);
 
     /**
      *  @brief Add marker to visualization
@@ -281,27 +202,59 @@ public:
         const Color color, const unsigned int markerSize);
 
     /**
+     *  @brief Show the Eve Event-display and pause.
+     */
+    void ViewEvent();
+
+    /**
      *  @brief  Pause thread until user enters 'return'
      */
     void Pause() const;
 
     /**
+     *  @brief  Sort clusters by descending hadronic energy
+     * 
+     *  @param  pLhs address of first cluster
+     *  @param  pRhs address of second cluster
+     */
+    static bool SortClustersByHadronicEnergy(const pandora::Cluster *const pLhs, const pandora::Cluster *const pRhs);
+
+    /**
+     *  @brief  Sort MCParticles by descending energy
+     * 
+     *  @param  pLhs address of first MCParticle
+     *  @param  pRhs address of second MCParticle
+     */
+    static bool SortMCParticlesByEnergy(const pandora::MCParticle *const pLhs, const pandora::MCParticle *const pRhs);
+
+    /**
+     *  @brief  Sort tracks by descending momentum
+     * 
+     *  @param  pLhs address of first track
+     *  @param  pRhs address of second track
+     */
+    static bool SortTracksByMomentum(const pandora::Track *const pLhs, const pandora::Track *const pRhs);
+
+    /**
+     *  @brief  Sort pfos by descending energy 
+     * 
+     *  @param  pLhs address of first pfo
+     *  @param  pRhs address of second pfo
+     */
+    static bool SortPfosByEnergy(const pandora::ParticleFlowObject *const pLhs, const pandora::ParticleFlowObject *const pRhs);
+
+private:
+    /**
+     *  @brief  Default constructor
+     * 
+     *  @param  pandora the associated pandora instance
+     */
+    PandoraMonitoring(const pandora::Pandora &pandora);
+
+    /**
      *  @brief  Destructor
      */
     ~PandoraMonitoring();
-
-    /**
-     *  @brief Delete instance of PandoraMonitoring
-     */
-    void DeleteInstance();
-
-private:
-    typedef std::vector< std::pair<double, double> > DoublePairVector;
-
-    /**
-     *  @brief  Default constructor
-     */
-    PandoraMonitoring();
 
     /**
      *  @brief Computes the corners of a box in 3D
@@ -310,6 +263,8 @@ private:
      *  @param corners will be filled with the x,y and z-coordinates of all 8 corners of the box
      */
     void MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, float corners[24]);
+
+    typedef std::vector< std::pair<double, double> > DoublePairVector;
 
     /**
      *  @brief compute the polygon corners for the detector outline
@@ -336,7 +291,7 @@ private:
      *  @param medium TGeoMedium of the volume
      */
     TGeoVolume *MakePolygonTube(std::string name, int innerSymmetryOrder, int outerSymmetryOrder, double innerClosestDistanceToIp,
-        double outerClosestDistanceToIp, double innerPhi0, double outerPhi0, double halfLength, TGeoMedium *medium = 0);
+        double outerClosestDistanceToIp, double innerPhi0, double outerPhi0, double halfLength, TGeoMedium *medium = NULL);
 
     /**
      *  @brief Creates a extruded polygonal (or cylindrical) shape with the given symmetry. If a symmetryOrder <= 2 is chosen, a
@@ -388,24 +343,22 @@ private:
      */
     void InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedium *pGapMedium, Char_t transparency);
 
-    typedef std::map<const std::string, TH1 *> HistogramMap;
+    typedef std::map<const pandora::Pandora*, PandoraMonitoring*> MonitoringInstanceMap;
+    static MonitoringInstanceMap    m_monitoringInstanceMap;    ///< The monitoring instance map
 
-    static bool                 m_instanceFlag;             ///< The pandora monitoring instance flag
-    static PandoraMonitoring   *m_pPandoraMonitoring;       ///< The pandora monitoring instance
-    TApplication               *m_pApplication;             ///< The root application
+    const pandora::Pandora *const   m_pPandora;                 ///< The associated pandora instance
+    TApplication                   *m_pApplication;             ///< The root application
+    TTreeWrapper                    m_treeWrapper;              ///< wrapper around TTree functionality
 
-    HistogramMap                m_histogramMap;             ///< The histogram map
-    TTreeWrapper                m_treeWrapper;              ///< wrapper around TTree functionality
+    bool                            m_eveInitialized;           ///< is set if ROOT Eve is initialized
+    float                           m_scalingFactor;            ///< TEve works with [cm], Pandora works with [mm]
+    bool                            m_openEveEvent;             ///< is set if an Event is open to store objects (hits, clusters,...) in it.
+    int                             m_eventDisplayCounter;      ///< counter for the event displays
 
-    static bool                 m_eveInitialized;           ///< is set if ROOT Eve is initialized
-    static float                m_scalingFactor;            ///< TEve works with [cm], Pandora works with [mm]
-    static bool                 m_openEveEvent;             ///< is set if an Event is open to store objects (hits, clusters,...) in it.
-    static int                  m_eventDisplayCounter;      ///< counter for the event displays
-
-    float                       m_transparencyThresholdE;   ///< Cell energy for which transparency is saturated (0%, fully opaque)
-    float                       m_energyScaleThresholdE;    ///< Cell energy for which color is at top end of continous color palette
-    bool                        m_showDetectors;            ///< Turns the visibility of the detector geometry on or off
-    DetectorView                m_detectorView;             ///< The detector view
+    float                           m_transparencyThresholdE;   ///< Cell energy for which transparency is saturated (0%, fully opaque)
+    float                           m_energyScaleThresholdE;    ///< Cell energy for which color is at top end of continous color palette
+    bool                            m_showDetectors;            ///< Turns the visibility of the detector geometry on or off
+    DetectorView                    m_detectorView;             ///< The detector view
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
