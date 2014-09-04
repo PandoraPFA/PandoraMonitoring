@@ -422,7 +422,6 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
     pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -bFieldZ));
     pTEveTrackPropagator->SetMaxOrbs(5);
 
-    // TODO try to remove these
     try {pTEveTrackPropagator->SetMaxR(m_pPandora->GetGeometry()->GetSubDetector(ECAL_BARREL).GetOuterRCoordinate() * m_scalingFactor);}
     catch (StatusCodeException &) {}
 
