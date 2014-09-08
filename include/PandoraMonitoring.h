@@ -18,6 +18,7 @@
 
 class TApplication;
 class TEveElement;
+class TEveManager;
 class TGeoShape;
 class TGeoVolume;
 class TGeoMedium;
@@ -348,9 +349,9 @@ private:
 
     const pandora::Pandora *const   m_pPandora;                 ///< The associated pandora instance
     TApplication                   *m_pApplication;             ///< The root application
+    TEveManager                    *m_pEveManager;              ///< The eve manager
     TTreeWrapper                    m_treeWrapper;              ///< wrapper around TTree functionality
 
-    bool                            m_eveInitialized;           ///< is set if ROOT Eve is initialized
     float                           m_scalingFactor;            ///< TEve works with [cm], Pandora works with [mm]
     bool                            m_openEveEvent;             ///< is set if an Event is open to store objects (hits, clusters,...) in it.
     int                             m_eventDisplayCounter;      ///< counter for the event displays

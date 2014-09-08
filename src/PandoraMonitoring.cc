@@ -386,8 +386,8 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
     }
     else
     {
-        gEve->AddElement(pTEveTrackList);
-        gEve->Redraw3D();
+        m_pEveManager->GetCurrentEvent()->AddElement(pTEveTrackList);
+        m_pEveManager->Redraw3D();
     }
 
     return pTEveTrackList;
@@ -515,8 +515,8 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
     }
     else
     {
-        gEve->AddElement(pTEveTrackList);
-        gEve->Redraw3D();
+        m_pEveManager->GetCurrentEvent()->AddElement(pTEveTrackList);
+        m_pEveManager->Redraw3D();
     }
 
     return pTEveTrackList;
@@ -668,8 +668,8 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
     }
     else
     {
-        gEve->AddElement(hits);
-        gEve->Redraw3D();
+        m_pEveManager->GetCurrentEvent()->AddElement(hits);
+        m_pEveManager->Redraw3D();
     }
 
     return hits;
@@ -749,8 +749,8 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
     }
     else
     {
-        gEve->AddElement(pClusterVectorElement);
-        gEve->Redraw3D();
+        m_pEveManager->GetCurrentEvent()->AddElement(pClusterVectorElement);
+        m_pEveManager->Redraw3D();
     }
 
     return pClusterVectorElement;
@@ -828,8 +828,8 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
     }
     else
     {
-        gEve->AddElement(pPfoVectorElement);
-        gEve->Redraw3D();
+        m_pEveManager->GetCurrentEvent()->AddElement(pPfoVectorElement);
+        m_pEveManager->Redraw3D();
     }
 
     return pPfoVectorElement;
@@ -863,8 +863,8 @@ TEveElement *PandoraMonitoring::VisualizeVertices(const pandora::VertexList *con
     }
     else
     {
-        gEve->AddElement(pTEvePointSet);
-        gEve->Redraw3D();
+        m_pEveManager->GetCurrentEvent()->AddElement(pTEvePointSet);
+        m_pEveManager->Redraw3D();
     }
 
     return pTEvePointSet;
@@ -894,8 +894,8 @@ TEveElement *PandoraMonitoring::AddMarkerToVisualization(const CartesianVector *
     }
     else
     {
-        gEve->AddElement(pTEvePointSet);
-        gEve->Redraw3D();
+        m_pEveManager->GetCurrentEvent()->AddElement(pTEvePointSet);
+        m_pEveManager->Redraw3D();
     }
 
     return pTEvePointSet;
@@ -907,13 +907,10 @@ void PandoraMonitoring::ViewEvent()
 {
     this->InitializeEve();
 
-    gEve->Redraw3D();
+    m_pEveManager->Redraw3D();
     this->Pause();
 
-    TEveEventManager *pTEveEventManager(gEve->GetCurrentEvent());
-
-    if (pTEveEventManager)
-        pTEveEventManager->SetRnrSelfChildren(kFALSE,kFALSE);
+    m_pEveManager->GetCurrentEvent()->SetRnrSelfChildren(kFALSE,kFALSE);
 
     m_openEveEvent = false;
     std::cout << "View done" << std::endl;
@@ -975,7 +972,7 @@ bool PandoraMonitoring::SortPfosByEnergy(const ParticleFlowObject *const pLhs, c
 PandoraMonitoring::PandoraMonitoring(const Pandora &pandora) :
     m_pPandora(&pandora),
     m_pApplication(NULL),
-    m_eveInitialized(false),
+    m_pEveManager(NULL),
     m_scalingFactor(0.1f),
     m_openEveEvent(false),
     m_eventDisplayCounter(0.f),
@@ -1004,9 +1001,9 @@ PandoraMonitoring::~PandoraMonitoring()
 {
     m_treeWrapper.Clear();
 
-    if (m_eveInitialized)
+    if (NULL != m_pEveManager)
     {
-        TEveManager::Terminate();
+        delete m_pEveManager;
         gSystem->ProcessEvents();
     }
 
@@ -1125,94 +1122,98 @@ TGeoShape *PandoraMonitoring::MakePolygonTube(int symmetryOrder, double closestD
 
 void PandoraMonitoring::InitializeEve(Char_t transparency)
 {
-    std::stringstream sstr;
-    sstr << "Event Display " << m_eventDisplayCounter;
-
-    if (PandoraMonitoring::m_eveInitialized)
+    if (NULL == m_pEveManager)
     {
-        TEveEventManager *pTEveEventManager(gEve->GetCurrentEvent());
-
-        if (pTEveEventManager)
-            pTEveEventManager->SetElementNameTitle(sstr.str().c_str(),sstr.str().c_str());
-
-        if (!m_openEveEvent)
-        {
-            gEve->AddEvent(new TEveEventManager(sstr.str().c_str(),sstr.str().c_str()));
-            m_openEveEvent = true;
-            m_eventDisplayCounter++;
-        }
-
-        return;
-    }
-
-    gSystem->Load("libGeom");
-    TGeoManager *pGeoManager = new TGeoManager("DetectorGeometry", "detector geometry");
-    TGeoMaterial *pVacuumMaterial = new TGeoMaterial("Vacuum", 0, 0, 0); // dummy material
-    TGeoMaterial *pAluminiumMaterial = new TGeoMaterial("Aluminium", 26.98, 13, 2.7); // dummy material
-    TGeoMedium *pVacuum = new TGeoMedium("Vacuum", 1, pVacuumMaterial);
-    TGeoMedium *pAluminium = new TGeoMedium("Aluminium", 2, pAluminiumMaterial);
-    TGeoVolume *pMainDetectorVolume = pGeoManager->MakeBox("Detector", pVacuum, 1000., 1000., 100.);
-    pGeoManager->SetTopVolume(pMainDetectorVolume);
-    this->InitializeSubDetectors(pMainDetectorVolume, pAluminium, transparency);
-    this->InitializeGaps(pMainDetectorVolume, pVacuum, transparency);
-    pGeoManager->CloseGeometry();
-
-    try
-    {
-        std::cout << "PandoraMonitoring::InitializeEve(): ";
-        const char *pDisplay(::getenv("DISPLAY"));
-
-        if (NULL == pDisplay)
-        {
-            std::cout << "DISPLAY environment not set" << std::endl;
-        }
-        else
-        {
-            std::cout << "DISPLAY environment set to " << pDisplay << std::endl;
-        }
-
-        TEveManager::Create();
-    }
-    catch (TEveException &tEveException1)
-    {
-        std::cout << "PandoraMonitoring::InitializeEve(): Caught TEveException: " << tEveException1.what() << std::endl;
-
         try
         {
-            std::cout << "PandoraMonitoring::InitializeEve(): Attempt to release ROOT from batch mode." << std::endl;
-            gROOT->SetBatch(kFALSE);
-            TEveManager::Create();
+            std::cout << "PandoraMonitoring::InitializeEve(): ";
+            const char *pDisplay(::getenv("DISPLAY"));
+
+            if (NULL == pDisplay)
+            {
+                std::cout << "DISPLAY environment not set" << std::endl;
+            }
+            else
+            {
+                std::cout << "DISPLAY environment set to " << pDisplay << std::endl;
+            }
+
+            m_pEveManager = TEveManager::Create();
         }
-        catch (TEveException &tEveException2)
+        catch (TEveException &tEveException1)
         {
-            std::cout << "PandoraMonitoring::InitializeEve(): Caught TEveException: " << tEveException2.what() << std::endl;
+            std::cout << "PandoraMonitoring::InitializeEve(): Caught TEveException: " << tEveException1.what() << std::endl;
+
+            try
+            {
+                std::cout << "PandoraMonitoring::InitializeEve(): Attempt to release ROOT from batch mode." << std::endl;
+                gROOT->SetBatch(kFALSE);
+                m_pEveManager = TEveManager::Create();
+            }
+            catch (TEveException &tEveException2)
+            {
+                std::cout << "PandoraMonitoring::InitializeEve(): Caught TEveException: " << tEveException2.what() << std::endl;
+                throw tEveException2;
+            }
+        }
+
+        if (NULL == m_pEveManager)
+        {
+            std::cout << "PandoraMonitoring, unable to create TEveManager. Bailing." << std::endl;
             throw std::exception();
         }
+
+        if (m_showDetectors && !m_pPandora->GetGeometry()->GetSubDetectorMap().empty())
+        {
+            TGeoManager *pGeoManager = new TGeoManager("DetectorGeometry", "detector geometry");
+
+            TGeoMaterial *pVacuumMaterial = new TGeoMaterial("Vacuum", 0, 0, 0); // dummy material
+            TGeoMaterial *pAluminiumMaterial = new TGeoMaterial("Aluminium", 26.98, 13, 2.7); // dummy material
+            TGeoMedium *pVacuum = new TGeoMedium("Vacuum", 1, pVacuumMaterial);
+            TGeoMedium *pAluminium = new TGeoMedium("Aluminium", 2, pAluminiumMaterial);
+            TGeoVolume *pMainDetectorVolume = pGeoManager->MakeBox("Detector", pVacuum, 1000., 1000., 100.);
+            
+            this->InitializeSubDetectors(pMainDetectorVolume, pAluminium, transparency);
+            this->InitializeGaps(pMainDetectorVolume, pVacuum, transparency);
+            pGeoManager->SetTopVolume(pMainDetectorVolume);
+            pGeoManager->CloseGeometry();
+
+            TGeoNode *pTGeoNode = pGeoManager->GetTopNode();
+            TEveGeoTopNode *pTEveGeoTopNode = new TEveGeoTopNode(pGeoManager, pTGeoNode);
+            pTEveGeoTopNode->SetVisLevel(1);
+            pTEveGeoTopNode->GetNode()->GetVolume()->SetVisibility(kFALSE);
+            
+            //std::stringstream sstr;
+            //sstr << "Geometry " << m_pPandora;
+            //TEveScene *pTEveScene = new TEveScene(sstr.str().c_str());
+            //pTEveScene->AddElement(pTEveGeoTopNode);
+            //m_pEveManager->GetDefaultViewer()->AddScene(pTEveScene);
+            
+            //m_pEveManager->GetCurrentEvent()->AddElement(pTEveGeoTopNode);
+            m_pEveManager->AddGlobalElement(pTEveGeoTopNode);
+            m_pEveManager->Redraw3D(kTRUE);
+        }
+
+        TGLViewer *pTGLViewer = m_pEveManager->GetDefaultGLViewer();
+        pTGLViewer->ColorSet().Background().SetColor(kWhite);
+        
+        if (DETECTOR_VIEW_XZ == m_detectorView)
+        {
+            pTGLViewer->SetCurrentCamera(TGLViewer::kCameraOrthoXOZ);
+        }
+        else if (DETECTOR_VIEW_XY == m_detectorView)
+        {
+            pTGLViewer->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);
+        }
     }
-
-    TGeoNode *pTGeoNode = gGeoManager->GetTopNode();
-    TEveGeoTopNode *pTEveGeoTopNode = new TEveGeoTopNode(gGeoManager, pTGeoNode);
-    pTEveGeoTopNode->SetVisLevel(1);
-    pTEveGeoTopNode->GetNode()->GetVolume()->SetVisibility(kFALSE);
-    gEve->AddGlobalElement(pTEveGeoTopNode);
-
-    TGLViewer *pTGLViewer = gEve->GetDefaultGLViewer();
-    pTGLViewer->ColorSet().Background().SetColor(kWhite);
-
-    if (DETECTOR_VIEW_XZ == m_detectorView)
+    
+    if (!m_openEveEvent)
     {
-        pTGLViewer->SetCurrentCamera(TGLViewer::kCameraOrthoXOZ);
+        std::stringstream sstr;
+        sstr << "Event Display " << m_eventDisplayCounter++;
+        m_pEveManager->AddEvent(new TEveEventManager(sstr.str().c_str(),sstr.str().c_str()));
+        m_openEveEvent = true;
     }
-    else if (DETECTOR_VIEW_XY == m_detectorView)
-    {
-        pTGLViewer->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);
-    }
-
-    gEve->GetGlobalScene()->SetRnrSelf(m_showDetectors);
-    gEve->Redraw3D(kTRUE);
-
-    m_eveInitialized = true;
-    m_openEveEvent = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
