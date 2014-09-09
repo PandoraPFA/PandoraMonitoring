@@ -54,6 +54,7 @@
 #include "TGeoCompositeShape.h"
 #include "TGeoManager.h"
 #include "TGeoMaterial.h"
+#include "TGeoMatrix.h"
 #include "TGeoTube.h"
 #include "TGeoXtru.h"
 
