@@ -1165,33 +1165,30 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
         if (m_showDetectors && !m_pPandora->GetGeometry()->GetSubDetectorMap().empty())
         {
-            TGeoManager *pGeoManager = new TGeoManager("DetectorGeometry", "detector geometry");
+            TGeoManager *pGeoManager = (NULL != gGeoManager) ? gGeoManager : new TGeoManager("DetectorGeometry", "detector geometry");
 
             TGeoMaterial *pVacuumMaterial = new TGeoMaterial("Vacuum", 0, 0, 0); // dummy material
             TGeoMaterial *pAluminiumMaterial = new TGeoMaterial("Aluminium", 26.98, 13, 2.7); // dummy material
             TGeoMedium *pVacuum = new TGeoMedium("Vacuum", 1, pVacuumMaterial);
             TGeoMedium *pAluminium = new TGeoMedium("Aluminium", 2, pAluminiumMaterial);
-            TGeoVolume *pMainDetectorVolume = pGeoManager->MakeBox("Detector", pVacuum, 1000., 1000., 100.);
-            
+
+            const bool topVolumeExists(NULL != pGeoManager->GetTopVolume());
+            TGeoVolume *pMainDetectorVolume = topVolumeExists ? pGeoManager->GetTopVolume() : pGeoManager->MakeBox("Detector", pVacuum, 1000., 1000., 100.);
+
             this->InitializeSubDetectors(pMainDetectorVolume, pAluminium, transparency);
             this->InitializeGaps(pMainDetectorVolume, pVacuum, transparency);
-            pGeoManager->SetTopVolume(pMainDetectorVolume);
-            pGeoManager->CloseGeometry();
 
-            TGeoNode *pTGeoNode = pGeoManager->GetTopNode();
-            TEveGeoTopNode *pTEveGeoTopNode = new TEveGeoTopNode(pGeoManager, pTGeoNode);
-            pTEveGeoTopNode->SetVisLevel(1);
-            pTEveGeoTopNode->GetNode()->GetVolume()->SetVisibility(kFALSE);
-            
-            //std::stringstream sstr;
-            //sstr << "Geometry " << m_pPandora;
-            //TEveScene *pTEveScene = new TEveScene(sstr.str().c_str());
-            //pTEveScene->AddElement(pTEveGeoTopNode);
-            //m_pEveManager->GetDefaultViewer()->AddScene(pTEveScene);
-            
-            //m_pEveManager->GetCurrentEvent()->AddElement(pTEveGeoTopNode);
-            m_pEveManager->AddGlobalElement(pTEveGeoTopNode);
-            m_pEveManager->Redraw3D(kTRUE);
+            if (!topVolumeExists)
+            {
+                pGeoManager->SetTopVolume(pMainDetectorVolume);
+                TGeoNode *pTGeoNode = pGeoManager->GetTopNode();
+                TEveGeoTopNode *pTEveGeoTopNode = new TEveGeoTopNode(pGeoManager, pTGeoNode);
+                pTEveGeoTopNode->SetVisLevel(1);
+                pTEveGeoTopNode->GetNode()->GetVolume()->SetVisibility(kFALSE);
+                m_pEveManager->AddGlobalElement(pTEveGeoTopNode);
+            }
+
+            m_pEveManager->FullRedraw3D(kTRUE);
         }
 
         TGLViewer *pTGLViewer = m_pEveManager->GetDefaultGLViewer();
