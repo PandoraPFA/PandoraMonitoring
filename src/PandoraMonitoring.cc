@@ -331,7 +331,6 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
         const float outerRadius(pPandoraMCParticle->GetOuterRadius());
 
         std::stringstream sstr, sstrName;
-        if (!name.empty()) sstr << name << "\n";
         sstr << starter << "MC particle" << "\nPDG=" << particleId << "\np=" << momentum.GetMagnitude() << "\nE=" << energy
             << "\nCharge=" << charge << "\nr_inner=" << innerRadius << "\nr_outer=" << outerRadius;
         sstrName << "MC" << "/PDG=" << particleId << "/p=" << momentum.GetMagnitude() << "/E=" << energy
@@ -413,7 +412,6 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
         const Color trackColor((color < AUTO) ? color : (charge == 0) ? AZURE : (charge > 0) ? RED : GREEN);
 
         std::stringstream sstr, sstrName;
-        if (!name.empty()) sstr << name << "\n";
         sstr << starter << "Track" << "\np=" << momentum.GetMagnitude() << "\nCharge=" << charge << "\nPDG=" << pPandoraTrack->GetParticleId();
         sstrName << "Track" << "/p=" << momentum.GetMagnitude() << "/Charge=" << charge << "/PDG=" << pPandoraTrack->GetParticleId();
 
@@ -593,7 +591,6 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
     }
 
     std::stringstream sstr, sstrName;
-    if (!name.empty()) sstr << name << "\n";
     sstr << starter << "CaloHits" << "\nEem=" << energySumElectromagnetic << "\nEhad=" << energySumHadronic << "\nInnerLayer=" << firstLayer
         << "\nOuterLayer=" << lastLayer;
     sstrName << "CaloHits" << "/Eem=" << energySumElectromagnetic << "/Ehad=" << energySumHadronic << "/InnerLayer=" << firstLayer
@@ -659,7 +656,6 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
             continue;
 
         std::stringstream sstr;
-        if (!name.empty()) sstr << name << "\n";
         sstr << starter << "Cluster\nEem(corr)=" << pCluster->GetElectromagneticEnergy() << "\nEhad(corr)=" << pCluster->GetHadronicEnergy()
             << "\nNHits=" << pCluster->GetNCaloHits() << "\nInnerHitType=" << this->GetHitTypeString(pCluster->GetInnerLayerHitType())
             << "\nOuterHitType=" << this->GetHitTypeString(pCluster->GetOuterLayerHitType());
