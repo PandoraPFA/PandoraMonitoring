@@ -660,8 +660,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
         std::stringstream sstr;
         if (!name.empty()) sstr << name << "\n";
-        if (!parent) sstr << starter;
-        sstr << "Cluster\nEem(corr)=" << pCluster->GetElectromagneticEnergy() << "\nEhad(corr)=" << pCluster->GetHadronicEnergy()
+        sstr << starter << "Cluster\nEem(corr)=" << pCluster->GetElectromagneticEnergy() << "\nEhad(corr)=" << pCluster->GetHadronicEnergy()
             << "\nNHits=" << pCluster->GetNCaloHits() << "\nInnerHitType=" << this->GetHitTypeString(pCluster->GetInnerLayerHitType())
             << "\nOuterHitType=" << this->GetHitTypeString(pCluster->GetOuterLayerHitType());
 
