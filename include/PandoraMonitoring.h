@@ -306,18 +306,25 @@ private:
     TGeoShape *MakePolygonTube(int symmetryOrder, double closestDistanceToIp, double phi, double halfLength);
 
     /**
+     *  @brief  Get a string representing a member of the pandora hit type enummeration
+     *
+     *  @return the hit type as a string
+     */
+    std::string GetHitTypeString(const pandora::HitType hitType) const;
+
+    /**
      *  @brief  Transform a Pandora monitoring API color enum into a ROOT color enum
      * 
      *  @param  color in Pandora monitoring API enum
      */
-    EColor GetROOTColor(Color color);
+    EColor GetROOTColor(Color color) const;
 
     /**
      *  @brief  Get a color for a PDG code
      * 
      *  @param  particleId pdgCode of the particle
      */
-    Color GetColorForPdgCode(int particleId);
+    Color GetColorForPdgCode(int particleId) const;
 
     /**
      *  @brief  Initialize eve elements
@@ -453,7 +460,7 @@ private:
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline EColor PandoraMonitoring::GetROOTColor(Color color)
+inline EColor PandoraMonitoring::GetROOTColor(Color color) const
 {
     switch (color)
     {
@@ -464,7 +471,7 @@ inline EColor PandoraMonitoring::GetROOTColor(Color color)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline Color PandoraMonitoring::GetColorForPdgCode(int particleId)
+inline Color PandoraMonitoring::GetColorForPdgCode(int particleId) const
 {
     switch (particleId)
     {

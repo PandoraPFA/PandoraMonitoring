@@ -277,12 +277,13 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
     MCParticleVector mcParticleVector(pMCParticleList->begin(), pMCParticleList->end());
     std::sort(mcParticleVector.begin(), mcParticleVector.end(), PandoraMonitoring::SortMCParticlesByEnergy);
 
+    const std::string starter("---");
     const std::string mcParticleListTitle(name.empty() ? "MCParticles" : name);
     std::string mcParticleListName(mcParticleListTitle);
     std::replace_if(mcParticleListName.begin(), mcParticleListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
 
     TEveTrackList *pTEveTrackList = new TEveTrackList();
-    pTEveTrackList->SetElementNameTitle( mcParticleListName.c_str(), mcParticleListTitle.c_str() );
+    pTEveTrackList->SetElementNameTitle(mcParticleListName.c_str(), mcParticleListTitle.c_str() );
     pTEveTrackList->SetMainColor(GetROOTColor(TEAL));
 
     float bFieldZ(0.f);
@@ -304,16 +305,10 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
     for (MCParticleVector::const_iterator iter = mcParticleVector.begin(), iterEnd = mcParticleVector.end(); iter != iterEnd; ++iter)
     { 
         MCParticle *pPandoraMCParticle(*iter);
-        const CartesianVector &momentum(pPandoraMCParticle->GetMomentum());
-        const float energy(pPandoraMCParticle->GetEnergy());
-
-        const CartesianVector position(pPandoraMCParticle->GetVertex() * m_scalingFactor);
-        const CartesianVector positionAtEnd(pPandoraMCParticle->GetEndpoint() * m_scalingFactor);
 
         // Does particle pass suppression conditions?
-        const int particleId = pPandoraMCParticle->GetParticleId();
-        const float innerRadius = pPandoraMCParticle->GetInnerRadius();
-        const float outerRadius = pPandoraMCParticle->GetOuterRadius();
+        const int particleId(pPandoraMCParticle->GetParticleId());
+        const float energy(pPandoraMCParticle->GetEnergy());
 
         if (pParticleSuppressionMap)
         {
@@ -323,47 +318,26 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
                 continue;
         }
 
-        // Create particle path
         TEveMCTrack *pTEveRecTrack = new TEveMCTrack();
+        const CartesianVector position(pPandoraMCParticle->GetVertex() * m_scalingFactor);
+        const CartesianVector &momentum(pPandoraMCParticle->GetMomentum());
         pTEveRecTrack->SetProductionVertex(position.GetX(), position.GetY(), position.GetZ(), 0.f);
         pTEveRecTrack->SetMomentum(momentum.GetX(), momentum.GetY(), momentum.GetZ(), energy);
         pTEveRecTrack->SetPdgCode(particleId);
 
-        // If known PDG code
-        int charge = 0;
-        if (pTEveRecTrack->GetPDG())
-            charge = ((int)pTEveRecTrack->GetPDG()->Charge()) / 3;
+        const int charge((pTEveRecTrack->GetPDG()) ? (static_cast<int>(pTEveRecTrack->GetPDG()->Charge()) / 3) : 0);
+        const Color mcParticleColor((color < AUTO) ? color : (charge == 0) ? CYAN : (charge > 0) ? LIGHTRED : LIGHTGREEN);
+        const float innerRadius(pPandoraMCParticle->GetInnerRadius());
+        const float outerRadius(pPandoraMCParticle->GetOuterRadius());
 
-        // Color assignment
-        Color mcParticleColor = color;
+        std::stringstream sstr, sstrName;
+        if (!name.empty()) sstr << name << "\n";
+        sstr << starter << "MC particle" << "\nPDG=" << particleId << "\np=" << momentum.GetMagnitude() << "\nE=" << energy
+            << "\nCharge=" << charge << "\nr_inner=" << innerRadius << "\nr_outer=" << outerRadius;
+        sstrName << "MC" << "/PDG=" << particleId << "/p=" << momentum.GetMagnitude() << "/E=" << energy
+            << "/Charge=" << charge << "/r_inner=" << innerRadius << "/r_outer=" << outerRadius;
 
-        if (color >= AUTO)
-        {
-            mcParticleColor = CYAN;
-
-            if (charge > 0)
-            {
-                mcParticleColor = LIGHTRED;
-            }
-            else if(charge < 0)
-            {
-                mcParticleColor = LIGHTGREEN;
-            }
-        }
-
-        // Build information string
-        std::stringstream sstr;
-        std::stringstream sstrName;
-
-        if (!name.empty())
-            sstr << name << "\n";
-
-        sstr << "--- MC particle" << "\np=" << momentum.GetMagnitude() << "\nE=" << energy << "\nCharge=" << charge << "\nPDG="
-            << particleId << "\nr_inner=" << innerRadius << "\nr_outer=" << outerRadius;
-
-        sstrName << "MC" << "/PDG=" << particleId << "/p=" << momentum.GetMagnitude() << "/E=" << energy << "/Charge=" << charge
-            << "/r_inner=" << innerRadius << "/r_outer=" << outerRadius;
-
+        // Create particle path
         TEveTrack *pTEveTrack = new TEveTrack(pTEveRecTrack, pTEveTrackPropagator);
         pTEveTrack->SetName(sstrName.str().c_str());
         pTEveTrack->SetTitle(sstr.str().c_str());
@@ -374,6 +348,7 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
 
         // Create mark at end position
         TEvePathMark endPositionMark(TEvePathMark::kDecay);
+        const CartesianVector positionAtEnd(pPandoraMCParticle->GetEndpoint() * m_scalingFactor);
         endPositionMark.fV.Set(positionAtEnd.GetX(), positionAtEnd.GetY(), positionAtEnd.GetZ());
         pTEveTrack->AddPathMark(endPositionMark);
 
@@ -402,15 +377,15 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
     TrackVector trackVector(pTrackList->begin(), pTrackList->end());
     std::sort(trackVector.begin(), trackVector.end(), PandoraMonitoring::SortTracksByMomentum);
 
-    const std::string starter("--- ");
+    const std::string starter("---");
     const std::string trackListTitle(name.empty() ? "Tracks" : name);
     std::string trackListName(trackListTitle);
     if (trackListName.find(starter) != std::string::npos)
-        trackListName.replace(trackListName.find(starter), starter.length(), "tracks/");
+        trackListName.replace(trackListName.find(starter), starter.length(), "Tracks/");
     std::replace_if(trackListName.begin(), trackListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
 
     TEveTrackList *pTEveTrackList = new TEveTrackList();
-    pTEveTrackList->SetElementNameTitle( trackListName.c_str(), trackListTitle.c_str() );
+    pTEveTrackList->SetElementNameTitle(trackListName.c_str(), trackListTitle.c_str() );
     pTEveTrackList->SetMainColor(GetROOTColor(TEAL));
 
     float bFieldZ(0.f);
@@ -433,43 +408,14 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
     { 
         Track *pPandoraTrack(*iter);
 
-        const TrackState &trackState(pPandoraTrack->GetTrackStateAtStart());
-        const CartesianVector &momentum(trackState.GetMomentum());
-        const CartesianVector position(trackState.GetPosition() * m_scalingFactor);
-
-        const TrackState &trackStateAtEnd(pPandoraTrack->GetTrackStateAtEnd());
-        const CartesianVector &momentumAtEnd(trackStateAtEnd.GetMomentum());
-        const CartesianVector positionAtEnd(trackStateAtEnd.GetPosition() * m_scalingFactor);
-
-        const TrackState &trackStateAtCalorimeter(pPandoraTrack->GetTrackStateAtCalorimeter());
-        const CartesianVector positionAtCalorimeter(trackStateAtCalorimeter.GetPosition() * m_scalingFactor);
-
-        // Color assignment
+        const CartesianVector &momentum(pPandoraTrack->GetTrackStateAtStart().GetMomentum());
         const int charge(pPandoraTrack->GetCharge());
+        const Color trackColor((color < AUTO) ? color : (charge == 0) ? AZURE : (charge > 0) ? RED : GREEN);
 
-        Color trackColor = color;
-        if (color >= AUTO)
-        {
-            trackColor = AZURE;
-
-            if (charge > 0)
-            {
-                trackColor = RED;
-            }
-            else if(charge < 0)
-            {
-                trackColor = GREEN;
-            }
-        }
-
-        // Build information string
         std::stringstream sstr, sstrName;
-
-        if (!name.empty())
-            sstr << name << "\n";
-
-        sstr << "--- track" << "\np=" << momentum.GetMagnitude() << "\nCharge=" << charge << "\nPDG=" << pPandoraTrack->GetParticleId();
-        sstrName << "track" << "/p=" << momentum.GetMagnitude() << "/Charge=" << charge << "/PDG=" << pPandoraTrack->GetParticleId();
+        if (!name.empty()) sstr << name << "\n";
+        sstr << starter << "Track" << "\np=" << momentum.GetMagnitude() << "\nCharge=" << charge << "\nPDG=" << pPandoraTrack->GetParticleId();
+        sstrName << "Track" << "/p=" << momentum.GetMagnitude() << "/Charge=" << charge << "/PDG=" << pPandoraTrack->GetParticleId();
 
         try
         {
@@ -484,6 +430,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
 
         // Create track path
         TEveRecTrack *pTEveRecTrack = new TEveRecTrack();
+        const CartesianVector position(pPandoraTrack->GetTrackStateAtStart().GetPosition() * m_scalingFactor);
         pTEveRecTrack->fV.Set(position.GetX(), position.GetY(), position.GetZ());
         pTEveRecTrack->fP.Set(momentum.GetX(), momentum.GetY(), momentum.GetZ());
         pTEveRecTrack->fSign = charge;
@@ -497,12 +444,15 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
 
         // Create mark at track end
         TEvePathMark endPositionMark(TEvePathMark::kReference);
+        const CartesianVector &momentumAtEnd(pPandoraTrack->GetTrackStateAtEnd().GetMomentum());
+        const CartesianVector positionAtEnd(pPandoraTrack->GetTrackStateAtEnd().GetPosition() * m_scalingFactor);
         endPositionMark.fV.Set(positionAtEnd.GetX(), positionAtEnd.GetY(), positionAtEnd.GetZ());
         endPositionMark.fP.Set(momentumAtEnd.GetX(), momentumAtEnd.GetY(), momentumAtEnd.GetZ());
         pTEveTrack->AddPathMark(endPositionMark);
 
         // Create mark at track projection to calorimeter
         TEvePathMark calorimeterPositionMark(TEvePathMark::kDecay);
+        const CartesianVector positionAtCalorimeter(pPandoraTrack->GetTrackStateAtCalorimeter().GetPosition() * m_scalingFactor);
         calorimeterPositionMark.fV.Set(positionAtCalorimeter.GetX(), positionAtCalorimeter.GetY(), positionAtCalorimeter.GetZ());
         pTEveTrack->AddPathMark(calorimeterPositionMark);
 
@@ -529,12 +479,23 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
 {
     this->InitializeEve();
 
+    const std::string starter("---");
+    const std::string caloHitListTitle(name.empty() ? "CaloHits" : name);
+    std::string caloHitListName(caloHitListTitle);
+    if (caloHitListName.find(starter) != std::string::npos)
+        caloHitListName.replace(caloHitListName.find(starter), starter.length(), "CaloHits/");
+    std::replace_if(caloHitListName.begin(), caloHitListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
+
+    TEveElement *pCaloHitVectorElement = new TEveElementList();
+    pCaloHitVectorElement->SetElementNameTitle(caloHitListName.c_str(), caloHitListTitle.c_str());
+
     TEveBoxSet *hits = new TEveBoxSet(name.c_str());
     hits->Reset(TEveBoxSet::kBT_FreeBox, kTRUE, 64);
     hits->SetOwnIds(kTRUE);
     hits->SetPickable(kTRUE);
     hits->SetMainTransparency(5);
     hits->SetAntiFlick(kTRUE);
+    pCaloHitVectorElement->AddElement(hits);
 
     static Double_t r[] = {1., 1.}, g[] = {1., 0.}, b[] = {0., 0.}, stop[] = {0., 1.};
     static const Int_t firstIndex(TColor::CreateGradientColorTable(2, stop, r, g, b, 256));
@@ -631,17 +592,12 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
         hits->DigitColor(hitColor, transparency);
     }
 
-    // Build information string
     std::stringstream sstr, sstrName;
-
-    if (!name.empty())
-        sstr << name << "\n";
-
-    sstr << "--- calo-hits" << "\nEem=" << energySumElectromagnetic << "\nEhad=" << energySumHadronic << "\nfirst pseudo-layer=" << firstLayer
-        << "\nlast  pseudo-layer=" << lastLayer;
-
-    sstrName << "calohits" << "/Eem=" << energySumElectromagnetic << "/Ehad=" << energySumHadronic << "/first pseudo-layer=" << firstLayer
-        << "/last  pseudo-layer=" << lastLayer;
+    if (!name.empty()) sstr << name << "\n";
+    sstr << starter << "CaloHits" << "\nEem=" << energySumElectromagnetic << "\nEhad=" << energySumHadronic << "\nInnerLayer=" << firstLayer
+        << "\nOuterLayer=" << lastLayer;
+    sstrName << "CaloHits" << "/Eem=" << energySumElectromagnetic << "/Ehad=" << energySumHadronic << "/InnerLayer=" << firstLayer
+        << "/OuterLayer=" << lastLayer;
 
     for (PandoraMonitoringApi::PdgCodeToEnergyMap::const_iterator iter = pdgCodeToEnergyMap.begin(), iterEnd = pdgCodeToEnergyMap.end(); iter != iterEnd; ++iter)
     {
@@ -650,13 +606,13 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
 
         if (0 == mcPDG)
         {
-            sstr << "\nCaloHits w/o MC particle = " << energy << " GeV";
-            sstrName << "/CaloHits wo MC particle = " << energy << " GeV";
+            sstr << "\nNoMC=" << energy << "GeV";
+            sstrName << "/NoMC=" << energy << "GeV";
         }
         else
         {
-            sstr << "\nfrom MC with PDG " << mcPDG << " = " << energy << " GeV";
-            sstrName << "/from MC with PDG " << mcPDG << " = " << energy << " GeV";
+            sstr << "\nFromMC(PDG " << mcPDG << ")=" << energy << "GeV";
+            sstrName << "/FromMC(PDG " << mcPDG << ")=" << energy << "GeV";
         }
     }
 
@@ -665,15 +621,15 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
 
     if (parent)
     {
-        parent->AddElement(hits);
+        parent->AddElement(pCaloHitVectorElement);
     }
     else
     {
-        m_pEveManager->GetCurrentEvent()->AddElement(hits);
+        m_pEveManager->GetCurrentEvent()->AddElement(pCaloHitVectorElement);
         m_pEveManager->Redraw3D();
     }
 
-    return hits;
+    return pCaloHitVectorElement;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -685,15 +641,15 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
     ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
     std::sort(clusterVector.begin(), clusterVector.end(), PandoraMonitoring::SortClustersByHadronicEnergy);
 
-    const std::string starter("--- ");
+    const std::string starter("---");
     const std::string clusterListTitle(name.empty() ? "Clusters" : name);
     std::string clusterListName(clusterListTitle);
     if (clusterListName.find(starter) != std::string::npos)
-        clusterListName.replace(clusterListName.find(starter), starter.length(), "");
+        clusterListName.replace(clusterListName.find(starter), starter.length(), "Clusters/");
     std::replace_if(clusterListName.begin(), clusterListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
 
     TEveElement *pClusterVectorElement = new TEveElementList();
-    pClusterVectorElement->SetElementNameTitle( clusterListName.c_str(), clusterListTitle.c_str());
+    pClusterVectorElement->SetElementNameTitle(clusterListName.c_str(), clusterListTitle.c_str());
 
     for (ClusterVector::const_iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
     {
@@ -702,45 +658,23 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
         if (pCluster->GetNCaloHits() == 0)
             continue;
 
-        // Color assignment
-        Color clusterColor = color;
-
-        if (color == AUTO)
-        {
-            if (!pCluster->GetAssociatedTrackList().empty())
-            {
-                clusterColor = MAGENTA;
-            }
-            else
-            {
-                clusterColor = LIGHTBLUE;
-            }
-        }
-
-        // Build information string
         std::stringstream sstr;
+        if (!name.empty()) sstr << name << "\n";
+        if (!parent) sstr << starter;
+        sstr << "Cluster\nEem(corr)=" << pCluster->GetElectromagneticEnergy() << "\nEhad(corr)=" << pCluster->GetHadronicEnergy()
+            << "\nNHits=" << pCluster->GetNCaloHits() << "\nInnerHitType=" << this->GetHitTypeString(pCluster->GetInnerLayerHitType())
+            << "\nOuterHitType=" << this->GetHitTypeString(pCluster->GetOuterLayerHitType());
 
-        if (!name.empty())
-            sstr << name << "\n";
-
-        sstr << "--- cluster\nEem(corr)=" << pCluster->GetElectromagneticEnergy() << "\nEhad(corr)=" << pCluster->GetHadronicEnergy()
-            << "\nNHits=" << pCluster->GetNCaloHits();
-
-        // Display constituent calo hits
-        const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+        const Color clusterColor((color != AUTO) ? color : (pCluster->GetAssociatedTrackList().empty()) ? LIGHTBLUE : MAGENTA);
 
         CaloHitList caloHitList;
-        orderedCaloHitList.GetCaloHitList(caloHitList);
-
+        pCluster->GetOrderedCaloHitList().GetCaloHitList(caloHitList);
         TEveElement *pCaloHitsElement = VisualizeCaloHits(&caloHitList, sstr.str().c_str(), pClusterVectorElement, clusterColor);
 
-        // Show tracks associated with clusters
-        if (showAssociatedTracks)
+        if (showAssociatedTracks && !pCluster->GetAssociatedTrackList().empty())
         {
-            const TrackList &trackList(pCluster->GetAssociatedTrackList());
-
-            if (!trackList.empty())
-                (void) VisualizeTracks(&trackList, sstr.str().c_str(), pCaloHitsElement, clusterColor);
+            TEveElement *pTrackParentElement(parent ? pClusterVectorElement : pCaloHitsElement);
+            (void) VisualizeTracks(&(pCluster->GetAssociatedTrackList()), sstr.str().c_str(), pTrackParentElement, clusterColor);
         }
     }
 
@@ -766,6 +700,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
     PfoVector pfoVector(pPfoList->begin(), pPfoList->end());
     std::sort(pfoVector.begin(), pfoVector.end(), PandoraMonitoring::SortPfosByEnergy);
 
+    const std::string starter("---");
     const std::string pfoListTitle(name.empty() ? "Pfos" : name);
     std::string pfoListName(pfoListTitle);
     std::replace_if(pfoListName.begin(), pfoListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
@@ -780,47 +715,30 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
         if (displayPfoHierarchy && !parent && (pPfo->GetNParentPfos() != 0))
             continue;
 
-        // Build information string
         std::stringstream sstr, sstrName;
-
-        sstr << "--- PFO" << "\nE=" << pPfo->GetEnergy() << "\nm=" << pPfo->GetMass() << "\nPDG=" << pPfo->GetParticleId();
+        sstr << starter << "PFO" << "\nE=" << pPfo->GetEnergy() << "\nm=" << pPfo->GetMass() << "\nPDG=" << pPfo->GetParticleId();
         sstrName << "PFO" << "/E=" << pPfo->GetEnergy() << "/m=" << pPfo->GetMass() << "/PDG=" << pPfo->GetParticleId();
 
-        // Default color assignment
-        Color pfoColor = color;
+        TEveElement *pPfoElement = new TEveElementList();
+        pPfoElement->SetElementNameTitle(sstrName.str().c_str(), sstrName.str().c_str());
+        pPfoVectorElement->AddElement(pPfoElement);
 
-        if (color == AUTO)
-        {
-            pfoColor = GetColorForPdgCode(pPfo->GetParticleId());
-        }
+        const Color pfoColor((color != AUTO) ? color : this->GetColorForPdgCode(pPfo->GetParticleId()));
 
-        // show clusters and tracks
         const ClusterList &clusterList(pPfo->GetClusterList());
         const TrackList &trackList(pPfo->GetTrackList());
 
-        TEveElement *pPfoElement = NULL;
-
         if (!clusterList.empty())
-        {
-            pPfoElement = VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoVectorElement, pfoColor, true);
-        }
-        else
-        {
-            pPfoElement = new TEveElementList();
-            pPfoElement->SetElementNameTitle(sstrName.str().c_str(), sstrName.str().c_str());
-            pPfoVectorElement->AddElement(pPfoElement);
+            (void) VisualizeClusters(&clusterList, sstr.str().c_str(), pPfoElement, pfoColor, false);
 
-            if (!trackList.empty())
-                (void) VisualizeTracks(&trackList, sstr.str().c_str(), pPfoElement, pfoColor);
-        }
+        if (!trackList.empty())
+            (void) VisualizeTracks(&trackList, sstr.str().c_str(), pPfoElement, pfoColor);
 
         if (showVertices && !pPfo->GetVertexList().empty())
             (void) VisualizeVertices(&(pPfo->GetVertexList()), "VertexList", pPfoElement, pfoColor);
 
-        const PfoList &daughterPfoList(pPfo->GetDaughterPfoList());
-
-        if (displayPfoHierarchy && !daughterPfoList.empty())
-            (void) VisualizeParticleFlowObjects(&daughterPfoList, "DaughterPfos", pPfoElement, pfoColor, showVertices, displayPfoHierarchy);
+        if (displayPfoHierarchy && !pPfo->GetDaughterPfoList().empty())
+            (void) VisualizeParticleFlowObjects(&(pPfo->GetDaughterPfoList()), "DaughterPfos", pPfoElement, pfoColor, showVertices, displayPfoHierarchy);
     }
 
     if (parent)
@@ -844,6 +762,7 @@ TEveElement *PandoraMonitoring::VisualizeVertices(const pandora::VertexList *con
 {
     this->InitializeEve();
 
+    const std::string starter("---");
     TEvePointSet *pTEvePointSet = new TEvePointSet(name.c_str(), 1);
     pTEvePointSet->SetOwnIds(kTRUE);
 
@@ -853,7 +772,7 @@ TEveElement *PandoraMonitoring::VisualizeVertices(const pandora::VertexList *con
         const CartesianVector &vertexPosition(pVertex->GetPosition());
 
         std::stringstream sstr;
-        sstr << "--- vertex\n" << vertexPosition;
+        sstr << starter << "Vertex\n" << vertexPosition;
 
         (void) AddMarkerToVisualization(&vertexPosition, sstr.str(), pTEvePointSet, color, 1);
     }
@@ -1117,6 +1036,25 @@ TGeoShape *PandoraMonitoring::MakePolygonTube(int symmetryOrder, double closestD
     delete[] y;
 
     return pTGeoXtru;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+std::string PandoraMonitoring::GetHitTypeString(const pandora::HitType hitType) const
+{
+    switch (hitType)
+    {
+        case TRACKER : return "TRACKER";
+        case ECAL : return "ECAL";
+        case HCAL : return "HCAL";
+        case MUON : return "MUON";
+        case TPC_VIEW_U : return "TPC_VIEW_U";
+        case TPC_VIEW_V : return "TPC_VIEW_V";
+        case TPC_VIEW_W : return "TPC_VIEW_W";
+        case TPC_3D : return "TPC_3D";
+        case HIT_CUSTOM : return "HIT_CUSTOM";
+        default : return "Unknown";
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

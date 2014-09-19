@@ -202,7 +202,7 @@ public:
      *  @param  showAssociatedTracks draw the tracks associated to the cluster
      */
     static void VisualizeClusters(const pandora::Pandora &pandora, const pandora::ClusterList *const pClusterList,
-        const std::string &name, const Color color, bool showAssociatedTracks = true);
+        const std::string &name, const Color color, bool showAssociatedTracks = false);
 
     /**
      *  @brief  Add Particle flow objects to the Eve event-display
