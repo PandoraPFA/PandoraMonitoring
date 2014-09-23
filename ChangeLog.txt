@@ -1,42 +1,57 @@
-************************************************************************
-TAG V00-16
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-17
+--------------------------------------------------------------------------------------------------------------------------------------------
+Update to reflect recent changes to PandoraSDK.
+Overhaul, with emphasis on ensuring that client applications can instantiate and use multiple concurrent pandora instances.
+Address issues highlighted by Coverity.
+Improvements for information available in display.
+Improvements for handling of PFO daughter tracks and clusters.
+Add new subdetectors, from separate instances, to global list of all subdetectors.
+Alter compiler warning flags, including all, extra, pedantic and shadow declarations to Makefile. Report warnings as errors.
 
-************************************************************************
-TAG V00-15
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-16
+--------------------------------------------------------------------------------------------------------------------------------------------
+Cosmetic.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-15
+--------------------------------------------------------------------------------------------------------------------------------------------
 Add vertex visualization.
 Add detector view configuration options.
 Enable display in the case where the GeometryHelper is uninitialized.
 The ifndef statements in header files are now fully qualified.
 
-************************************************************************
-TAG V00-14
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-14
+--------------------------------------------------------------------------------------------------------------------------------------------
 Enable visualization of pfo vertices.
 Enable visualization of pfo hierarchy.
 Allow default TApplication to be replaced by a real TApplication.
 Use global TApplication if it already exists.
 Changes for clang build on Mavericks.
 
-************************************************************************
-TAG V00-13
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-13
+--------------------------------------------------------------------------------------------------------------------------------------------
 Update to reflect recent changes to mc particle handling in PandoraSDK.
 
-************************************************************************
-TAG V00-12 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-12
+--------------------------------------------------------------------------------------------------------------------------------------------
 Specified tree directory immediately after creation.
 Ensured local include directory is first in include path.
 
-************************************************************************
-TAG V00-11 FOLLOWING REPOSITORY RESTRUCTURING
-************************************************************************
-Between V00-06 (first direct inclusion in Ilcsoft) and V00-11, PandoraMonitoring was part of the PandoraPFANew parent package.
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-11
+--------------------------------------------------------------------------------------------------------------------------------------------
+RESTRUCTURING
+Between v00-06 (first direct inclusion in Ilcsoft) and v00-11, PandoraMonitoring was part of the PandoraPFANew parent package.
 PandoraPFANew is now a "metadata" package containing only Makefiles for downloading and building relevant Pandora libraries.
 The PandoraMonitoring library is now maintained and released separately.
 
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
 GENERAL INFO:
 Pandora consists of the PandoraSDK (Software Development Kit), which comprises a single library and header files with flexible APIs.
 There is also an optional PandoraMonitoring library, which contains event display and tree/histogram-writing functionality.
@@ -46,11 +61,13 @@ The algorithms can be built as part of a Pandora client application, such as Mar
 Algorithms declared to be suitably generic may be designed for use by multiple client applications.
 Such re-usable algorithms are best bundled together into a Pandora "content" library.
 Algorithms are always registered via the client application, using the PandoraAPIs, but the client app can link against as many content libraries as required.
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
 
 
-************************************************************************
-TAG V00-06 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-06
+--------------------------------------------------------------------------------------------------------------------------------------------
 Added Pause and Create APIs, allowing for easy creation of Monitoring TApplication and allowing access to reusable pause functionality.
 Moved PandoraMonitoring to PandoraPFANew repository.
 Updated to reflect recent changes to pandora APIs, including typedef changes and use of CaloHitLists, rather than OrderedCaloHitLists.
@@ -58,9 +75,9 @@ Added ability to deal with pandora rectangular and pointing calo hits, via virtu
 Added hit colour scheme that uses continuous palette to reflect energy of hits.
 Removed unused options to draw fit to clusters and pfos.
 
-************************************************************************
-TAG V00-05 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-05
+--------------------------------------------------------------------------------------------------------------------------------------------
 Added ability to draw pandora histograms.
 Added option for drawing each cluster/pfo with a different color (iterates through list of available colors).
 Updated to reflect changes to pandora::CartesianVector class.
@@ -69,9 +86,9 @@ Removed dashes from TEveList names in tree menu of the TEve display for PFOs and
 Muon endcap is invisible by default only if muon barrel exists; helps with visualization of test beam set ups.
 Updated standalone Makefile: changed default compiler to g++ and added -O2 optimization flag.
 
-************************************************************************
-TAG V00-04 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-04
+--------------------------------------------------------------------------------------------------------------------------------------------
 Updated CMake files to use new ILCUTIL package.
 Updated CMake files to reflect restructuring of PandoraPFANew.
 Updated standalone makefile to reflect restructuring of PandoraPFANew.
@@ -84,15 +101,15 @@ Improved exception handling when creating TEveManager.
 Improved memory management when sorting content by energy, etc.
 Addressed CppCheck (static analysis package) warnings.
 
-************************************************************************
-TAG V00-03 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-03
+--------------------------------------------------------------------------------------------------------------------------------------------
 Display maximum and minimum radiation and interaction lengths from the ip for all calo hit lists.
 Reduced geometry dependence, adding try/catch blocks around queries for any specific geometry information.
 
-************************************************************************
-CREATE CLIC_CDR BRANCH
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG LCD_WG2_VALIDATION_4
+--------------------------------------------------------------------------------------------------------------------------------------------
 Added transparency for calorimeter hits (option)
 Added color scheme AUTOTYPE, which highlights confusion between neutral hadrons, charged hadrons, electrons, muons or photons.
 Added color-scheme AUTOID, which highlights particle ID issues.
@@ -103,17 +120,17 @@ Changed default background color to white
 Improved tool-tip information (add MC particle info for calohitclusters)
 Provided a gnu makefile.
 
-************************************************************************
-TAG V00-02 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-02
+--------------------------------------------------------------------------------------------------------------------------------------------
 Added axis title parameters for histograms.
 Added functionality to add, multiply or divide histograms.
 Updated to reflect changes to pandora GeometryHelper.
 Set BUILD_32BIT_COMPATIBLE to OFF by default.
 
-************************************************************************
-LCD_WG2_VALIDATION_3 TAG
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG LCD_WG2_VALIDATION_3
+--------------------------------------------------------------------------------------------------------------------------------------------
 Flip sign of magnetic field, rather than individual track charges, in order to match ALICE sign convention.
 Cluster fit arrow now turned off by default.
 Added visualization of MCParticles.
@@ -125,13 +142,18 @@ Added muon system to the visualized detector geometry (by default invisible)
 Added calo hit title information (interaction lengths, pseudolayers)
 Draw charged PFOs even if they contain no associated clusters.
 
-************************************************************************
-LCD_WG2_VALIDATION_2 TAG
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG LCD_WG2_VALIDATION_2
+--------------------------------------------------------------------------------------------------------------------------------------------
 Add checks for incorrect calo hit normal vectors
 Tidied entire package, aggressively removing outdated features and support for old root versions (pre ~5.25.00).
 Removed lcio dependency.
 
-************************************************************************
-LCD_WG2_VALIDATION TAG
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG LCD_WG2_VALIDATION
+--------------------------------------------------------------------------------------------------------------------------------------------
+Update to reflect changes to PandoraPFANew.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-01
+--------------------------------------------------------------------------------------------------------------------------------------------
