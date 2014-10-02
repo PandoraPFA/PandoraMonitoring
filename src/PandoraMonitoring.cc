@@ -897,9 +897,12 @@ PandoraMonitoring::PandoraMonitoring(const Pandora &pandora) :
     m_showDetectors(false),
     m_detectorView(DETECTOR_VIEW_DEFAULT)
 {
-    if (gApplication && !gApplication->TestBit(TApplication::kDefaultApplication))
+    if (gApplication)
     {
         m_pApplication = gApplication;
+
+        if (m_pApplication->TestBit(TApplication::kDefaultApplication))
+            std::cout << "PandoraMonitoring, only able to use default TApplication (limited functionality)." << std::endl;
     }
     else
     {
