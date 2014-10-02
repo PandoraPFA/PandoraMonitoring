@@ -357,7 +357,7 @@ private:
     const pandora::Pandora *const   m_pPandora;                 ///< The associated pandora instance
     TApplication                   *m_pApplication;             ///< The root application
     TEveManager                    *m_pEveManager;              ///< The eve manager
-    TTreeWrapper                    m_treeWrapper;              ///< wrapper around TTree functionality
+    TTreeWrapper                   *m_pTreeWrapper;             ///< wrapper around TTree functionality
 
     float                           m_scalingFactor;            ///< TEve works with [cm], Pandora works with [mm]
     bool                            m_openEveEvent;             ///< is set if an Event is open to store objects (hits, clusters,...) in it.

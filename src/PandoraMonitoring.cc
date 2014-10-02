@@ -119,7 +119,7 @@ void PandoraMonitoring::DeleteInstance(const Pandora &pandora)
 template <typename VariableType>
 void PandoraMonitoring::SetTreeVariable(const std::string &treeName, const std::string &variableName, VariableType variable)
 {
-    m_treeWrapper.Set(treeName, variableName, variable);
+    m_pTreeWrapper->Set(treeName, variableName, variable);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ void PandoraMonitoring::FillTree(const std::string &treeName)
 {
     try
     {
-        m_treeWrapper.Fill(treeName);
+        m_pTreeWrapper->Fill(treeName);
     }
     catch(TTreeWrapper::TreeNotFoundError& excpt)
     {
@@ -146,7 +146,7 @@ void PandoraMonitoring::PrintTree(const std::string &treeName)
 {
     try
     {
-        m_treeWrapper.Print(treeName);
+        m_pTreeWrapper->Print(treeName);
     }
     catch(TTreeWrapper::TreeNotFoundError& excpt)
     {
@@ -164,7 +164,7 @@ void PandoraMonitoring::ScanTree(const std::string &treeName)
 {
     try
     {
-        m_treeWrapper.Scan(treeName);
+        m_pTreeWrapper->Scan(treeName);
     }
     catch(TTreeWrapper::TreeNotFoundError& excpt)
     {
@@ -182,7 +182,7 @@ void PandoraMonitoring::SaveTree(const std::string &treeName, const std::string 
 {
     try
     {
-       TTree *&pTTree = m_treeWrapper.GetTree(treeName);
+       TTree *&pTTree = m_pTreeWrapper->GetTree(treeName);
 
        TFile *pTFile = new TFile(fileName.c_str(), fileOptions.c_str());
 
@@ -888,6 +888,7 @@ PandoraMonitoring::PandoraMonitoring(const Pandora &pandora) :
     m_pPandora(&pandora),
     m_pApplication(NULL),
     m_pEveManager(NULL),
+    m_pTreeWrapper(NULL),
     m_scalingFactor(0.1f),
     m_openEveEvent(false),
     m_eventDisplayCounter(0.f),
@@ -896,25 +897,26 @@ PandoraMonitoring::PandoraMonitoring(const Pandora &pandora) :
     m_showDetectors(false),
     m_detectorView(DETECTOR_VIEW_DEFAULT)
 {
-    int argc = 0;
-    char *argv = (char *)"";
-
     if (gApplication && !gApplication->TestBit(TApplication::kDefaultApplication))
     {
         m_pApplication = gApplication;
     }
     else
     {
+        int argc = 0;
+        char *argv = (char *)"";
         m_pApplication = new TApplication("PandoraMonitoring", &argc, &argv);
         m_pApplication->SetReturnFromRun(kTRUE);
     }
+   
+    m_pTreeWrapper = new TTreeWrapper;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 PandoraMonitoring::~PandoraMonitoring()
 {
-    m_treeWrapper.Clear();
+    delete m_pTreeWrapper;
 
     if (NULL != m_pEveManager)
     {
