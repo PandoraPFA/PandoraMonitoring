@@ -15,8 +15,28 @@ SET( PandoraMonitoring_VERSION_MINOR 17 )
 SET( PandoraMonitoring_VERSION_PATCH 0 )
 
 
-# load default settings from ILCSOFT_CMAKE_MODULES
-INCLUDE( ilcsoft_default_settings )
+### DEPENDENCIES ############################################################
+FIND_PACKAGE( ILCUTIL COMPONENTS ILCSOFT_CMAKE_MODULES QUIET )
+
+IF( ILCUTIL_FOUND )
+    INCLUDE( ilcsoft_default_settings )
+ELSE()
+    LIST( APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake/" )
+    INCLUDE( Default_settings )
+ENDIF()
+
+FIND_PACKAGE( PandoraSDK 0.17 REQUIRED )
+FOREACH( pkg PandoraSDK )
+    IF( ${pkg}_FOUND )
+        INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
+        LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
+        ADD_DEFINITIONS ( ${${pkg}_DEFINITIONS} )
+    ENDIF()
+ENDFOREACH()
+
+FIND_PACKAGE( ROOT 5.26.00 REQUIRED COMPONENTS Eve Geom RGL EG ) # minimum required ROOT version
+INCLUDE_DIRECTORIES( ${ROOT_INCLUDE_DIRS} )
+LINK_LIBRARIES( ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} )
 
 
 ### DOCUMENTATION ############################################################
@@ -47,24 +67,6 @@ ADD_DEFINITIONS( "-Wall -ansi -pedantic" )
 
 # need long long for int64 for now
 ADD_DEFINITIONS( "-Wno-long-long -Wno-sign-compare -fno-strict-aliasing" )
-
-
-### DEPENDENCIES ############################################################
-
-FIND_PACKAGE( ILCUTIL COMPONENTS ILCSOFT_CMAKE_MODULES REQUIRED )
-
-FIND_PACKAGE( PandoraSDK 0.17 REQUIRED )
-FOREACH( pkg PandoraSDK )
-    IF( ${pkg}_FOUND )
-        INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
-        LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
-        ADD_DEFINITIONS ( ${${pkg}_DEFINITIONS} )
-    ENDIF()
-ENDFOREACH()
-
-FIND_PACKAGE( ROOT 5.26.00 REQUIRED COMPONENTS Eve Geom RGL EG ) # minimum required ROOT version
-INCLUDE_DIRECTORIES( ${ROOT_INCLUDE_DIRS} )
-LINK_LIBRARIES( ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} )
 
 
 ### LIBRARY #################################################################
