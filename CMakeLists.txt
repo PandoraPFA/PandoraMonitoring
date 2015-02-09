@@ -55,14 +55,12 @@ ENDIF()
 INCLUDE_DIRECTORIES( ./include )
 INSTALL_DIRECTORY( ./include DESTINATION . FILES_MATCHING PATTERN "*.h" )
 
-ADD_DEFINITIONS( "-Wall -ansi -pedantic" )
-ADD_DEFINITIONS( "-Wno-long-long" )
-ADD_DEFINITIONS( "-DMONITORING" )
-
 AUX_SOURCE_DIRECTORY( ./src/ PandoraMonitoring_SRCS )
 
+ADD_DEFINITIONS( "-DMONITORING" )
+
 # require proper C++
-ADD_DEFINITIONS( "-Wall -ansi -pedantic" )
+ADD_DEFINITIONS( "-Wall -ansi -pedantic -std=c++0x" )
 
 # need long long for int64 for now
 ADD_DEFINITIONS( "-Wno-long-long -Wno-sign-compare -fno-strict-aliasing" )
