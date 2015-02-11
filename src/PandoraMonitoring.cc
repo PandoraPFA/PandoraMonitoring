@@ -303,8 +303,8 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
     catch (StatusCodeException &) {}
 
     for (MCParticleVector::const_iterator iter = mcParticleVector.begin(), iterEnd = mcParticleVector.end(); iter != iterEnd; ++iter)
-    { 
-        MCParticle *pPandoraMCParticle(*iter);
+    {
+        const MCParticle *pPandoraMCParticle(*iter);
 
         // Does particle pass suppression conditions?
         const int particleId(pPandoraMCParticle->GetParticleId());
@@ -404,8 +404,8 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
     catch (StatusCodeException &) {}
 
     for (TrackVector::const_iterator iter = trackVector.begin(), iterEnd = trackVector.end(); iter != iterEnd; ++iter)
-    { 
-        Track *pPandoraTrack(*iter);
+    {
+        const Track *pPandoraTrack(*iter);
 
         const CartesianVector &momentum(pPandoraTrack->GetTrackStateAtStart().GetMomentum());
         const int charge(pPandoraTrack->GetCharge());
@@ -650,7 +650,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
     for (ClusterVector::const_iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
     {
-        Cluster *pCluster(*iter);
+        const Cluster *pCluster(*iter);
 
         if (pCluster->GetNCaloHits() == 0)
             continue;
@@ -705,7 +705,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
 
     for (PfoVector::const_iterator iter = pfoVector.begin(), iterEnd = pfoVector.end(); iter != iterEnd; ++iter)
     {
-        ParticleFlowObject *pPfo(*iter);
+        const ParticleFlowObject *pPfo(*iter);
 
         if (displayPfoHierarchy && !parent && (pPfo->GetNParentPfos() != 0))
             continue;
@@ -763,7 +763,7 @@ TEveElement *PandoraMonitoring::VisualizeVertices(const pandora::VertexList *con
 
     for (VertexList::const_iterator iter = pVertexList->begin(), iterEnd = pVertexList->end(); iter != iterEnd; ++iter)
     {
-        Vertex *pVertex = *iter;
+        const Vertex *pVertex = *iter;
         const CartesianVector &vertexPosition(pVertex->GetPosition());
 
         std::stringstream sstr;
@@ -1230,8 +1230,8 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
     {
         std::string gapName("gap" + TypeToString(gapCounter++));
 
-        BoxGap *pBoxGap = NULL;
-        pBoxGap = dynamic_cast<BoxGap *>(*iter);
+        const BoxGap *pBoxGap = NULL;
+        pBoxGap = dynamic_cast<const BoxGap *>(*iter);
 
         if (NULL != pBoxGap)
         {
@@ -1273,8 +1273,8 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
             continue;
         }
 
-        ConcentricGap *pConcentricGap = NULL;
-        pConcentricGap = dynamic_cast<ConcentricGap *>(*iter);
+        const ConcentricGap *pConcentricGap = NULL;
+        pConcentricGap = dynamic_cast<const ConcentricGap *>(*iter);
 
         if (NULL != pConcentricGap)
         {
