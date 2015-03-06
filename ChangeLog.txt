@@ -1,4 +1,15 @@
 --------------------------------------------------------------------------------------------------------------------------------------------
+TAG v01-00-00
+--------------------------------------------------------------------------------------------------------------------------------------------
+Milestone v01 release.
+Update to reflect recent changes to PandoraSDK.
+Improved const-correctness. Algorithms are now only exposed to pointers to const managed-objects. Access to managed-object non-const functionality is now only via Pandora APIs.
+Construct TTreeWrapper instance (can implicitly create a dummy global TApplication) only after constructing TApplication instance.
+Work around ROOT crash in the event that a default global TApplication already exists at time of PandoraMonitoring construction.
+Makefile and CMakeLists overhaul.
+Updated readme.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
 TAG v00-17
 --------------------------------------------------------------------------------------------------------------------------------------------
 Update to reflect recent changes to PandoraSDK.
