@@ -24,6 +24,7 @@
 #include "Objects/Vertex.h"
 
 #include "Pandora/Algorithm.h"
+#include "Pandora/PandoraEnumeratedTypes.h"
 
 #include "Plugins/BFieldPlugin.h"
 
