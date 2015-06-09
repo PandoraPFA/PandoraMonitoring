@@ -10,9 +10,9 @@ PROJECT( PandoraMonitoring )
 
 
 # project version
-SET( PandoraMonitoring_VERSION_MAJOR 01 )
+SET( PandoraMonitoring_VERSION_MAJOR 02 )
 SET( PandoraMonitoring_VERSION_MINOR 00 )
-SET( PandoraMonitoring_VERSION_PATCH 01 )
+SET( PandoraMonitoring_VERSION_PATCH 00 )
 
 
 ### CMAKE ###################################################################
@@ -55,16 +55,15 @@ IF( NOT COMPILER_SUPPORTS_CXX_FLAGS )
 ENDIF()
 
 if( APPLE )
-#fg: the clang linker(!) does not like -ansi ...
-SET( CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -pedantic -Wno-long-long -Wno-sign-compare -Wshadow -fno-strict-aliasing ${CMAKE_CXX_FLAGS}" )
+    SET( CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -pedantic -Wno-long-long -Wno-sign-compare -Wshadow -fno-strict-aliasing ${CMAKE_CXX_FLAGS}" )
 else()
-SET( CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -ansi -pedantic -Wno-long-long -Wno-sign-compare -Wshadow -fno-strict-aliasing ${CMAKE_CXX_FLAGS}" )
+    SET( CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -ansi -pedantic -Wno-long-long -Wno-sign-compare -Wshadow -fno-strict-aliasing ${CMAKE_CXX_FLAGS}" )
 endif()
 
 
 ### DEPENDENCIES ############################################################
 
-FIND_PACKAGE( PandoraSDK 01.00.00 REQUIRED )
+FIND_PACKAGE( PandoraSDK 02.00.00 REQUIRED )
 FOREACH( pkg PandoraSDK )
     IF( ${pkg}_FOUND )
         INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
