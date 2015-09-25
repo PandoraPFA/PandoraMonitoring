@@ -28,11 +28,10 @@ find_package(ROOT 5.26.00 REQUIRED COMPONENTS Eve Geom RGL EG)
 include_directories(${ROOT_INCLUDE_DIRS})
 link_libraries(${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
 add_definitions(${ROOT_DEFINITIONS})
+add_definitions("-DMONITORING")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # Low level settings - compiler etc
-add_definitions("-DMONITORING")
-
 if (NOT CMAKE_CXX_FLAGS)
     set(CMAKE_CXX_FLAGS "-std=c++11")
     set(PROCEED_WITHOUT_CXX_FLAGS ON)
