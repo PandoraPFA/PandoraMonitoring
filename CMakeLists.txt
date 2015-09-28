@@ -10,16 +10,16 @@ endif()
 project(PandoraMonitoring)
 
 # project version
-set(PandoraMonitoring_VERSION_MAJOR 02)
-set(PandoraMonitoring_VERSION_MINOR 00)
-set(PandoraMonitoring_VERSION_PATCH 01)
-set(PandoraMonitoring_VERSION "${PandoraMonitoring_VERSION_MAJOR}.${PandoraMonitoring_VERSION_MINOR}.${PandoraMonitoring_VERSION_PATCH}")
+set(${PROJECT_NAME}_VERSION_MAJOR 02)
+set(${PROJECT_NAME}_VERSION_MINOR 01)
+set(${PROJECT_NAME}_VERSION_PATCH 00)
+set(${PROJECT_NAME}_VERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # Dependencies
 include(PandoraCMakeSettings)
 
-find_package(PandoraSDK 02.00.02 REQUIRED)
+find_package(PandoraSDK 02.01.00 REQUIRED)
 include_directories(${PandoraSDK_INCLUDE_DIRS})
 link_libraries(${PandoraSDK_LIBRARIES})
 add_definitions(${PandoraSDK_DEFINITIONS})
