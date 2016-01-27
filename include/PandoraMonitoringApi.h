@@ -152,9 +152,11 @@ public:
      *  @param  detectorView the detector view
      *  @param  transparencyThresholdE cell energy for which transparency is saturated (0%, fully opaque)
      *  @param  energyScaleThresholdE cell energy for which color is at top end of continous color palette
+     *  @param  scalingFactor TEve works with [cm], Pandora works with [mm] (unless user has decided to use alternative units)
      */
     static void SetEveDisplayParameters(const pandora::Pandora &pandora, const bool showDetectors = true,
-        const DetectorView detectorView = DETECTOR_VIEW_DEFAULT, const float transparencyThresholdE = -1.f, const float energyScaleThresholdE = -1.f);
+        const DetectorView detectorView = DETECTOR_VIEW_DEFAULT, const float transparencyThresholdE = -1.f,
+        const float energyScaleThresholdE = -1.f, const float scalingFactor = 0.1f);
 
     typedef std::map<int, float> PdgCodeToEnergyMap;
 

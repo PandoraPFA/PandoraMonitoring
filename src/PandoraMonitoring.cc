@@ -261,12 +261,13 @@ void PandoraMonitoring::DrawPandoraHistogram(const pandora::TwoDHistogram &twoDH
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PandoraMonitoring::SetEveDisplayParameters(const bool showDetectors, const DetectorView detectorView, const float transparencyThresholdE,
-    const float energyScaleThresholdE)
+    const float energyScaleThresholdE, const float scalingFactor)
 {
     m_showDetectors = showDetectors;
     m_detectorView = detectorView;
     m_transparencyThresholdE = transparencyThresholdE;
     m_energyScaleThresholdE = energyScaleThresholdE;
+    m_scalingFactor = scalingFactor;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

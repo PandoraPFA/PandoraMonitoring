@@ -106,9 +106,10 @@ public:
      *  @param  detectorView the detector view
      *  @param  transparencyThresholdE cell energy for which transparency is saturated (0%, fully opaque)
      *  @param  energyScaleThresholdE cell energy for which color is at top end of continous color palette
+     *  @param  scalingFactor TEve works with [cm], Pandora works with [mm] (unless user has decided to use alternative units)
      */
     void SetEveDisplayParameters(const bool showDetectors, const DetectorView detectorView, const float transparencyThresholdE,
-        const float energyScaleThresholdE);
+        const float energyScaleThresholdE, const float scalingFactor);
 
     /**
      *  @brief Add MC particles to the Eve event-display
