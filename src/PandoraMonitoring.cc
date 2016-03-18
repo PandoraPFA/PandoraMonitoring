@@ -52,6 +52,7 @@
 #include "TEveTrack.h"
 #include "TEveTrackPropagator.h"
 
+#include "TGeoBBox.h"
 #include "TGeoCompositeShape.h"
 #include "TGeoManager.h"
 #include "TGeoMaterial.h"
@@ -298,11 +299,27 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
     pTEveTrackPropagator->SetMagFieldObj(new TEveMagFieldConst(0., 0., -bFieldZ));
     pTEveTrackPropagator->SetMaxOrbs(5);
 
-    try {pTEveTrackPropagator->SetMaxR(m_pPandora->GetGeometry()->GetSubDetector(HCAL_BARREL).GetOuterRCoordinate() * m_scalingFactor);}
-    catch (StatusCodeException &) {}
+    try
+    {
+        pTEveTrackPropagator->SetMaxR(m_pPandora->GetGeometry()->GetSubDetector(HCAL_BARREL).GetOuterRCoordinate() * m_scalingFactor);
+    }
+    catch (StatusCodeException &)
+    {
+        double xMin(-1000.), xMax(1000.);
+        if (gGeoManager) gGeoManager->GetTopVolume()->GetShape()->GetAxisRange(1, xMin, xMax);
+        pTEveTrackPropagator->SetMaxR(xMax - xMin);
+    }
 
-    try {pTEveTrackPropagator->SetMaxZ(std::fabs(m_pPandora->GetGeometry()->GetSubDetector(HCAL_ENDCAP).GetOuterZCoordinate()) * m_scalingFactor);}
-    catch (StatusCodeException &) {}
+    try
+    {
+        pTEveTrackPropagator->SetMaxZ(std::fabs(m_pPandora->GetGeometry()->GetSubDetector(HCAL_ENDCAP).GetOuterZCoordinate()) * m_scalingFactor);
+    }
+    catch (StatusCodeException &)
+    {
+        double zMin(-1000.), zMax(1000.);
+        if (gGeoManager) gGeoManager->GetTopVolume()->GetShape()->GetAxisRange(3, zMin, zMax);
+        pTEveTrackPropagator->SetMaxZ(zMax - zMin);
+    }
 
     for (MCParticleVector::const_iterator iter = mcParticleVector.begin(), iterEnd = mcParticleVector.end(); iter != iterEnd; ++iter)
     {
@@ -1104,7 +1121,7 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
             throw std::exception();
         }
 
-        if (m_showDetectors && !m_pPandora->GetGeometry()->GetSubDetectorMap().empty())
+        if (m_showDetectors && (!m_pPandora->GetGeometry()->GetSubDetectorMap().empty() || !m_pPandora->GetGeometry()->GetDetectorGapList().empty()))
         {
             TGeoManager *pGeoManager = (NULL != gGeoManager) ? gGeoManager : new TGeoManager("DetectorGeometry", "detector geometry");
 
@@ -1114,7 +1131,7 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
             TGeoMedium *pAluminium = new TGeoMedium("Aluminium", 2, pAluminiumMaterial);
 
             const bool topVolumeExists(NULL != pGeoManager->GetTopVolume());
-            TGeoVolume *pMainDetectorVolume = topVolumeExists ? pGeoManager->GetTopVolume() : pGeoManager->MakeBox("Detector", pVacuum, 1000., 1000., 100.);
+            TGeoVolume *pMainDetectorVolume = topVolumeExists ? pGeoManager->GetTopVolume() : pGeoManager->MakeBox("Detector", pVacuum, 1000., 1000., 1000.);
 
             this->InitializeSubDetectors(pMainDetectorVolume, pAluminium, transparency);
             this->InitializeGaps(pMainDetectorVolume, pVacuum, transparency);
@@ -1230,13 +1247,42 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
 
     for (DetectorGapList::const_iterator iter = detectorGapList.begin(), iterEnd = detectorGapList.end(); iter != iterEnd; ++iter)
     {
-        std::string gapName("gap" + TypeToString(gapCounter++));
+        const LineGap *pLineGap = NULL;
+        pLineGap = dynamic_cast<const LineGap *>(*iter);
+
+        if (NULL != pLineGap)
+        {
+            // ATTN Rather LAr-TPC specific
+            const HitType hitType(pLineGap->GetHitType());
+            const std::string hitTypeLabel((TPC_VIEW_U == hitType) ? "U" : (TPC_VIEW_V == hitType) ? "V" : (TPC_VIEW_W == hitType) ? "W" : "Unknown");
+            const std::string gapName("LineGap_" + hitTypeLabel + "_" + TypeToString(gapCounter++));
+
+            const double zMin(pLineGap->GetLineStartZ() * m_scalingFactor);
+            const double zMax(pLineGap->GetLineEndZ() * m_scalingFactor);
+
+            double xMin(0.f), xMax(0.f);
+            pMainDetectorVolume->GetShape()->GetAxisRange(1, xMin, xMax);
+
+            double yMin(0.f), yMax(0.f);
+            pMainDetectorVolume->GetShape()->GetAxisRange(2, yMin, yMax);
+
+            TGeoShape *pGapShape = new TGeoBBox(gapName.c_str(), xMax - xMin, yMax - yMin, zMax - zMin);
+            TGeoVolume *pGapVol = new TGeoVolume(gapName.c_str(), pGapShape, pGapMedium);
+
+            pGapVol->SetLineColor(1);
+            pGapVol->SetFillColor(1);
+            pGapVol->SetTransparency(transparency + 23);
+
+            pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoTranslation(0.f, 0.f, 0.5f * (zMin + zMax)));
+            continue;
+        }
 
         const BoxGap *pBoxGap = NULL;
         pBoxGap = dynamic_cast<const BoxGap *>(*iter);
 
         if (NULL != pBoxGap)
         {
+            const std::string gapName("BoxGap_" + TypeToString(gapCounter++));
             TGeoShape *pGapShape = new TGeoBBox(gapName.c_str(), 0.5f * pBoxGap->GetSide1().GetMagnitude() * m_scalingFactor,
                 0.5f * pBoxGap->GetSide2().GetMagnitude() * m_scalingFactor, 0.5f * pBoxGap->GetSide3().GetMagnitude() * m_scalingFactor);
 
@@ -1247,12 +1293,12 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
 
             try
             {
-                // TODO Remove ILD-specific correction, required for endcap box gaps that do not point back to origin in xy plane.
+                // ATTN ILD-specific correction, required for endcap box gaps that do not point back to origin in xy plane.
                 //      Pandora gaps are self-describing (four vectors), but this does not map cleanly to TGeoBBox class.
                 //      Best solution may be to move to different root TGeoShape.
                 const float vertexZ(pBoxGap->GetVertex().GetZ());
                 const float hcalEndCapInnerZ(std::fabs(m_pPandora->GetGeometry()->GetSubDetector(HCAL_ENDCAP).GetInnerZCoordinate()));
-                correction = ((std::fabs(vertexZ) < hcalEndCapInnerZ) ? 0 : ((vertexZ > 0) ? pi / 4.f : -pi / 4.f));
+                correction = ((std::fabs(vertexZ) < hcalEndCapInnerZ) ? 0 : ((vertexZ > 0.f) ? pi / 4.f : -pi / 4.f));
             }
             catch (StatusCodeException &)
             {
@@ -1280,6 +1326,7 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
 
         if (NULL != pConcentricGap)
         {
+            const std::string gapName("ConcentricGap_" + TypeToString(gapCounter++));
             const double zMin = pConcentricGap->GetMinZCoordinate() * m_scalingFactor;
             const double zMax = pConcentricGap->GetMaxZCoordinate() * m_scalingFactor;
             const double zThick = zMax - zMin;
@@ -1292,7 +1339,7 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
             pGapVol->SetFillColor(1);
             pGapVol->SetTransparency(transparency + 23);
 
-            pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoTranslation(0, 0, zMin + (zThick / 2.f)));
+            pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoTranslation(0.f, 0.f, zMin + (zThick / 2.f)));
             continue;
         }
     }
