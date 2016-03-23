@@ -1130,13 +1130,13 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
             TGeoMedium *pVacuum = new TGeoMedium("Vacuum", 1, pVacuumMaterial);
             TGeoMedium *pAluminium = new TGeoMedium("Aluminium", 2, pAluminiumMaterial);
 
-            const bool topVolumeExists(NULL != pGeoManager->GetTopVolume());
-            TGeoVolume *pMainDetectorVolume = topVolumeExists ? pGeoManager->GetTopVolume() : pGeoManager->MakeBox("Detector", pVacuum, 1000., 1000., 1000.);
+            const bool pandoraTopVolumeExists((NULL != pGeoManager->GetTopVolume()) && (m_monitoringInstanceMap.size() > 1));
+            TGeoVolume *pMainDetectorVolume = pandoraTopVolumeExists ? pGeoManager->GetTopVolume() : pGeoManager->MakeBox("Detector", pVacuum, 1000., 1000., 1000.);
 
             this->InitializeSubDetectors(pMainDetectorVolume, pAluminium, transparency);
             this->InitializeGaps(pMainDetectorVolume, pVacuum, transparency);
 
-            if (!topVolumeExists)
+            if (!pandoraTopVolumeExists)
             {
                 pGeoManager->SetTopVolume(pMainDetectorVolume);
                 TGeoNode *pTGeoNode = pGeoManager->GetTopNode();
@@ -1242,107 +1242,157 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
 
 void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedium *pGapMedium, Char_t transparency)
 {
+    LineGapVector lineGapVector; BoxGapVector boxGapVector; ConcentricGapVector concentricGapVector;
     const DetectorGapList &detectorGapList(m_pPandora->GetGeometry()->GetDetectorGapList());
-    unsigned int gapCounter(0);
 
     for (DetectorGapList::const_iterator iter = detectorGapList.begin(), iterEnd = detectorGapList.end(); iter != iterEnd; ++iter)
     {
         const LineGap *pLineGap = NULL;
         pLineGap = dynamic_cast<const LineGap *>(*iter);
-
-        if (NULL != pLineGap)
-        {
-            // ATTN Rather LAr-TPC specific
-            const HitType hitType(pLineGap->GetHitType());
-            const std::string hitTypeLabel((TPC_VIEW_U == hitType) ? "U" : (TPC_VIEW_V == hitType) ? "V" : (TPC_VIEW_W == hitType) ? "W" : "Unknown");
-            const std::string gapName("LineGap_" + hitTypeLabel + "_" + TypeToString(gapCounter++));
-
-            const double zMin(pLineGap->GetLineStartZ() * m_scalingFactor);
-            const double zMax(pLineGap->GetLineEndZ() * m_scalingFactor);
-
-            double xMin(0.f), xMax(0.f);
-            pMainDetectorVolume->GetShape()->GetAxisRange(1, xMin, xMax);
-
-            double yMin(0.f), yMax(0.f);
-            pMainDetectorVolume->GetShape()->GetAxisRange(2, yMin, yMax);
-
-            TGeoShape *pGapShape = new TGeoBBox(gapName.c_str(), xMax - xMin, yMax - yMin, zMax - zMin);
-            TGeoVolume *pGapVol = new TGeoVolume(gapName.c_str(), pGapShape, pGapMedium);
-
-            pGapVol->SetLineColor(1);
-            pGapVol->SetFillColor(1);
-            pGapVol->SetTransparency(transparency + 23);
-
-            pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoTranslation(0.f, 0.f, 0.5f * (zMin + zMax)));
-            continue;
-        }
+        if (pLineGap) lineGapVector.push_back(pLineGap);
 
         const BoxGap *pBoxGap = NULL;
         pBoxGap = dynamic_cast<const BoxGap *>(*iter);
-
-        if (NULL != pBoxGap)
-        {
-            const std::string gapName("BoxGap_" + TypeToString(gapCounter++));
-            TGeoShape *pGapShape = new TGeoBBox(gapName.c_str(), 0.5f * pBoxGap->GetSide1().GetMagnitude() * m_scalingFactor,
-                0.5f * pBoxGap->GetSide2().GetMagnitude() * m_scalingFactor, 0.5f * pBoxGap->GetSide3().GetMagnitude() * m_scalingFactor);
-
-            TGeoVolume *pGapVol = new TGeoVolume(gapName.c_str(), pGapShape, pGapMedium);
-
-            static const float pi(std::acos(-1.));
-            float correction(0.f);
-
-            try
-            {
-                // ATTN ILD-specific correction, required for endcap box gaps that do not point back to origin in xy plane.
-                //      Pandora gaps are self-describing (four vectors), but this does not map cleanly to TGeoBBox class.
-                //      Best solution may be to move to different root TGeoShape.
-                const float vertexZ(pBoxGap->GetVertex().GetZ());
-                const float hcalEndCapInnerZ(std::fabs(m_pPandora->GetGeometry()->GetSubDetector(HCAL_ENDCAP).GetInnerZCoordinate()));
-                correction = ((std::fabs(vertexZ) < hcalEndCapInnerZ) ? 0 : ((vertexZ > 0.f) ? pi / 4.f : -pi / 4.f));
-            }
-            catch (StatusCodeException &)
-            {
-            }
-
-            const float phi(correction + std::atan2(pBoxGap->GetVertex().GetX(), pBoxGap->GetVertex().GetY()));
-
-            const TGeoTranslation trans("trans",
-                ( 0.5f * pBoxGap->GetSide1().GetMagnitude() * std::cos(phi) + 0.5f * pBoxGap->GetSide2().GetMagnitude() * std::sin(phi) + pBoxGap->GetVertex().GetX()) * m_scalingFactor,
-                (-0.5f * pBoxGap->GetSide1().GetMagnitude() * std::sin(phi) + 0.5f * pBoxGap->GetSide2().GetMagnitude() * std::cos(phi) + pBoxGap->GetVertex().GetY()) * m_scalingFactor,
-                ( 0.5f * (2.f * pBoxGap->GetVertex().GetZ() + pBoxGap->GetSide3().GetZ()) * m_scalingFactor));
-
-            const TGeoRotation rot("rot", -180.f * phi / pi, 0, 0);
-
-            pGapVol->SetLineColor(1);
-            pGapVol->SetFillColor(1);
-            pGapVol->SetTransparency(transparency + 23);
-
-            pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoCombiTrans(trans, rot));
-            continue;
-        }
+        if (pBoxGap) boxGapVector.push_back(pBoxGap);
 
         const ConcentricGap *pConcentricGap = NULL;
         pConcentricGap = dynamic_cast<const ConcentricGap *>(*iter);
-
-        if (NULL != pConcentricGap)
-        {
-            const std::string gapName("ConcentricGap_" + TypeToString(gapCounter++));
-            const double zMin = pConcentricGap->GetMinZCoordinate() * m_scalingFactor;
-            const double zMax = pConcentricGap->GetMaxZCoordinate() * m_scalingFactor;
-            const double zThick = zMax - zMin;
-
-            TGeoVolume *pGapVol = MakePolygonTube(gapName.c_str(), pConcentricGap->GetInnerSymmetryOrder(), pConcentricGap->GetOuterSymmetryOrder(),
-                pConcentricGap->GetInnerRCoordinate() * m_scalingFactor, pConcentricGap->GetOuterRCoordinate() * m_scalingFactor,
-                pConcentricGap->GetInnerPhiCoordinate(), pConcentricGap->GetOuterPhiCoordinate(), (zThick / 2.), pGapMedium);
-
-            pGapVol->SetLineColor(1);
-            pGapVol->SetFillColor(1);
-            pGapVol->SetTransparency(transparency + 23);
-
-            pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoTranslation(0.f, 0.f, zMin + (zThick / 2.f)));
-            continue;
-        }
+        if (pConcentricGap) concentricGapVector.push_back(pConcentricGap);
     }
+
+    std::sort(lineGapVector.begin(), lineGapVector.end(), PandoraMonitoring::SortLineGaps);
+    std::sort(boxGapVector.begin(), boxGapVector.end(), PandoraMonitoring::SortBoxGaps);
+    std::sort(concentricGapVector.begin(), concentricGapVector.end(), PandoraMonitoring::SortConcentricGaps);
+
+    unsigned int gapCounter(0);
+
+    for (LineGapVector::const_iterator iter = lineGapVector.begin(), iterEnd = lineGapVector.end(); iter != iterEnd; ++iter)
+    {
+        const LineGap *const pLineGap(*iter);
+
+        // ATTN Rather LAr-TPC specific
+        const HitType hitType(pLineGap->GetHitType());
+        const std::string hitTypeLabel((TPC_VIEW_U == hitType) ? "U" : (TPC_VIEW_V == hitType) ? "V" : (TPC_VIEW_W == hitType) ? "W" : "Unknown");
+        const std::string gapName("LineGap_" + hitTypeLabel + "_" + TypeToString(gapCounter++));
+
+        const double zMin(pLineGap->GetLineStartZ() * m_scalingFactor);
+        const double zMax(pLineGap->GetLineEndZ() * m_scalingFactor);
+
+        double xMin(0.f), xMax(0.f);
+        pMainDetectorVolume->GetShape()->GetAxisRange(1, xMin, xMax);
+
+        double yMin(0.f), yMax(0.f);
+        pMainDetectorVolume->GetShape()->GetAxisRange(2, yMin, yMax);
+
+        TGeoShape *pGapShape = new TGeoBBox(gapName.c_str(), 0.5f * (xMax - xMin), 0.5f * (yMax - yMin), 0.5f * (zMax - zMin));
+        TGeoVolume *pGapVol = new TGeoVolume(gapName.c_str(), pGapShape, pGapMedium);
+
+        pGapVol->SetLineColor(1);
+        pGapVol->SetFillColor(1);
+        pGapVol->SetTransparency(transparency + 23);
+        pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoTranslation(0.f, 0.f, 0.5f * (zMin + zMax)));
+    }
+
+    for (BoxGapVector::const_iterator iter = boxGapVector.begin(), iterEnd = boxGapVector.end(); iter != iterEnd; ++iter)
+    {
+        const BoxGap *const pBoxGap(*iter);
+
+        const std::string gapName("BoxGap_" + TypeToString(gapCounter++));
+        TGeoShape *pGapShape = new TGeoBBox(gapName.c_str(), 0.5f * pBoxGap->GetSide1().GetMagnitude() * m_scalingFactor,
+            0.5f * pBoxGap->GetSide2().GetMagnitude() * m_scalingFactor, 0.5f * pBoxGap->GetSide3().GetMagnitude() * m_scalingFactor);
+
+        TGeoVolume *pGapVol = new TGeoVolume(gapName.c_str(), pGapShape, pGapMedium);
+
+        static const float pi(std::acos(-1.));
+        float correction(0.f);
+
+        try
+        {
+            // ATTN ILD-specific correction, required for endcap box gaps that do not point back to origin in xy plane.
+            //      Pandora gaps are self-describing (four vectors), but this does not map cleanly to TGeoBBox class.
+            //      Best solution may be to move to different root TGeoShape.
+            const float vertexZ(pBoxGap->GetVertex().GetZ());
+            const float hcalEndCapInnerZ(std::fabs(m_pPandora->GetGeometry()->GetSubDetector(HCAL_ENDCAP).GetInnerZCoordinate()));
+            correction = ((std::fabs(vertexZ) < hcalEndCapInnerZ) ? 0 : ((vertexZ > 0.f) ? pi / 4.f : -pi / 4.f));
+        }
+        catch (StatusCodeException &)
+        {
+        }
+
+        const float phi(correction + std::atan2(pBoxGap->GetVertex().GetX(), pBoxGap->GetVertex().GetY()));
+
+        const TGeoTranslation trans("trans",
+            ( 0.5f * pBoxGap->GetSide1().GetMagnitude() * std::cos(phi) + 0.5f * pBoxGap->GetSide2().GetMagnitude() * std::sin(phi) + pBoxGap->GetVertex().GetX()) * m_scalingFactor,
+            (-0.5f * pBoxGap->GetSide1().GetMagnitude() * std::sin(phi) + 0.5f * pBoxGap->GetSide2().GetMagnitude() * std::cos(phi) + pBoxGap->GetVertex().GetY()) * m_scalingFactor,
+            ( 0.5f * (2.f * pBoxGap->GetVertex().GetZ() + pBoxGap->GetSide3().GetZ()) * m_scalingFactor));
+
+        const TGeoRotation rot("rot", -180.f * phi / pi, 0, 0);
+
+        pGapVol->SetLineColor(1);
+        pGapVol->SetFillColor(1);
+        pGapVol->SetTransparency(transparency + 23);
+        pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoCombiTrans(trans, rot));
+    }
+
+    for (ConcentricGapVector::const_iterator iter = concentricGapVector.begin(), iterEnd = concentricGapVector.end(); iter != iterEnd; ++iter)
+    {
+        const ConcentricGap *const pConcentricGap(*iter);
+
+        const std::string gapName("ConcentricGap_" + TypeToString(gapCounter++));
+        const double zMin = pConcentricGap->GetMinZCoordinate() * m_scalingFactor;
+        const double zMax = pConcentricGap->GetMaxZCoordinate() * m_scalingFactor;
+        const double zThick = zMax - zMin;
+
+        TGeoVolume *pGapVol = MakePolygonTube(gapName.c_str(), pConcentricGap->GetInnerSymmetryOrder(), pConcentricGap->GetOuterSymmetryOrder(),
+            pConcentricGap->GetInnerRCoordinate() * m_scalingFactor, pConcentricGap->GetOuterRCoordinate() * m_scalingFactor,
+            pConcentricGap->GetInnerPhiCoordinate(), pConcentricGap->GetOuterPhiCoordinate(), (zThick / 2.), pGapMedium);
+
+        pGapVol->SetLineColor(1);
+        pGapVol->SetFillColor(1);
+        pGapVol->SetTransparency(transparency + 23);
+
+        pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoTranslation(0.f, 0.f, zMin + (zThick / 2.f)));
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PandoraMonitoring::SortLineGaps(const LineGap *const pLhs, const LineGap *const pRhs)
+{
+    // ATTN Not ideal to sort via enumeration values, but this is pragmatic, matches required use-case and is well-defined
+    if (pLhs->GetHitType() != pRhs->GetHitType())
+        return (pLhs->GetHitType() < pRhs->GetHitType());
+
+    if (std::fabs(pLhs->GetLineStartZ() - pRhs->GetLineStartZ()) > std::numeric_limits<float>::epsilon())
+        return (pLhs->GetLineStartZ() < pRhs->GetLineStartZ());
+
+    return (pLhs->GetLineEndZ() < pRhs->GetLineEndZ());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PandoraMonitoring::SortBoxGaps(const BoxGap *const pLhs, const BoxGap *const pRhs)
+{
+    if (std::fabs(pLhs->GetVertex().GetZ() - pRhs->GetVertex().GetZ()) > std::numeric_limits<float>::epsilon())
+        return (pLhs->GetVertex().GetZ() < pRhs->GetVertex().GetZ());
+
+    if (std::fabs(pLhs->GetVertex().GetX() - pRhs->GetVertex().GetX()) > std::numeric_limits<float>::epsilon())
+        return (pLhs->GetVertex().GetX() < pRhs->GetVertex().GetX());
+
+    return (pLhs->GetVertex().GetY() < pRhs->GetVertex().GetY());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PandoraMonitoring::SortConcentricGaps(const ConcentricGap *const pLhs, const ConcentricGap *const pRhs)
+{
+    if (std::fabs(pLhs->GetInnerRCoordinate() - pRhs->GetInnerRCoordinate()) > std::numeric_limits<float>::epsilon())
+        return (pLhs->GetInnerRCoordinate() < pRhs->GetInnerRCoordinate());
+
+    if (std::fabs(pLhs->GetOuterRCoordinate() - pRhs->GetOuterRCoordinate()) > std::numeric_limits<float>::epsilon())
+        return (pLhs->GetOuterRCoordinate() < pRhs->GetOuterRCoordinate());
+
+    return (pLhs->GetMinZCoordinate() < pRhs->GetMinZCoordinate());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

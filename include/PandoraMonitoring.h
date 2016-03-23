@@ -23,7 +23,7 @@ class TGeoShape;
 class TGeoVolume;
 class TGeoMedium;
 
-namespace pandora { class CartesianVector; class Pandora; }
+namespace pandora { class CartesianVector; class LineGap; class BoxGap; class ConcentricGap; class Pandora; }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -351,6 +351,40 @@ private:
      *  @param  transparency the transparency
      */
     void InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedium *pGapMedium, Char_t transparency);
+
+    /**
+     *  @brief  Whether lhs object should appear before rhs object in a sorted list
+     *
+     *  @param  pLhs first object for comparison
+     *  @param  pRhs second object for comparison
+     * 
+     *  @return boolean
+     */
+    static bool SortLineGaps(const pandora::LineGap *const pLhs, const pandora::LineGap *const pRhs);
+
+    /**
+     *  @brief  Whether lhs object should appear before rhs object in a sorted list
+     *
+     *  @param  pLhs first object for comparison
+     *  @param  pRhs second object for comparison
+     * 
+     *  @return boolean
+     */
+    static bool SortBoxGaps(const pandora::BoxGap *const pLhs, const pandora::BoxGap *const pRhs);
+
+    /**
+     *  @brief  Whether lhs object should appear before rhs object in a sorted list
+     *
+     *  @param  pLhs first object for comparison
+     *  @param  pRhs second object for comparison
+     * 
+     *  @return boolean
+     */
+    static bool SortConcentricGaps(const pandora::ConcentricGap *const pLhs, const pandora::ConcentricGap *const pRhs);
+
+    typedef std::vector<const pandora::LineGap*> LineGapVector;
+    typedef std::vector<const pandora::BoxGap*> BoxGapVector;
+    typedef std::vector<const pandora::ConcentricGap*> ConcentricGapVector;
 
     typedef std::map<const pandora::Pandora*, PandoraMonitoring*> MonitoringInstanceMap;
     static MonitoringInstanceMap    m_monitoringInstanceMap;    ///< The monitoring instance map
