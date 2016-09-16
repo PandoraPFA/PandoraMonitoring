@@ -954,15 +954,15 @@ PandoraMonitoring::~PandoraMonitoring()
 
 void PandoraMonitoring::MakeCaloHitCell(const CaloHit *const pCaloHit, float corners[24])
 {
-    CartesianPointList cartesianPointList;
-    pCaloHit->GetCellCorners(cartesianPointList);
+    CartesianPointVector cartesianPointVector;
+    pCaloHit->GetCellCorners(cartesianPointVector);
 
-    if (8 != cartesianPointList.size())
+    if (8 != cartesianPointVector.size())
         throw StatusCodeException(STATUS_CODE_FAILURE);
 
     unsigned int counter(0);
 
-    for (CartesianPointList::iterator iter = cartesianPointList.begin(), iterEnd = cartesianPointList.end(); iter != iterEnd; ++iter)
+    for (CartesianPointVector::iterator iter = cartesianPointVector.begin(), iterEnd = cartesianPointVector.end(); iter != iterEnd; ++iter)
     {
         CartesianVector &corner = *iter;
         corner *= m_scalingFactor;
