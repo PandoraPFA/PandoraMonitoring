@@ -1287,8 +1287,9 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
         TGeoShape *pGapShape = new TGeoBBox(gapName.c_str(), 0.5f * (xMax - xMin), 0.5f * (yMax - yMin), 0.5f * (zMax - zMin));
         TGeoVolume *pGapVol = new TGeoVolume(gapName.c_str(), pGapShape, pGapMedium);
 
-        pGapVol->SetLineColor(1);
-        pGapVol->SetFillColor(1);
+        pGapVol->SetLineColor((TPC_VIEW_U == hitType) ? kRed: (TPC_VIEW_V == hitType) ? kGreen: (TPC_VIEW_W == hitType) ? kBlue: kBlack);
+        pGapVol->SetFillColor((TPC_VIEW_U == hitType) ? kRed: (TPC_VIEW_V == hitType) ? kGreen: (TPC_VIEW_W == hitType) ? kBlue: kBlack);
+
         pGapVol->SetTransparency(transparency + 23);
         pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoTranslation(0.f, 0.f, 0.5f * (zMin + zMax)));
     }
