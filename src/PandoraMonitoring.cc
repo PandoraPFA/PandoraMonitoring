@@ -69,6 +69,7 @@
 #include <limits>
 #include <map>
 #include <set>
+#include <unordered_map>
 #include <vector>
 
 using namespace pandora;
@@ -1176,9 +1177,7 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, TGeoMedium *pSubDetectorMedium, Char_t transparency)
 {
     const SubDetectorMap &subDetectorMap(m_pPandora->GetGeometry()->GetSubDetectorMap());
-
-    typedef std::set<std::string> StringSet;
-    StringSet setInvisible;
+    pandora::StringSet setInvisible;
 
     setInvisible.insert("Coil");
     setInvisible.insert("Tracker");
@@ -1203,7 +1202,7 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
             }
 
             const std::string name(iter->first);
-            StringSet::iterator itSetInvisible = setInvisible.find(name);
+            pandora::StringSet::iterator itSetInvisible = setInvisible.find(name);
             const bool drawInvisible = (itSetInvisible != setInvisible.end() ? true : false);
 
             std::stringstream sstr;
