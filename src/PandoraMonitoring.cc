@@ -436,7 +436,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
 
         try
         {
-            const MCParticle *pMCParticle(pPandoraTrack->GetMainMCParticle());
+            const MCParticle *pMCParticle(MCParticleHelper::GetMainMCParticle(pPandoraTrack));
             const int mcPdg(pMCParticle->GetParticleId());
             sstr << "\nPDG_MC=" << mcPdg;
             sstrName << "/PDG_MC=" << mcPdg;
