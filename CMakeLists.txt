@@ -37,7 +37,6 @@ add_definitions("-DMONITORING")
 # Low level settings - compiler etc
 if (NOT CMAKE_CXX_FLAGS)
     set(CMAKE_CXX_FLAGS "-std=c++11")
-    set(PROCEED_WITHOUT_CXX_FLAGS ON)
 endif()
 
 include(CheckCXXCompilerFlag)
@@ -45,12 +44,7 @@ unset(COMPILER_SUPPORTS_CXX_FLAGS CACHE)
 CHECK_CXX_COMPILER_FLAG(${CMAKE_CXX_FLAGS} COMPILER_SUPPORTS_CXX_FLAGS)
 
 if(NOT COMPILER_SUPPORTS_CXX_FLAGS)
-    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} does not support cxx flags ${CMAKE_CXX_FLAGS}")
-    if(NOT PROCEED_WITHOUT_CXX_FLAGS)
-        message(FATAL_ERROR "CMake abort.")
-    endif()
-    message(STATUS "Proceed without cxx flags ${CMAKE_CXX_FLAGS}")
-    unset(CMAKE_CXX_FLAGS)
+    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} does not support cxx flags ${CMAKE_CXX_FLAGS}")
 endif()
 
 if(APPLE)
