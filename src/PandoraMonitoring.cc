@@ -683,7 +683,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
         const Color clusterColor((color != AUTO) ? color : (pCluster->GetAssociatedTrackList().empty()) ? LIGHTBLUE : MAGENTA);
 
         CaloHitList caloHitList;
-        pCluster->GetOrderedCaloHitList().GetCaloHitList(caloHitList);
+        pCluster->GetOrderedCaloHitList().FillCaloHitList(caloHitList);
         TEveElement *pCaloHitsElement = VisualizeCaloHits(&caloHitList, sstr.str().c_str(), pClusterVectorElement, clusterColor);
 
         if (showAssociatedTracks && !pCluster->GetAssociatedTrackList().empty())
