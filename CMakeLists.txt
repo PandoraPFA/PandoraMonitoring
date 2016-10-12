@@ -10,9 +10,9 @@ endif()
 project(PandoraMonitoring)
 
 # project version
-set(${PROJECT_NAME}_VERSION_MAJOR 02)
-set(${PROJECT_NAME}_VERSION_MINOR 03)
-set(${PROJECT_NAME}_VERSION_PATCH 01)
+set(${PROJECT_NAME}_VERSION_MAJOR 03)
+set(${PROJECT_NAME}_VERSION_MINOR 00)
+set(${PROJECT_NAME}_VERSION_PATCH 00)
 set(${PROJECT_NAME}_VERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ include(PandoraCMakeSettings)
 # Prefer local include directory to any paths to installed header files
 include_directories(include)
 
-find_package(PandoraSDK 02.03.00 REQUIRED)
+find_package(PandoraSDK 03.00.00 REQUIRED)
 include_directories(${PandoraSDK_INCLUDE_DIRS})
 link_libraries(${PandoraSDK_LIBRARIES})
 add_definitions(${PandoraSDK_DEFINITIONS})
