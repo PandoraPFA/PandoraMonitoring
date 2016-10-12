@@ -23,7 +23,7 @@
 #include "Objects/Track.h"
 #include "Objects/Vertex.h"
 
-#include "Pandora/Algorithm.h"
+#include "Pandora/Pandora.h"
 #include "Pandora/PandoraEnumeratedTypes.h"
 
 #include "Plugins/BFieldPlugin.h"
@@ -69,6 +69,7 @@
 #include <limits>
 #include <map>
 #include <set>
+#include <unordered_map>
 #include <vector>
 
 using namespace pandora;
@@ -436,7 +437,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
 
         try
         {
-            const MCParticle *pMCParticle(pPandoraTrack->GetMainMCParticle());
+            const MCParticle *pMCParticle(MCParticleHelper::GetMainMCParticle(pPandoraTrack));
             const int mcPdg(pMCParticle->GetParticleId());
             sstr << "\nPDG_MC=" << mcPdg;
             sstrName << "/PDG_MC=" << mcPdg;
@@ -682,7 +683,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
         const Color clusterColor((color != AUTO) ? color : (pCluster->GetAssociatedTrackList().empty()) ? LIGHTBLUE : MAGENTA);
 
         CaloHitList caloHitList;
-        pCluster->GetOrderedCaloHitList().GetCaloHitList(caloHitList);
+        pCluster->GetOrderedCaloHitList().FillCaloHitList(caloHitList);
         TEveElement *pCaloHitsElement = VisualizeCaloHits(&caloHitList, sstr.str().c_str(), pClusterVectorElement, clusterColor);
 
         if (showAssociatedTracks && !pCluster->GetAssociatedTrackList().empty())
@@ -954,15 +955,15 @@ PandoraMonitoring::~PandoraMonitoring()
 
 void PandoraMonitoring::MakeCaloHitCell(const CaloHit *const pCaloHit, float corners[24])
 {
-    CartesianPointList cartesianPointList;
-    pCaloHit->GetCellCorners(cartesianPointList);
+    CartesianPointVector cartesianPointVector;
+    pCaloHit->GetCellCorners(cartesianPointVector);
 
-    if (8 != cartesianPointList.size())
+    if (8 != cartesianPointVector.size())
         throw StatusCodeException(STATUS_CODE_FAILURE);
 
     unsigned int counter(0);
 
-    for (CartesianPointList::iterator iter = cartesianPointList.begin(), iterEnd = cartesianPointList.end(); iter != iterEnd; ++iter)
+    for (CartesianPointVector::iterator iter = cartesianPointVector.begin(), iterEnd = cartesianPointVector.end(); iter != iterEnd; ++iter)
     {
         CartesianVector &corner = *iter;
         corner *= m_scalingFactor;
@@ -1176,9 +1177,7 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, TGeoMedium *pSubDetectorMedium, Char_t transparency)
 {
     const SubDetectorMap &subDetectorMap(m_pPandora->GetGeometry()->GetSubDetectorMap());
-
-    typedef std::set<std::string> StringSet;
-    StringSet setInvisible;
+    pandora::StringSet setInvisible;
 
     setInvisible.insert("Coil");
     setInvisible.insert("Tracker");
@@ -1203,7 +1202,7 @@ void PandoraMonitoring::InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, 
             }
 
             const std::string name(iter->first);
-            StringSet::iterator itSetInvisible = setInvisible.find(name);
+            pandora::StringSet::iterator itSetInvisible = setInvisible.find(name);
             const bool drawInvisible = (itSetInvisible != setInvisible.end() ? true : false);
 
             std::stringstream sstr;

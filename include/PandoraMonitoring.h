@@ -386,7 +386,7 @@ private:
     typedef std::vector<const pandora::BoxGap*> BoxGapVector;
     typedef std::vector<const pandora::ConcentricGap*> ConcentricGapVector;
 
-    typedef std::map<const pandora::Pandora*, PandoraMonitoring*> MonitoringInstanceMap;
+    typedef std::unordered_map<const pandora::Pandora*, PandoraMonitoring*> MonitoringInstanceMap;
     static MonitoringInstanceMap    m_monitoringInstanceMap;    ///< The monitoring instance map
 
     const pandora::Pandora *const   m_pPandora;                 ///< The associated pandora instance
