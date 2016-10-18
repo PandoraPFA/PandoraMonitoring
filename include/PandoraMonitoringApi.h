@@ -239,10 +239,23 @@ public:
      *  @param pMarkerPoint address of the marker point
      *  @param name of the marker
      *  @param color the marker color
-     *  @param showAssociatedTracks draw the tracks associated to the cluster
+     *  @param markerSize the marker size
      */
     static void AddMarkerToVisualization(const pandora::Pandora &pandora, const pandora::CartesianVector *const pMarkerPoint,
         const std::string &name, const Color color, const unsigned int markerSize);
+
+    /**
+     *  @brief Add line to visualization
+     * 
+     *  @param  pandora the calling pandora instance
+     *  @param pStartPoint/pEndPoint start and end points to define a line
+     *  @param name of the line
+     *  @param color the line color
+     *  @param lineWidth the line width 
+     *  @param lineStyle the line style 
+     */
+    static void AddLineToVisualization(const pandora::Pandora &pandora, const pandora::CartesianVector *const pStartPoint, 
+				       const pandora::CartesianVector *const pEndPoint, const std::string &name, const Color color, const unsigned int lineWidth, const unsigned int lineStyle);
 
     /**
      *  @brief  Show the Eve Event-display and pause.

@@ -203,6 +203,18 @@ public:
     TEveElement *AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, const std::string &name, TEveElement *parent,
         const Color color, const unsigned int markerSize);
 
+    /**                                                                                                                                                               
+     *  @brief Add line to visualization                                                                                                                         
+     *                                                                                                                                                           
+     *  @param pStartPoint, pEndPoint address start and end of line                                                                                          
+     *  @param name of the line                                                                                                                            
+     *  @param color the line color                                                                                                                          
+     *  @param lineWidth the line width                                                                                                                   
+     *  @param lineStyle the line style                                                                                                                      
+     */                                                                                                                                                     
+    TEveElement *AddLineToVisualization(const pandora::CartesianVector *const pStartPoint, const pandora::CartesianVector *const pEndPoint,
+					const std::string &name, TEveElement *parent, const Color color, const unsigned int lineWidth, const unsigned int lineStyle);  
+
     /**
      *  @brief Show the Eve Event-display and pause.
      */
