@@ -835,34 +835,37 @@ TEveElement *PandoraMonitoring::AddMarkerToVisualization(const CartesianVector *
 
     return pTEvePointSet;
 }
-//------------------------------------------------------------------------------------------------------------------------------------------            
-TEveElement *PandoraMonitoring::AddLineToVisualization(const CartesianVector *const pStartPoint, const CartesianVector *const pEndPoint, const std::string &name, TEveElement *parent, const Color color, const unsigned int lineWidth, const unsigned int lineStyle)
-{                                                                                                                                                                 
-  this->InitializeEve();                                                                                                                                     
-  const std::string lineTitle(name.empty() ? "Line" : name);                                                                                               
-  TEveLine *pTEveLine = new TEveLine(lineTitle.c_str(), 1);                                                                                               
-  pTEveLine->SetOwnIds(kTRUE);                                                                                                                          
-  pTEveLine->SetNextPoint(pStartPoint->GetX() * m_scalingFactor, pStartPoint->GetY() * m_scalingFactor, pStartPoint->GetZ() * m_scalingFactor);          
-  pTEveLine->SetNextPoint(pEndPoint->GetX() * m_scalingFactor, pEndPoint->GetY() * m_scalingFactor, pEndPoint->GetZ() * m_scalingFactor);                      
-  
-  const Color chosenColor((color < AUTO) ? color : ORANGE);                                                                                           
-  pTEveLine->SetMainColor(GetROOTColor(chosenColor));                                                                                                
-  pTEveLine->SetLineWidth(lineWidth);                                                                                                                   
-  pTEveLine->SetLineStyle(lineStyle);                                                                                                                  
-  
-  if (parent)                                                                                                                                          
-    {                                                                                                                                                     
-      parent->AddElement(pTEveLine);                                                                                                                    
-    }                               
- else                       
-   {                                                                                                                                                     
-     m_pEveManager->GetCurrentEvent()->AddElement(pTEveLine);                                                                                         
-     m_pEveManager->Redraw3D();                                                                                                                             
-   }                                                                                                                                                              
-                                                                                                                                                                  
-  return pTEveLine;                                                                                                                                               
-  //TODO - add another method to add points to a given line one by one (for 3D line)  
-}                           
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+TEveElement *PandoraMonitoring::AddLineToVisualization(const CartesianVector *const pStartPoint, const CartesianVector *const pEndPoint,
+    const std::string &name, TEveElement *parent, const Color color, const unsigned int lineWidth, const unsigned int lineStyle)
+{
+    this->InitializeEve();
+
+    const std::string lineTitle(name.empty() ? "Line" : name);
+
+    TEveLine *pTEveLine = new TEveLine(lineTitle.c_str(), 1);
+    pTEveLine->SetOwnIds(kTRUE);
+    pTEveLine->SetNextPoint(pStartPoint->GetX() * m_scalingFactor, pStartPoint->GetY() * m_scalingFactor, pStartPoint->GetZ() * m_scalingFactor);
+    pTEveLine->SetNextPoint(pEndPoint->GetX() * m_scalingFactor, pEndPoint->GetY() * m_scalingFactor, pEndPoint->GetZ() * m_scalingFactor);
+
+    const Color chosenColor((color < AUTO) ? color : ORANGE);
+    pTEveLine->SetMainColor(GetROOTColor(chosenColor));
+    pTEveLine->SetLineWidth(lineWidth);
+    pTEveLine->SetLineStyle(lineStyle);
+
+    if (parent)
+    {
+        parent->AddElement(pTEveLine);
+    }
+    else
+    {
+        m_pEveManager->GetCurrentEvent()->AddElement(pTEveLine);
+        m_pEveManager->Redraw3D();
+    }
+
+    return pTEveLine;
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
