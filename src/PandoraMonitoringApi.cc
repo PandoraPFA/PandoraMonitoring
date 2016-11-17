@@ -129,6 +129,14 @@ void PandoraMonitoringApi::AddMarkerToVisualization(const pandora::Pandora &pand
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoringApi::AddLineToVisualization(const pandora::Pandora &pandora, const pandora::CartesianVector *const pStartPoint,
+    const pandora::CartesianVector *const pEndPoint, const std::string &name, const Color color, const unsigned int lineWidth, const unsigned int lineStyle)
+{
+    PandoraMonitoring::GetInstance(pandora)->AddLineToVisualization(pStartPoint,pEndPoint, name, NULL, color, lineWidth, lineStyle);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoringApi::ViewEvent(const pandora::Pandora &pandora)
 {
     PandoraMonitoring::GetInstance(pandora)->ViewEvent();

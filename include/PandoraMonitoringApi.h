@@ -184,12 +184,12 @@ public:
         const std::string &name, const Color color);
 
     /**
-     *  @brief Add CaloHits to the Eve event-display
+     *  @brief  Add CaloHits to the Eve event-display
      * 
      *  @param  pandora the calling pandora instance
-     *  @param pCaloHitList list of calohits to be added to the event display
-     *  @param name of the calohit list
-     *  @param color The color the cluster elements are drawn with
+     *  @param  pCaloHitList list of calohits to be added to the event display
+     *  @param  name of the calohit list
+     *  @param  color The color the cluster elements are drawn with
      */  
     static void VisualizeCaloHits(const pandora::Pandora &pandora, const pandora::CaloHitList *const pCaloHitList,
         const std::string &name, const Color color);
@@ -233,16 +233,31 @@ public:
         const std::string &name, const Color color);
 
     /**
-     *  @brief Add marker to visualization
+     *  @brief  Add marker to visualization
      * 
      *  @param  pandora the calling pandora instance
-     *  @param pMarkerPoint address of the marker point
-     *  @param name of the marker
-     *  @param color the marker color
-     *  @param showAssociatedTracks draw the tracks associated to the cluster
+     *  @param  pMarkerPoint address of the marker point
+     *  @param  name of the marker
+     *  @param  color the marker color
+     *  @param  markerSize the marker size
      */
     static void AddMarkerToVisualization(const pandora::Pandora &pandora, const pandora::CartesianVector *const pMarkerPoint,
         const std::string &name, const Color color, const unsigned int markerSize);
+
+    /**
+     *  @brief  Add line to visualization
+     * 
+     *  @param  pandora the calling pandora instance
+     *  @param  pStartPoint address of the line start point
+     *  @param  pEndPoint address of the line end point
+     *  @param  name of the line
+     *  @param  color the line color
+     *  @param  lineWidth the line width
+     *  @param  lineStyle the line style
+     */
+    static void AddLineToVisualization(const pandora::Pandora &pandora, const pandora::CartesianVector *const pStartPoint,
+        const pandora::CartesianVector *const pEndPoint, const std::string &name, const Color color, const unsigned int lineWidth,
+        const unsigned int lineStyle);
 
     /**
      *  @brief  Show the Eve Event-display and pause.
