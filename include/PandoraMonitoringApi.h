@@ -184,12 +184,12 @@ public:
         const std::string &name, const Color color);
 
     /**
-     *  @brief Add CaloHits to the Eve event-display
+     *  @brief  Add CaloHits to the Eve event-display
      * 
      *  @param  pandora the calling pandora instance
-     *  @param pCaloHitList list of calohits to be added to the event display
-     *  @param name of the calohit list
-     *  @param color The color the cluster elements are drawn with
+     *  @param  pCaloHitList list of calohits to be added to the event display
+     *  @param  name of the calohit list
+     *  @param  color The color the cluster elements are drawn with
      */  
     static void VisualizeCaloHits(const pandora::Pandora &pandora, const pandora::CaloHitList *const pCaloHitList,
         const std::string &name, const Color color);

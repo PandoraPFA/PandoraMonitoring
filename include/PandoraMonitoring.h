@@ -112,13 +112,13 @@ public:
         const float energyScaleThresholdE, const float scalingFactor);
 
     /**
-     *  @brief Add MC particles to the Eve event-display
+     *  @brief  Add MC particles to the Eve event-display
      * 
-     *  @param pMCParticleList list of tracks to be added to the event display
-     *  @param name of the MC particle list
-     *  @param parent pointer to the parent TEveElement. If NULL, the track will be parent element
-     *  @param color The color the track elements are drawn with
-     *  @param pParticleSuppressionMap map from pdg-codes to energy for suppression of particles types below specific energies
+     *  @param  pMCParticleList list of tracks to be added to the event display
+     *  @param  name of the MC particle list
+     *  @param  parent pointer to the parent TEveElement. If NULL, the track will be parent element
+     *  @param  color The color the track elements are drawn with
+     *  @param  pParticleSuppressionMap map from pdg-codes to energy for suppression of particles types below specific energies
      *
      *  @return pointer to created TEveElement
      */
@@ -126,12 +126,12 @@ public:
         const Color color, const PandoraMonitoringApi::PdgCodeToEnergyMap *pParticleSuppressionMap);
 
     /**
-     *  @brief Add Tracks to the Eve event-display
+     *  @brief  Add Tracks to the Eve event-display
      * 
-     *  @param pTrackList list of tracks to be added to the event display
-     *  @param name of the track list
-     *  @param parent pointer to the parent TEveElement. If NULL, the track will be parent element
-     *  @param color The color the track elements are drawn with
+     *  @param  pTrackList list of tracks to be added to the event display
+     *  @param  name of the track list
+     *  @param  parent pointer to the parent TEveElement. If NULL, the track will be parent element
+     *  @param  color The color the track elements are drawn with
      *
      *  @return pointer to created TEveElement
      */
@@ -139,12 +139,12 @@ public:
         const Color color);
 
     /**
-     *  @brief Add CaloHits to the Eve event-display
+     *  @brief  Add CaloHits to the Eve event-display
      * 
-     *  @param pCaloHitList list of calohits to be added to the event display
-     *  @param parent name of the calohitlist
-     *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
-     *  @param color The color the cluster elements are drawn with
+     *  @param  pCaloHitList list of calohits to be added to the event display
+     *  @param  parent name of the calohitlist
+     *  @param  parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
+     *  @param  color The color the cluster elements are drawn with
      *
      *  @return pointer to created TEveElement
      */
@@ -152,13 +152,13 @@ public:
         const Color color);
 
     /**
-     *  @brief Add Clusters to the Eve event-display
+     *  @brief  Add Clusters to the Eve event-display
      * 
-     *  @param pClusterList list of clusters to be added to the event display
-     *  @param name of the cluster list
-     *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
-     *  @param color The color the cluster elements are drawn with
-     *  @param showAssociatedTracks draw the tracks associated to the cluster
+     *  @param  pClusterList list of clusters to be added to the event display
+     *  @param  name of the cluster list
+     *  @param  parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
+     *  @param  color The color the cluster elements are drawn with
+     *  @param  showAssociatedTracks draw the tracks associated to the cluster
      *
      *  @return pointer to created TEveElement
      */
@@ -166,26 +166,26 @@ public:
         const Color color, bool showAssociatedTracks);
 
     /**
-     *  @brief Add Particle flow objects to the Eve event-display
+     *  @brief  Add Particle flow objects to the Eve event-display
      * 
-     *  @param pPfoList list of particle flow objects to be added to the event display
-     *  @param name of the pfo list
-     *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
-     *  @param color The color the cluster elements are drawn with
-     *  @param showAssociatedTracks draw the tracks associated to the cluster
-     *  @param showVertices whether to draw markers to represent the pfo vertices
-     *  @param displayPfoHierarchy whether to draw daughter particles (only) within parent elements
+     *  @param  pPfoList list of particle flow objects to be added to the event display
+     *  @param  name of the pfo list
+     *  @param  parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
+     *  @param  color The color the cluster elements are drawn with
+     *  @param  showAssociatedTracks draw the tracks associated to the cluster
+     *  @param  showVertices whether to draw markers to represent the pfo vertices
+     *  @param  displayPfoHierarchy whether to draw daughter particles (only) within parent elements
      */
     TEveElement *VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, const std::string &name, TEveElement *parent,
         const Color color, bool showVertices, bool displayPfoHierarchy);
 
     /**
-     *  @brief Add vertices to the Eve event-display
+     *  @brief  Add vertices to the Eve event-display
      * 
-     *  @param pVertexList list of vertices to be added to the event display
-     *  @param parent name of the vertexlist
-     *  @param parent pointer to the parent TEveElement. If NULL, the vertex will be parent element
-     *  @param color The color the vertex elements are drawn with
+     *  @param  pVertexList list of vertices to be added to the event display
+     *  @param  parent name of the vertexlist
+     *  @param  parent pointer to the parent TEveElement. If NULL, the vertex will be parent element
+     *  @param  color The color the vertex elements are drawn with
      *
      *  @return pointer to created TEveElement
      */
@@ -193,31 +193,32 @@ public:
         const Color color);
 
     /**
-     *  @brief Add marker to visualization
+     *  @brief  Add marker to visualization
      * 
-     *  @param pMarkerPoint address of the marker point
-     *  @param name of the marker
-     *  @param color the marker color
-     *  @param showAssociatedTracks draw the tracks associated to the cluster
-     *  @param markerSize the marker size
+     *  @param  pMarkerPoint address of the marker point
+     *  @param  name of the marker
+     *  @param  parent pointer to the parent TEveElement. If NULL, the marker will be parent element
+     *  @param  color the marker color
+     *  @param  markerSize the marker size
      */
     TEveElement *AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, const std::string &name, TEveElement *parent,
         const Color color, const unsigned int markerSize);
 
     /**
-     *  @brief Add line to visualization
+     *  @brief  Add line to visualization
      * 
-     *  @param pStartPoint, pEndPoint address start and end of line
-     *  @param name of the line
-     *  @param color the line color
-     *  @param lineWidth the line width
-     *  @param lineStyle the line style
+     *  @param  pStartPoint, pEndPoint address start and end of line
+     *  @param  name of the line
+     *  @param  parent pointer to the parent TEveElement. If NULL, the marker will be parent element
+     *  @param  color the line color
+     *  @param  lineWidth the line width
+     *  @param  lineStyle the line style
      */
     TEveElement *AddLineToVisualization(const pandora::CartesianVector *const pStartPoint, const pandora::CartesianVector *const pEndPoint,
         const std::string &name, TEveElement *parent, const Color color, const unsigned int lineWidth, const unsigned int lineStyle);
 
     /**
-     *  @brief Show the Eve Event-display and pause.
+     *  @brief  Show the Eve Event-display and pause.
      */
     void ViewEvent();
 
@@ -272,50 +273,50 @@ private:
     ~PandoraMonitoring();
 
     /**
-     *  @brief Computes the corners of a box in 3D
+     *  @brief  Computes the corners of a box in 3D
      * 
-     *  @param pCaloHit address of the calo hit
-     *  @param corners will be filled with the x,y and z-coordinates of all 8 corners of the box
+     *  @param  pCaloHit address of the calo hit
+     *  @param  corners will be filled with the x,y and z-coordinates of all 8 corners of the box
      */
     void MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, float corners[24]);
 
     typedef std::vector< std::pair<double, double> > DoublePairVector;
 
     /**
-     *  @brief compute the polygon corners for the detector outline
+     *  @brief  Compute the polygon corners for the detector outline
      * 
-     *  @param symmetryOrder is the number of polygon corners
-     *  @param closestDistanceToIp is the distance to the closest points on the polygon
-     *  @param phi0 reference angle where to start the polygon
-     *  @param coordinates vector of double,double pairs which is filled with the x and y coordinates of the polygon corners
+     *  @param  symmetryOrder is the number of polygon corners
+     *  @param  closestDistanceToIp is the distance to the closest points on the polygon
+     *  @param  phi0 reference angle where to start the polygon
+     *  @param  coordinates vector of double,double pairs which is filled with the x and y coordinates of the polygon corners
      */
     void ComputePolygonCorners(int symmetryOrder, double closestDistanceToIp, double phi0, DoublePairVector &coordinates);
 
     /**
-     *  @brief Creates a "tube" volume with the given symmetry inside and outside. If a symmetryOrder <= 2 is chosen, a circle is
-     *         used instead of a polygon
+     *  @brief  Creates a "tube" volume with the given symmetry inside and outside. If a symmetryOrder <= 2 is chosen, a circle is
+     *          used instead of a polygon
      * 
-     *  @param name of the volume
-     *  @param innerSymmetryOrder symmetry order of the inner polygon (circle)
-     *  @param outerSymmetryOrder symmetry order of the outer polygon (circle)
-     *  @param innerClosestDistanceToIp closest distance between IP and polygon for the inner part of the tube
-     *  @param outerClosestDistanceToIp closest distance between IP and polygon for the outer part of the tube
-     *  @param innerPhi0 starting angle of the inner polygon
-     *  @param outerPhi0 starting angle of the outer polygon
-     *  @param halfLength half length (z) of the tube
-     *  @param medium TGeoMedium of the volume
+     *  @param  name of the volume
+     *  @param  innerSymmetryOrder symmetry order of the inner polygon (circle)
+     *  @param  outerSymmetryOrder symmetry order of the outer polygon (circle)
+     *  @param  innerClosestDistanceToIp closest distance between IP and polygon for the inner part of the tube
+     *  @param  outerClosestDistanceToIp closest distance between IP and polygon for the outer part of the tube
+     *  @param  innerPhi0 starting angle of the inner polygon
+     *  @param  outerPhi0 starting angle of the outer polygon
+     *  @param  halfLength half length (z) of the tube
+     *  @param  medium TGeoMedium of the volume
      */
     TGeoVolume *MakePolygonTube(std::string name, int innerSymmetryOrder, int outerSymmetryOrder, double innerClosestDistanceToIp,
         double outerClosestDistanceToIp, double innerPhi0, double outerPhi0, double halfLength, TGeoMedium *medium = NULL);
 
     /**
-     *  @brief Creates a extruded polygonal (or cylindrical) shape with the given symmetry. If a symmetryOrder <= 2 is chosen, a
-     *         circle is used instead of a polygon
+     *  @brief  Creates a extruded polygonal (or cylindrical) shape with the given symmetry. If a symmetryOrder <= 2 is chosen, a
+     *          circle is used instead of a polygon
      * 
-     *  @param symmetryOrder symmetry order of the polygon (circle if <=2)
-     *  @param closestDistanceToIp closest distance between IP and polygon (circle radius)
-     *  @param phi starting angle of the polygon
-     *  @param halfLength half length (z) of the tube
+     *  @param  symmetryOrder symmetry order of the polygon (circle if <=2)
+     *  @param  closestDistanceToIp closest distance between IP and polygon (circle radius)
+     *  @param  phi starting angle of the polygon
+     *  @param  halfLength half length (z) of the tube
      */
     TGeoShape *MakePolygonTube(int symmetryOrder, double closestDistanceToIp, double phi, double halfLength);
 
