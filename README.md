@@ -1,5 +1,6 @@
 # PandoraMonitoring
 [![Build Status](https://travis-ci.org/PandoraPFA/PandoraMonitoring.svg?branch=master)](https://travis-ci.org/PandoraPFA/PandoraMonitoring)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/13054/badge.svg)](https://scan.coverity.com/projects/pandorapfa-pandoramonitoring)
 
 ROOT-based Event Visualisation Environment for Pandora with tree-writing functionality
 
