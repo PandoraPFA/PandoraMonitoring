@@ -1350,7 +1350,9 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
         {
         }
 
-        const float phi(correction + std::atan2(pBoxGap->GetVertex().GetX(), pBoxGap->GetVertex().GetY()));
+        const float phiCorrection1(pBoxGap->GetVertex().GetX());
+        const float phiCorrection2(pBoxGap->GetVertex().GetY());
+        const float phi(correction + std::atan2(phiCorrection1, phiCorrection2));
 
         const TGeoTranslation trans("trans",
             ( 0.5f * pBoxGap->GetSide1().GetMagnitude() * std::cos(phi) + 0.5f * pBoxGap->GetSide2().GetMagnitude() * std::sin(phi) + pBoxGap->GetVertex().GetX()) * m_scalingFactor,
