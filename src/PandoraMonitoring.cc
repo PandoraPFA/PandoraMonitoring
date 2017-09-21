@@ -9,17 +9,19 @@
 // Pandora include files
 #include "Helpers/MCParticleHelper.h"
 
+#include "Geometry/DetectorGap.h"
+#include "Geometry/LArTPC.h"
+#include "Geometry/SubDetector.h"
+
 #include "Managers/GeometryManager.h"
 #include "Managers/PluginManager.h"
 
 #include "Objects/CaloHit.h"
 #include "Objects/CartesianVector.h"
 #include "Objects/Cluster.h"
-#include "Objects/DetectorGap.h"
 #include "Objects/Histograms.h"
 #include "Objects/MCParticle.h"
 #include "Objects/ParticleFlowObject.h"
-#include "Objects/SubDetector.h"
 #include "Objects/Track.h"
 #include "Objects/Vertex.h"
 
@@ -1296,38 +1298,40 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
 
     unsigned int gapCounter(0);
 
-    for (LineGapVector::const_iterator iter = lineGapVector.begin(), iterEnd = lineGapVector.end(); iter != iterEnd; ++iter)
+    for (const LineGap *const pLineGap : lineGapVector)
     {
-        const LineGap *const pLineGap(*iter);
-
-        // ATTN Rather LAr-TPC specific
-        const HitType hitType(pLineGap->GetHitType());
-        const std::string hitTypeLabel((TPC_VIEW_U == hitType) ? "U" : (TPC_VIEW_V == hitType) ? "V" : (TPC_VIEW_W == hitType) ? "W" : "Unknown");
+        const LineGapType lineGapType(pLineGap->GetLineGapType());
+        const std::string hitTypeLabel((TPC_WIRE_GAP_VIEW_U == lineGapType) ? "U" : (TPC_WIRE_GAP_VIEW_V == lineGapType) ? "V" :
+            (TPC_WIRE_GAP_VIEW_W == lineGapType) ? "W" : (TPC_DRIFT_GAP == lineGapType) ? "X" : "Unknown");
         const std::string gapName("LineGap_" + hitTypeLabel + "_" + TypeToString(gapCounter++));
 
-        const double zMin(pLineGap->GetLineStartZ() * m_scalingFactor);
-        const double zMax(pLineGap->GetLineEndZ() * m_scalingFactor);
+        const double inputXMin(pLineGap->GetLineStartX() * m_scalingFactor);
+        const double inputXMax(pLineGap->GetLineEndX() * m_scalingFactor);
+        const double inputZMin(pLineGap->GetLineStartZ() * m_scalingFactor);
+        const double inputZMax(pLineGap->GetLineEndZ() * m_scalingFactor);
 
-        double xMin(0.f), xMax(0.f);
-        pMainDetectorVolume->GetShape()->GetAxisRange(1, xMin, xMax);
+        double volumeXMin(0.f), volumeXMax(0.f), volumeYMin(0.f), volumeYMax(0.f), volumeZMin(0.f), volumeZMax(0.f);
+        pMainDetectorVolume->GetShape()->GetAxisRange(1, volumeXMin, volumeXMax);
+        pMainDetectorVolume->GetShape()->GetAxisRange(2, volumeYMin, volumeYMax);
+        pMainDetectorVolume->GetShape()->GetAxisRange(3, volumeZMin, volumeZMax);
 
-        double yMin(0.f), yMax(0.f);
-        pMainDetectorVolume->GetShape()->GetAxisRange(2, yMin, yMax);
+        const double xMin(std::max(inputXMin, volumeXMin)), xMax(std::min(inputXMax, volumeXMax));
+        const double zMin(std::max(inputZMin, volumeZMin)), zMax(std::min(inputZMax, volumeZMax));
 
-        TGeoShape *pGapShape = new TGeoBBox(gapName.c_str(), 0.5f * (xMax - xMin), 0.5f * (yMax - yMin), 0.5f * (zMax - zMin));
-        TGeoVolume *pGapVol = new TGeoVolume(gapName.c_str(), pGapShape, pGapMedium);
+        TGeoShape *pGapShape = new TGeoBBox(gapName.c_str(), 0.5f * (xMax - xMin), 0.5f * (volumeYMax - volumeYMin), 0.5f * (zMax - zMin));
+        TGeoVolume *pGapVolume = new TGeoVolume(gapName.c_str(), pGapShape, pGapMedium);
 
-        pGapVol->SetLineColor((TPC_VIEW_U == hitType) ? kRed: (TPC_VIEW_V == hitType) ? kGreen: (TPC_VIEW_W == hitType) ? kBlue: kBlack);
-        pGapVol->SetFillColor((TPC_VIEW_U == hitType) ? kRed: (TPC_VIEW_V == hitType) ? kGreen: (TPC_VIEW_W == hitType) ? kBlue: kBlack);
+        const EColor lineGapColor((TPC_WIRE_GAP_VIEW_U == lineGapType) ? kRed : (TPC_WIRE_GAP_VIEW_V == lineGapType) ? kGreen :
+            (TPC_WIRE_GAP_VIEW_W == lineGapType) ? kBlue : (TPC_DRIFT_GAP == lineGapType) ? kBlack : kGray);
+        pGapVolume->SetLineColor(lineGapColor);
+        pGapVolume->SetFillColor(lineGapColor);
+        pGapVolume->SetTransparency(transparency + 23);
 
-        pGapVol->SetTransparency(transparency + 23);
-        pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoTranslation(0.f, 0.f, 0.5f * (zMin + zMax)));
+        pMainDetectorVolume->AddNode(pGapVolume, 0, new TGeoTranslation(0.5f * (xMin + xMax), 0.f, 0.5f * (zMin + zMax)));
     }
 
-    for (BoxGapVector::const_iterator iter = boxGapVector.begin(), iterEnd = boxGapVector.end(); iter != iterEnd; ++iter)
+    for (const BoxGap *const pBoxGap : boxGapVector)
     {
-        const BoxGap *const pBoxGap(*iter);
-
         const std::string gapName("BoxGap_" + TypeToString(gapCounter++));
         TGeoShape *pGapShape = new TGeoBBox(gapName.c_str(), 0.5f * pBoxGap->GetSide1().GetMagnitude() * m_scalingFactor,
             0.5f * pBoxGap->GetSide2().GetMagnitude() * m_scalingFactor, 0.5f * pBoxGap->GetSide3().GetMagnitude() * m_scalingFactor);
@@ -1367,10 +1371,8 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
         pMainDetectorVolume->AddNode(pGapVol, 0, new TGeoCombiTrans(trans, rot));
     }
 
-    for (ConcentricGapVector::const_iterator iter = concentricGapVector.begin(), iterEnd = concentricGapVector.end(); iter != iterEnd; ++iter)
+    for (const ConcentricGap *const pConcentricGap : concentricGapVector)
     {
-        const ConcentricGap *const pConcentricGap(*iter);
-
         const std::string gapName("ConcentricGap_" + TypeToString(gapCounter++));
         const double zMin = pConcentricGap->GetMinZCoordinate() * m_scalingFactor;
         const double zMax = pConcentricGap->GetMaxZCoordinate() * m_scalingFactor;
@@ -1393,13 +1395,19 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
 bool PandoraMonitoring::SortLineGaps(const LineGap *const pLhs, const LineGap *const pRhs)
 {
     // ATTN Not ideal to sort via enumeration values, but this is pragmatic, matches required use-case and is well-defined
-    if (pLhs->GetHitType() != pRhs->GetHitType())
-        return (pLhs->GetHitType() < pRhs->GetHitType());
+    if (pLhs->GetLineGapType() != pRhs->GetLineGapType())
+        return (pLhs->GetLineGapType() < pRhs->GetLineGapType());
 
     if (std::fabs(pLhs->GetLineStartZ() - pRhs->GetLineStartZ()) > std::numeric_limits<float>::epsilon())
         return (pLhs->GetLineStartZ() < pRhs->GetLineStartZ());
 
-    return (pLhs->GetLineEndZ() < pRhs->GetLineEndZ());
+    if (std::fabs(pLhs->GetLineEndZ() - pRhs->GetLineEndZ()) > std::numeric_limits<float>::epsilon())
+        return (pLhs->GetLineEndZ() < pRhs->GetLineEndZ());
+
+    if (std::fabs(pLhs->GetLineStartX() - pRhs->GetLineStartX()) > std::numeric_limits<float>::epsilon())
+        return (pLhs->GetLineStartX() < pRhs->GetLineStartX());
+
+    return (pLhs->GetLineEndX() < pRhs->GetLineEndX());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
