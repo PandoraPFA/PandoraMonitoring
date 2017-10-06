@@ -9,6 +9,7 @@
 #define PANDORA_MONITORING_H 1
 
 #include "TColor.h"
+#include "TGLViewer.h"
 
 #include "Pandora/PandoraInputTypes.h"
 #include "Pandora/PandoraInternal.h"
@@ -19,6 +20,8 @@
 class TApplication;
 class TEveElement;
 class TEveManager;
+class TEveScene;
+class TEveViewer;
 class TGeoShape;
 class TGeoVolume;
 class TGeoMedium;
@@ -349,6 +352,22 @@ private:
     void InitializeEve(Char_t transparency = 70);
 
     /**
+     *  @brief  Initialize the viewers
+     */
+    void InitializeViews();
+
+    /**
+     *  @brief  Add event and geometry scences to a specifed view and specify camera and axis type for view
+     *
+     *  @param  pTEveViewer viewer 
+     *  @param  pTEveEventScene event scene 
+     *  @param  pTEveGeometryScene geometry scene
+     *  @param  camera orthogonal/perspective view choice
+     *  @param  axisType for view
+     */
+    void AddScenes(TEveViewer *pTEveViewer, TEveScene *pTEveEventScene, TEveScene *pTEveGeometryScene, TGLViewer::ECameraType camera, int axisType);
+
+    /**
      *  @brief  Initialize subdetector eve elements
      * 
      *  @param  pMainDetectorVolume address of the main detector volume
@@ -356,6 +375,15 @@ private:
      *  @param  transparency the transparency
      */
     void InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, TGeoMedium *pSubDetectorMedium, Char_t transparency);
+
+    /**
+     *  @brief  Initialize subdetector eve elements
+     * 
+     *  @param  pMainDetectorVolume address of the main detector volume
+     *  @param  pSubDetectorMedium address of the medium to be used for the subdetectors
+     *  @param  transparency the transparency
+     */
+    void InitializeLArTPCs(TGeoVolume *pMainDetectorVolume, TGeoMedium *pSubDetectorMedium, Char_t transparency);
 
     /**
      *  @brief  Initialize detector gap eve elements
@@ -408,10 +436,30 @@ private:
     TEveManager                    *m_pEveManager;              ///< The eve manager
     TTreeWrapper                   *m_pTreeWrapper;             ///< wrapper around TTree functionality
 
+    TEveViewer                     *m_p3DView;                  ///< Viewer for the 3D view
+    TEveViewer                     *m_p2DUView;                 ///< Viewer for the U 2D view
+    TEveViewer                     *m_p2DVView;                 ///< Viewer for the V 2D view
+    TEveViewer                     *m_p2DWView;                 ///< Viewer for the W 2D view
+
+    TEveScene                      *m_p3DEventScene;            ///< Scene containing the 3D event
+    TEveScene                      *m_p2DUEventScene;           ///< Scene containing the U 2D event
+    TEveScene                      *m_p2DVEventScene;           ///< Scene containing the V 2D event
+    TEveScene                      *m_p2DWEventScene;           ///< Scene containing the W 2D event
+
+    TEveScene                      *m_p3DGeometryScene;         ///< Scene containing the 3D geometry
+    TEveScene                      *m_p2DUGeometryScene;        ///< Scene containing the U 2D geometry
+    TEveScene                      *m_p2DVGeometryScene;        ///< Scene containing the V 2D geometry
+    TEveScene                      *m_p2DWGeometryScene;        ///< Scene containing the W 2D geometry
+
     float                           m_scalingFactor;            ///< TEve works with [cm], Pandora works with [mm]
     bool                            m_openEveEvent;             ///< is set if an Event is open to store objects (hits, clusters,...) in it.
     int                             m_eventDisplayCounter;      ///< counter for the event displays
-
+    double                          m_minXLArTPC;               ///< Minimum x position to which any LAr TPC in the event extends
+    double                          m_maxXLArTPC;               ///< Maximum x position to which any LAr TPC in the event extends
+    double                          m_minYLArTPC;               ///< Minimum y position to which any LAr TPC in the event extends
+    double                          m_maxYLArTPC;               ///< Maximum y position to which any LAr TPC in the event extends
+    double                          m_minZLArTPC;               ///< Minimum z position to which any LAr TPC in the event extends
+    double                          m_maxZLArTPC;               ///< Maximum z position to which any LAr TPC in the event extends
     float                           m_transparencyThresholdE;   ///< Cell energy for which transparency is saturated (0%, fully opaque)
     float                           m_energyScaleThresholdE;    ///< Cell energy for which color is at top end of continous color palette
     bool                            m_showDetectors;            ///< Turns the visibility of the detector geometry on or off
