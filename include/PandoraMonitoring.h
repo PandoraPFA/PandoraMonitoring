@@ -205,7 +205,7 @@ public:
      *  @param  markerSize the marker size
      */
     TEveElement *AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, const std::string &name, TEveElement *parent,
-        const Color color, const unsigned int markerSize);
+        const Color color, const float markerSize, const unsigned int markerStyle=20);
 
     /**
      *  @brief  Add line to visualization

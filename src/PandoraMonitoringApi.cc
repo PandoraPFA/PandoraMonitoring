@@ -122,9 +122,9 @@ void PandoraMonitoringApi::VisualizeVertices(const pandora::Pandora &pandora, co
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PandoraMonitoringApi::AddMarkerToVisualization(const pandora::Pandora &pandora, const pandora::CartesianVector *const pMarkerPoint,
-    const std::string &name, const Color color, const unsigned int markerSize)
+    const std::string &name, const Color color, const float markerSize, const unsigned int markerStyle)
 {
-    PandoraMonitoring::GetInstance(pandora)->AddMarkerToVisualization(pMarkerPoint, name, NULL, color, markerSize);
+  PandoraMonitoring::GetInstance(pandora)->AddMarkerToVisualization(pMarkerPoint, name, NULL, color, markerSize, markerStyle);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

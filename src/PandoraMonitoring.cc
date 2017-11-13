@@ -907,7 +907,7 @@ TEveElement *PandoraMonitoring::VisualizeVertices(const pandora::VertexList *con
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TEveElement *PandoraMonitoring::AddMarkerToVisualization(const CartesianVector *const pMarkerPoint, const std::string &name, TEveElement *parent,
-    const Color color, const unsigned int markerSize)
+    const Color color, const float markerSize, const unsigned int markerStyle)
 {
     this->InitializeEve();
 
@@ -920,7 +920,7 @@ TEveElement *PandoraMonitoring::AddMarkerToVisualization(const CartesianVector *
     const Color chosenColor((color < AUTO) ? color : ORANGE);
     pTEvePointSet->SetMarkerColor(GetROOTColor(chosenColor));
     pTEvePointSet->SetMarkerSize(markerSize);
-    pTEvePointSet->SetMarkerStyle(20);
+    pTEvePointSet->SetMarkerStyle(markerStyle);
 
     if (parent)
     {
