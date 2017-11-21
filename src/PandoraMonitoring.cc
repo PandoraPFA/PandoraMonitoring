@@ -1457,7 +1457,7 @@ void PandoraMonitoring::InitializeLArTPCs(TGeoVolume *pMainDetectorVolume, TGeoM
     int color(4);
     for (auto &iter : larTPCMap)
     {
-        const std::string &name(iter.first);
+        const std::string &name("LArTPC_" + TypeToString(iter.first));
         const LArTPC *const pLArTPC(iter.second);
 
         TGeoVolume *pLArTPCVol(nullptr);
