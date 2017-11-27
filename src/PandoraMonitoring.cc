@@ -1280,7 +1280,8 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
 
         this->InitializeViews();
 
-        if (m_showDetectors && (!m_pPandora->GetGeometry()->GetSubDetectorMap().empty() || !m_pPandora->GetGeometry()->GetDetectorGapList().empty()))
+        if (m_showDetectors && (!m_pPandora->GetGeometry()->GetSubDetectorMap().empty() || !m_pPandora->GetGeometry()->GetLArTPCMap().empty() ||
+            !m_pPandora->GetGeometry()->GetDetectorGapList().empty()))
         {
             TGeoManager *pGeoManager = (nullptr != gGeoManager) ? gGeoManager : new TGeoManager("DetectorGeometry", "detector geometry");
 
@@ -1290,7 +1291,7 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
             TGeoMedium *pAluminium = new TGeoMedium("Aluminium", 2, pAluminiumMaterial);
 
             const bool pandoraTopVolumeExists((nullptr != pGeoManager->GetTopVolume()) && (m_monitoringInstanceMap.size() > 1));
-            TGeoVolume *pMainDetectorVolume = pandoraTopVolumeExists ? pGeoManager->GetTopVolume() : pGeoManager->MakeBox("Detector", pVacuum, 1000., 1000., 1000.);
+            TGeoVolume *pMainDetectorVolume = pandoraTopVolumeExists ? pGeoManager->GetTopVolume() : pGeoManager->MakeBox("Detector", pVacuum, 1000., 1000., 10000.);
 
             this->InitializeSubDetectors(pMainDetectorVolume, pAluminium, transparency);
             this->InitializeLArTPCs(pMainDetectorVolume, pAluminium, transparency);
@@ -1457,7 +1458,7 @@ void PandoraMonitoring::InitializeLArTPCs(TGeoVolume *pMainDetectorVolume, TGeoM
     int color(4);
     for (auto &iter : larTPCMap)
     {
-        const std::string &name(iter.first);
+        const std::string &name("LArTPC_" + TypeToString(iter.first));
         const LArTPC *const pLArTPC(iter.second);
 
         TGeoVolume *pLArTPCVol(nullptr);
@@ -1639,7 +1640,7 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
         pMainDetectorVolume->GetShape()->GetAxisRange(2, volumeYMin, volumeYMax);
         pMainDetectorVolume->GetShape()->GetAxisRange(3, volumeZMin, volumeZMax);
 
-        float xMin(std::max(inputXMin, std::max(volumeXMin, m_minXLArTPC))), xMax(std::min(inputXMax, std::min(volumeXMax, m_maxXLArTPC)));
+        float xMin(std::max(inputXMin, volumeXMin)), xMax(std::min(inputXMax, volumeXMax));
         float yMin(std::max(m_minYLArTPC, volumeYMin)), yMax(std::min(m_maxYLArTPC, volumeYMax));
         float zMin(std::max(inputZMin, std::max(volumeZMin, m_minZLArTPC))), zMax(std::min(inputZMax, std::min(volumeZMax, m_maxZLArTPC)));
 
@@ -1656,7 +1657,7 @@ void PandoraMonitoring::InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedi
         if (TPC_WIRE_GAP_VIEW_U == lineGapType || (TPC_WIRE_GAP_VIEW_V == lineGapType) || (TPC_WIRE_GAP_VIEW_W == lineGapType))
         {
             // In a 2D view, the LArTPC size is not a consideration as the coordinate axes in 2D and 3D do not match up.  Therefore, drop the 
-            // LArTPC consideration for Z.  For X and Y line gaps contain no physical infomraton, so use TPC/world volume sizes for display purposes
+            // LArTPC consideration for Z.  For X and Y line gaps contain no physical information, so use TPC/world volume sizes for display purposes
             zMin = inputZMin;
             zMax = inputZMax;
 
