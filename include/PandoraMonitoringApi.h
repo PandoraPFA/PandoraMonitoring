@@ -242,7 +242,7 @@ public:
      *  @param  markerSize the marker size
      */
     static void AddMarkerToVisualization(const pandora::Pandora &pandora, const pandora::CartesianVector *const pMarkerPoint,
-        const std::string &name, const Color color, const unsigned int markerSize);
+        const std::string &name, const Color color, const float markerSize, const unsigned int markerStyle=20);
 
     /**
      *  @brief  Add line to visualization
