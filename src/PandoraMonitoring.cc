@@ -290,7 +290,7 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
     const std::string starter("---");
     const std::string mcParticleListTitle(name.empty() ? "MCParticles" : name);
     std::string mcParticleListName(mcParticleListTitle);
-    std::replace_if(mcParticleListName.begin(), mcParticleListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
+    std::replace(mcParticleListName.begin(), mcParticleListName.end(), '\n', '/');
 
     TEveTrackList *pTEveTrackList = new TEveTrackList();
     pTEveTrackList->SetElementNameTitle(mcParticleListName.c_str(), mcParticleListTitle.c_str() );
@@ -405,7 +405,7 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
     std::string trackListName(trackListTitle);
     if (trackListName.find(starter) != std::string::npos)
         trackListName.replace(trackListName.find(starter), starter.length(), "Tracks/");
-    std::replace_if(trackListName.begin(), trackListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
+    std::replace(trackListName.begin(), trackListName.end(), '\n', '/');
 
     TEveTrackList *pTEveTrackList = new TEveTrackList();
     pTEveTrackList->SetElementNameTitle(trackListName.c_str(), trackListTitle.c_str() );
@@ -504,7 +504,7 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
     std::string caloHitListName(caloHitListTitle);
     if (caloHitListName.find(starter) != std::string::npos)
         caloHitListName.replace(caloHitListName.find(starter), starter.length(), "CaloHits/");
-    std::replace_if(caloHitListName.begin(), caloHitListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
+    std::replace(caloHitListName.begin(), caloHitListName.end(), '\n', '/');
 
     bool isU(false), isV(false), isW(false);
 
@@ -713,7 +713,7 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
     std::string clusterListName(clusterListTitle);
     if (clusterListName.find(starter) != std::string::npos)
         clusterListName.replace(clusterListName.find(starter), starter.length(), "Clusters/");
-    std::replace_if(clusterListName.begin(), clusterListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
+    std::replace(clusterListName.begin(), clusterListName.end(), '\n', '/');
 
     TEveElement *pClusterVectorElement = new TEveElementList();
     pClusterVectorElement->SetElementNameTitle(clusterListName.c_str(), clusterListTitle.c_str());
@@ -766,7 +766,7 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
     const std::string starter("---");
     const std::string pfoListTitle(name.empty() ? "Pfos" : name);
     std::string pfoListName(pfoListTitle);
-    std::replace_if(pfoListName.begin(), pfoListName.end(), std::bind2nd(std::equal_to<char>(),'\n'), '/');
+    std::replace(pfoListName.begin(), pfoListName.end(), '\n', '/');
 
     TEveElement *pPfoVectorElement = new TEveElementList();
     pPfoVectorElement->SetElementNameTitle(pfoListName.c_str(), pfoListTitle.c_str());
