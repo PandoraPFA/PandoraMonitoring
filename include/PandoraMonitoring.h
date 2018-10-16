@@ -41,21 +41,21 @@ class PandoraMonitoring
 public:
     /**
      *  @brief  Get the relevant pandora monitoring instance
-     * 
+     *
      *  @param  pandora the calling pandora instance
      */
     static PandoraMonitoring *GetInstance(const pandora::Pandora &pandora);
 
     /**
      *  @brief Delete instance of PandoraMonitoring
-     * 
+     *
      *  @param  pandora the calling pandora instance
      */
     static void DeleteInstance(const pandora::Pandora &pandora);
 
     /**
      *  @brief  Set a variable in a tree (create the tree and the branch if not yet existing)
-     * 
+     *
      *  @param  treeName name of the tree (is created if it does not exist yet)
      *  @param  variableName name of the branch in the tree (the branch is created if it does not exist yet)
      *  @param  t sets value of the variable (permitted types are float/double/int and std::vector<float>*,std::vector<double>*,std::vector<int>*
@@ -65,21 +65,21 @@ public:
 
     /**
      *  @brief  Fill the tree with the variables which have been set before with SetTreeVariable
-     * 
+     *
      *  @param  treeName name of the tree to be filled
      */
     void FillTree(const std::string &treeName);
 
     /**
      *  @brief  Print the tree
-     * 
+     *
      *  @param  treeName name of the tree to be printed
      */
     void PrintTree(const std::string &treeName);
 
     /**
      *  @brief  Scan the tree (print the values of all branches)
-     * 
+     *
      *  @param  treeName name of the tree to be scanned
      */
     void ScanTree(const std::string &treeName);
@@ -88,14 +88,14 @@ public:
      *  @brief  Save the tree to a file
      *  @param  fileName the file name under which to save the histogram
      *  @param  fileOptions the options associated with opening/recreating a file
-     * 
+     *
      *  @param  treeName name of the tree to be written to a file
      */
     void SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions);
 
     /**
      *  @brief  Draw a pandora histogram
-     * 
+     *
      *  @param  name the name associated with the histogram
      *  @param  options the drawing options
      */
@@ -104,7 +104,7 @@ public:
 
     /**
      *  @brief  Set TEve display parameters
-     * 
+     *
      *  @param  showDetectors turns the visibility of the detector geometry on or off
      *  @param  detectorView the detector view
      *  @param  transparencyThresholdE cell energy for which transparency is saturated (0%, fully opaque)
@@ -116,7 +116,7 @@ public:
 
     /**
      *  @brief  Add MC particles to the Eve event-display
-     * 
+     *
      *  @param  pMCParticleList list of tracks to be added to the event display
      *  @param  name of the MC particle list
      *  @param  parent pointer to the parent TEveElement. If NULL, the track will be parent element
@@ -130,7 +130,7 @@ public:
 
     /**
      *  @brief  Add Tracks to the Eve event-display
-     * 
+     *
      *  @param  pTrackList list of tracks to be added to the event display
      *  @param  name of the track list
      *  @param  parent pointer to the parent TEveElement. If NULL, the track will be parent element
@@ -143,7 +143,7 @@ public:
 
     /**
      *  @brief  Add CaloHits to the Eve event-display
-     * 
+     *
      *  @param  pCaloHitList list of calohits to be added to the event display
      *  @param  parent name of the calohitlist
      *  @param  parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
@@ -156,7 +156,7 @@ public:
 
     /**
      *  @brief  Add Clusters to the Eve event-display
-     * 
+     *
      *  @param  pClusterList list of clusters to be added to the event display
      *  @param  name of the cluster list
      *  @param  parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
@@ -170,7 +170,7 @@ public:
 
     /**
      *  @brief  Add Particle flow objects to the Eve event-display
-     * 
+     *
      *  @param  pPfoList list of particle flow objects to be added to the event display
      *  @param  name of the pfo list
      *  @param  parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
@@ -184,7 +184,7 @@ public:
 
     /**
      *  @brief  Add vertices to the Eve event-display
-     * 
+     *
      *  @param  pVertexList list of vertices to be added to the event display
      *  @param  parent name of the vertexlist
      *  @param  parent pointer to the parent TEveElement. If NULL, the vertex will be parent element
@@ -197,7 +197,7 @@ public:
 
     /**
      *  @brief  Add marker to visualization
-     * 
+     *
      *  @param  pMarkerPoint address of the marker point
      *  @param  name of the marker
      *  @param  parent pointer to the parent TEveElement. If NULL, the marker will be parent element
@@ -209,7 +209,7 @@ public:
 
     /**
      *  @brief  Add line to visualization
-     * 
+     *
      *  @param  pStartPoint, pEndPoint address start and end of line
      *  @param  name of the line
      *  @param  parent pointer to the parent TEveElement. If NULL, the marker will be parent element
@@ -232,7 +232,7 @@ public:
 
     /**
      *  @brief  Sort clusters by descending hadronic energy
-     * 
+     *
      *  @param  pLhs address of first cluster
      *  @param  pRhs address of second cluster
      */
@@ -240,7 +240,7 @@ public:
 
     /**
      *  @brief  Sort MCParticles by descending energy
-     * 
+     *
      *  @param  pLhs address of first MCParticle
      *  @param  pRhs address of second MCParticle
      */
@@ -248,15 +248,15 @@ public:
 
     /**
      *  @brief  Sort tracks by descending momentum
-     * 
+     *
      *  @param  pLhs address of first track
      *  @param  pRhs address of second track
      */
     static bool SortTracksByMomentum(const pandora::Track *const pLhs, const pandora::Track *const pRhs);
 
     /**
-     *  @brief  Sort pfos by descending energy 
-     * 
+     *  @brief  Sort pfos by descending energy
+     *
      *  @param  pLhs address of first pfo
      *  @param  pRhs address of second pfo
      */
@@ -265,7 +265,7 @@ public:
 private:
     /**
      *  @brief  Default constructor
-     * 
+     *
      *  @param  pandora the associated pandora instance
      */
     PandoraMonitoring(const pandora::Pandora &pandora);
@@ -277,7 +277,7 @@ private:
 
     /**
      *  @brief  Computes the corners of a box in 3D
-     * 
+     *
      *  @param  pCaloHit address of the calo hit
      *  @param  corners will be filled with the x,y and z-coordinates of all 8 corners of the box
      */
@@ -287,7 +287,7 @@ private:
 
     /**
      *  @brief  Compute the polygon corners for the detector outline
-     * 
+     *
      *  @param  symmetryOrder is the number of polygon corners
      *  @param  closestDistanceToIp is the distance to the closest points on the polygon
      *  @param  phi0 reference angle where to start the polygon
@@ -298,7 +298,7 @@ private:
     /**
      *  @brief  Creates a "tube" volume with the given symmetry inside and outside. If a symmetryOrder <= 2 is chosen, a circle is
      *          used instead of a polygon
-     * 
+     *
      *  @param  name of the volume
      *  @param  innerSymmetryOrder symmetry order of the inner polygon (circle)
      *  @param  outerSymmetryOrder symmetry order of the outer polygon (circle)
@@ -315,7 +315,7 @@ private:
     /**
      *  @brief  Creates a extruded polygonal (or cylindrical) shape with the given symmetry. If a symmetryOrder <= 2 is chosen, a
      *          circle is used instead of a polygon
-     * 
+     *
      *  @param  symmetryOrder symmetry order of the polygon (circle if <=2)
      *  @param  closestDistanceToIp closest distance between IP and polygon (circle radius)
      *  @param  phi starting angle of the polygon
@@ -332,21 +332,21 @@ private:
 
     /**
      *  @brief  Transform a Pandora monitoring API color enum into a ROOT color enum
-     * 
+     *
      *  @param  color in Pandora monitoring API enum
      */
     EColor GetROOTColor(Color color) const;
 
     /**
      *  @brief  Get a color for a PDG code
-     * 
+     *
      *  @param  particleId pdgCode of the particle
      */
     Color GetColorForPdgCode(int particleId) const;
 
     /**
      *  @brief  Initialize eve elements
-     * 
+     *
      *  @param  transparency the transparency
      */
     void InitializeEve(Char_t transparency = 70);
@@ -359,8 +359,8 @@ private:
     /**
      *  @brief  Add event and geometry scences to a specifed view and specify camera and axis type for view
      *
-     *  @param  pTEveViewer viewer 
-     *  @param  pTEveEventScene event scene 
+     *  @param  pTEveViewer viewer
+     *  @param  pTEveEventScene event scene
      *  @param  pTEveGeometryScene geometry scene
      *  @param  camera orthogonal/perspective view choice
      *  @param  axisType for view
@@ -369,37 +369,32 @@ private:
 
     /**
      *  @brief  Initialize subdetector eve elements
-     * 
-     *  @param  pMainDetectorVolume address of the main detector volume
-     *  @param  pSubDetectorMedium address of the medium to be used for the subdetectors
+     *
      *  @param  transparency the transparency
      */
-    void InitializeSubDetectors(TGeoVolume *pMainDetectorVolume, TGeoMedium *pSubDetectorMedium, Char_t transparency);
+    void InitializeSubDetectors(Char_t transparency);
 
     /**
      *  @brief  Initialize subdetector eve elements
-     * 
-     *  @param  pMainDetectorVolume address of the main detector volume
-     *  @param  pSubDetectorMedium address of the medium to be used for the subdetectors
+     *
      *  @param  transparency the transparency
      */
-    void InitializeLArTPCs(TGeoVolume *pMainDetectorVolume, TGeoMedium *pSubDetectorMedium, Char_t transparency);
+    void InitializeLArTPCs(Char_t transparency);
 
     /**
      *  @brief  Initialize detector gap eve elements
-     * 
-     *  @param  pMainDetectorVolume address of the main detector volume
-     *  @param  pSubDetectorMedium address of the medium to be used for the gaps
+     *
      *  @param  transparency the transparency
+     *  @param  are the gaps transient
      */
-    void InitializeGaps(TGeoVolume *pMainDetectorVolume, TGeoMedium *pGapMedium, Char_t transparency);
+    void InitializeGaps(Char_t transparency, bool transient);
 
     /**
      *  @brief  Whether lhs object should appear before rhs object in a sorted list
      *
      *  @param  pLhs first object for comparison
      *  @param  pRhs second object for comparison
-     * 
+     *
      *  @return boolean
      */
     static bool SortLineGaps(const pandora::LineGap *const pLhs, const pandora::LineGap *const pRhs);
@@ -409,7 +404,7 @@ private:
      *
      *  @param  pLhs first object for comparison
      *  @param  pRhs second object for comparison
-     * 
+     *
      *  @return boolean
      */
     static bool SortBoxGaps(const pandora::BoxGap *const pLhs, const pandora::BoxGap *const pRhs);
@@ -419,7 +414,7 @@ private:
      *
      *  @param  pLhs first object for comparison
      *  @param  pRhs second object for comparison
-     * 
+     *
      *  @return boolean
      */
     static bool SortConcentricGaps(const pandora::ConcentricGap *const pLhs, const pandora::ConcentricGap *const pRhs);
