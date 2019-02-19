@@ -1,0 +1,12 @@
+# Ignore temp and data files
+*~
+*.bak
+*.log
+*.root
+
+# Ignore built library files
+lib/
+
+# Ignore compiled files
+*.o
+*.d
