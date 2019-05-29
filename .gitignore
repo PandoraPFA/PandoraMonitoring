@@ -3,10 +3,13 @@
 *.bak
 *.log
 *.root
+*.cmake
 
 # Ignore built library files
 lib/
+build/
 
 # Ignore compiled files
 *.o
 *.d
+

@@ -35,7 +35,7 @@ add_definitions("-DMONITORING")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # Low level settings - compiler etc
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -pedantic -Wno-long-long -Wno-sign-compare -Wshadow -fno-strict-aliasing -std=c++11 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -pedantic -Wno-long-long -Wno-sign-compare -Wshadow -fno-strict-aliasing -std=c++17 ${CMAKE_CXX_FLAGS}")
 
 include(CheckCXXCompilerFlag)
 unset(COMPILER_SUPPORTS_CXX_FLAGS CACHE)
