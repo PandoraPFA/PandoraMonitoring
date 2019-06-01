@@ -976,6 +976,23 @@ void PandoraMonitoring::ViewEvent()
 
     m_pEveManager->Redraw3D(kTRUE, kTRUE);
 
+    int count = 0;
+    const int NUM_OF_VIEWS = 5;
+
+    for (auto viewer : m_pEveManager->GetViewers()->RefChildren()) {
+        auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
+        eveViewer->GetGLViewer()->SavePicture(
+                "/Users/ryanc/git/data/events/event_" + std::to_string(m_eventDisplayCounter) +
+                "_display_" + std::to_string(count) +
+                ".png"
+        );
+        ++count;
+
+        if (count >= NUM_OF_VIEWS) {
+            break;
+        }
+    }
+
     this->Pause();
 
     m_pEveManager->GetCurrentEvent()->SetRnrSelfChildren(kFALSE,kFALSE);
