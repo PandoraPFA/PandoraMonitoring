@@ -226,6 +226,11 @@ public:
     void ViewEvent();
 
     /**
+     *  @brief  Save the Eve Event-displays.
+     */
+    void SaveEvent();
+
+    /**
      *  @brief  Pause thread until user enters 'return'
      */
     void Pause() const;

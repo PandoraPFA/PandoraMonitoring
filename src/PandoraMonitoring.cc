@@ -976,23 +976,6 @@ void PandoraMonitoring::ViewEvent()
 
     m_pEveManager->Redraw3D(kTRUE, kTRUE);
 
-    int count = 0;
-    const int NUM_OF_VIEWS = 5;
-
-    for (auto viewer : m_pEveManager->GetViewers()->RefChildren()) {
-        auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
-        eveViewer->GetGLViewer()->SavePicture(
-                "/Users/ryanc/git/data/events/event_" + std::to_string(m_eventDisplayCounter) +
-                "_display_" + std::to_string(count) +
-                ".png"
-        );
-        ++count;
-
-        if (count >= NUM_OF_VIEWS) {
-            break;
-        }
-    }
-
     this->Pause();
 
     m_pEveManager->GetCurrentEvent()->SetRnrSelfChildren(kFALSE,kFALSE);
@@ -1001,9 +984,52 @@ void PandoraMonitoring::ViewEvent()
     m_p2DVEventScene->RemoveElements();
     m_p2DWEventScene->RemoveElements();
     m_p3DEventScene->RemoveElements();
+    this->SaveEvent();
 
     m_openEveEvent = false;
     std::cout << "View done" << std::endl;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+const int NUM_OF_VIEWS = 5;
+const std::string DISPLAY_NAMES[NUM_OF_VIEWS] = {
+    "Viewer_1_View",
+    "3D_View",
+    "2D_W_View",
+    "2D_U_View",
+    "2D_V_View",
+};
+
+void PandoraMonitoring::SaveEvent()
+{
+    char* saveEventDisplays = std::getenv("PANDORA_SAVE_DISPLAYS");
+    char* saveDirEnvVar = std::getenv("PANDORA_SAVE_DISPLAY_PATH");
+    bool shouldSaveEventDisplays = saveEventDisplays != NULL &&
+                                   saveDirEnvVar != NULL &&
+                                   saveEventDisplays[0] == '1';
+
+    if (shouldSaveEventDisplays == false) {
+        return;
+    }
+
+    std::string saveDir = std::string(saveDirEnvVar);
+    int count = 0;
+
+    for (auto viewer : m_pEveManager->GetViewers()->RefChildren()) {
+        auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
+        eveViewer->GetGLViewer()->SavePictureUsingFBO(
+                saveDir + "/event_" + std::to_string(m_eventDisplayCounter) +
+                "_" + DISPLAY_NAMES[count] + ".png",
+                1920,
+                1080
+                );
+        ++count;
+
+        if (count >= NUM_OF_VIEWS) {
+            break;
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
