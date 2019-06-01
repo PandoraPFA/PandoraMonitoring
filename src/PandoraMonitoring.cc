@@ -1003,12 +1003,21 @@ const std::string DISPLAY_NAMES[NUM_OF_VIEWS] = {
 
 void PandoraMonitoring::SaveEvent()
 {
+    // Check if we should be saving event displays.  If we should, the
+    // environment variable and a location to save to should be set.
     char* saveEventDisplays = std::getenv("PANDORA_SAVE_DISPLAYS");
     char* saveDirEnvVar = std::getenv("PANDORA_SAVE_DISPLAY_PATH");
     bool shouldSaveEventDisplays = saveEventDisplays != NULL &&
                                    saveDirEnvVar != NULL &&
                                    saveEventDisplays[0] == '1';
 
+    // Optionally, an event number may have been set, else just
+    // use the display counter.
+    char* eventNumberEnvVar = std::getenv("PANDORA_EVENT_NUMBER");
+    int eventNumber = eventNumberEnvVar != NULL ? eventNumberEnvVar[0] - '0' :
+        m_eventDisplayCounter;
+
+    // If the variables aren't set, we shouldn't or can't do anything.
     if (shouldSaveEventDisplays == false) {
         return;
     }
@@ -1016,10 +1025,11 @@ void PandoraMonitoring::SaveEvent()
     std::string saveDir = std::string(saveDirEnvVar);
     int count = 0;
 
+    // Otherwise, pull out the display types and save images of them.
     for (auto viewer : m_pEveManager->GetViewers()->RefChildren()) {
         auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
         eveViewer->GetGLViewer()->SavePictureUsingFBO(
-                saveDir + "/event_" + std::to_string(m_eventDisplayCounter) +
+                saveDir + "/event_" + std::to_string(eventNumber) +
                 "_" + DISPLAY_NAMES[count] + ".png",
                 1920,
                 1080
