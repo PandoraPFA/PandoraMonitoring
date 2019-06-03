@@ -1014,7 +1014,7 @@ void PandoraMonitoring::SaveEvent()
     // Optionally, an event number may have been set, else just
     // use the display counter.
     char* eventNumberEnvVar = std::getenv("PANDORA_EVENT_NUMBER");
-    int eventNumber = eventNumberEnvVar != NULL ? eventNumberEnvVar[0] - '0' :
+    int eventNumber = eventNumberEnvVar != NULL ? std::stoi(eventNumberEnvVar) :
         m_eventDisplayCounter;
 
     // If the variables aren't set, we shouldn't or can't do anything.
