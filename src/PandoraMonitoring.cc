@@ -984,7 +984,6 @@ void PandoraMonitoring::ViewEvent()
     m_p2DVEventScene->RemoveElements();
     m_p2DWEventScene->RemoveElements();
     m_p3DEventScene->RemoveElements();
-    this->SaveEvent();
 
     m_openEveEvent = false;
     std::cout << "View done" << std::endl;
@@ -992,44 +991,18 @@ void PandoraMonitoring::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-const int NUM_OF_VIEWS = 5;
-const std::string DISPLAY_NAMES[NUM_OF_VIEWS] = {
-    "Viewer_1_View",
-    "3D_View",
-    "2D_W_View",
-    "2D_U_View",
-    "2D_V_View",
-};
-
-void PandoraMonitoring::SaveEvent()
+void PandoraMonitoring::SaveEvent(const std::string savePath, const int eventNumber)
 {
-    // Check if we should be saving event displays.  If we should, the
-    // environment variable and a location to save to should be set.
-    char* saveEventDisplays = std::getenv("PANDORA_SAVE_DISPLAYS");
-    char* saveDirEnvVar = std::getenv("PANDORA_SAVE_DISPLAY_PATH");
-    bool shouldSaveEventDisplays = saveEventDisplays != NULL &&
-                                   saveDirEnvVar != NULL &&
-                                   saveEventDisplays[0] == '1';
+    // TODO: We should be checking the path exists/check SavePic is capable of
+    // dealing with the case it isn't.
 
-    // Optionally, an event number may have been set, else just
-    // use the display counter.
-    char* eventNumberEnvVar = std::getenv("PANDORA_EVENT_NUMBER");
-    int eventNumber = eventNumberEnvVar != NULL ? std::stoi(eventNumberEnvVar) :
-        m_eventDisplayCounter;
-
-    // If the variables aren't set, we shouldn't or can't do anything.
-    if (shouldSaveEventDisplays == false) {
-        return;
-    }
-
-    std::string saveDir = std::string(saveDirEnvVar);
     int count = 0;
 
-    // Otherwise, pull out the display types and save images of them.
+    // Pull out each display type and save an image of it.
     for (auto viewer : m_pEveManager->GetViewers()->RefChildren()) {
         auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
         eveViewer->GetGLViewer()->SavePictureUsingFBO(
-                saveDir + "/event_" + std::to_string(eventNumber) +
+                savePath + "/event_" + std::to_string(eventNumber) +
                 "_" + DISPLAY_NAMES[count] + ".png",
                 1920,
                 1080

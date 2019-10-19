@@ -267,6 +267,15 @@ public:
     static void ViewEvent(const pandora::Pandora &pandora);
 
     /**
+     *  @brief  Save each of the event display views from the Eve event display.
+     * 
+     *  @param  pandora the calling pandora instance
+     *  @param  savePath The path to save the images into.
+     *  @param  pandora The current event number.
+     */
+    static void SaveEvent(const pandora::Pandora &pandora, const std::string savePath, const int eventNumber);
+
+    /**
      *  @brief  Pause thread until user enters 'return'
      * 
      *  @param  pandora the calling pandora instance

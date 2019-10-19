@@ -228,7 +228,7 @@ public:
     /**
      *  @brief  Save the Eve Event-displays.
      */
-    void SaveEvent();
+    void SaveEvent(const std::string savePath, const int eventNumber);
 
     /**
      *  @brief  Pause thread until user enters 'return'
@@ -560,6 +560,16 @@ private:
     case b : return c;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+const int NUM_OF_VIEWS = 5;
+const std::string DISPLAY_NAMES[NUM_OF_VIEWS] = {
+    "Viewer_1_View",
+    "3D_View",
+    "2D_W_View",
+    "2D_U_View",
+    "2D_V_View",
+};
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline EColor PandoraMonitoring::GetROOTColor(Color color) const
