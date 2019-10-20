@@ -970,11 +970,16 @@ TEveElement *PandoraMonitoring::AddLineToVisualization(const CartesianVector *co
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::ViewEvent()
+void PandoraMonitoring::ViewEvent(const bool needsInitialsation)
 {
-    this->InitializeEve();
-
-    m_pEveManager->Redraw3D(kTRUE, kTRUE);
+    // Initialize the GUI if it needs doing.
+    //
+    // This allows the Save method to avoid initializing twice.
+    if (needsInitialsation)
+    {
+        this->InitializeEve();
+        m_pEveManager->Redraw3D(kTRUE, kTRUE);
+    }
 
     this->Pause();
 
@@ -991,10 +996,17 @@ void PandoraMonitoring::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::SaveEvent(const std::string savePath, const int eventNumber)
+void PandoraMonitoring::SaveAndViewEvent(const std::string savePath)
 {
     // TODO: We should be checking the path exists/check SavePic is capable of
     // dealing with the case it isn't.
+
+    this->InitializeEve();
+    m_pEveManager->Redraw3D(kTRUE, kTRUE);
+
+    // Force a redraw of the event, to avoid any issues where Eve has not updated in time.
+    gSystem->ProcessEvents();
+    usleep(1000);
 
     int count = 0;
 
@@ -1002,7 +1014,7 @@ void PandoraMonitoring::SaveEvent(const std::string savePath, const int eventNum
     for (auto viewer : m_pEveManager->GetViewers()->RefChildren()) {
         auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
         eveViewer->GetGLViewer()->SavePictureUsingFBO(
-                savePath + "/event_" + std::to_string(eventNumber) +
+                savePath + "/event_" + std::to_string(m_eventDisplayCounter) +
                 "_" + DISPLAY_NAMES[count] + ".png",
                 1920,
                 1080
@@ -1013,6 +1025,10 @@ void PandoraMonitoring::SaveEvent(const std::string savePath, const int eventNum
             break;
         }
     }
+
+    // Now we've finished the saving, lets actually view the event like normal.
+    // We want to skip initialising the GUI again, since its already been done.
+    this->ViewEvent(false);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
