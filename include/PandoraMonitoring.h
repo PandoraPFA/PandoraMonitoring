@@ -223,12 +223,12 @@ public:
     /**
      *  @brief  Show the Eve Event-display and pause.
      */
-    void ViewEvent();
+    void ViewEvent(const bool needsInitialsation = true);
 
     /**
      *  @brief  Save the Eve Event-displays.
      */
-    void SaveEvent(const std::string savePath, const int eventNumber);
+    void SaveAndViewEvent(const std::string savePath);
 
     /**
      *  @brief  Pause thread until user enters 'return'
