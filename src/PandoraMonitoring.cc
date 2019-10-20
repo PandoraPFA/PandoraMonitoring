@@ -974,7 +974,7 @@ void PandoraMonitoring::ViewEvent(const bool needsInitialsation)
 {
     // Initialize the GUI if it needs doing.
     //
-    // This allows the Save method to avoid initializing twice.
+    // This allows the save method to avoid initializing twice.
     if (needsInitialsation)
     {
         this->InitializeEve();
@@ -1002,7 +1002,9 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string savePath)
     // dealing with the case it isn't.
 
     this->InitializeEve();
-    m_pEveManager->Redraw3D(kTRUE, kTRUE);
+    // TODO: For whatever reason, the first save has a different camera angle in the 3D view.
+    // This is then sorted for the rest of the events.
+    m_pEveManager->FullRedraw3D(kTRUE, kTRUE);
 
     // Force a redraw of the event, to avoid any issues where Eve has not updated in time.
     gSystem->ProcessEvents();
