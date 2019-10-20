@@ -6,7 +6,7 @@ else
 endif
 
 CC = g++
-CFLAGS = -c -g -fPIC -O2 -Wall -Wextra -Werror -pedantic -Wno-long-long -Wno-sign-compare -Wshadow -fno-strict-aliasing -std=c++17
+CFLAGS = -c -g -fPIC -O2 -Wall -Wextra -Werror -pedantic -Wno-long-long -Wno-sign-compare -Wshadow -fno-strict-aliasing -std=c++11
 ifdef BUILD_32BIT_COMPATIBLE
     CFLAGS += -m32
 endif
@@ -20,7 +20,7 @@ PROJECT_INCLUDE_DIR = $(PROJECT_DIR)/include/
 PROJECT_LIBRARY = $(PROJECT_LIBRARY_DIR)/libPandoraMonitoring.so
 
 INCLUDES  = -I$(PROJECT_INCLUDE_DIR)
-INCLUDES += -I$(PANDORA_DIR)/include
+INCLUDES += -I$(PANDORA_DIR)/PandoraSDK/include
 INCLUDES += -I$(shell root-config --incdir)
 
 DEFINES  = -DMONITORING=1
