@@ -1020,9 +1020,12 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string savePath)
                 "_" + DISPLAY_NAMES[count] + ".png",
                 1920,
                 1080
-                );
+        );
+
         ++count;
 
+        // This is to stop us saving out every event display.
+        // We only want the ones for the current event.
         if (count >= NUM_OF_VIEWS)
         {
             break;
