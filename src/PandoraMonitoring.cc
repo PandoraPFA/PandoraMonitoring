@@ -1012,7 +1012,8 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string savePath)
     int count = 0;
 
     // Pull out each display type and save an image of it.
-    for (auto viewer : m_pEveManager->GetViewers()->RefChildren()) {
+    for (auto viewer : m_pEveManager->GetViewers()->RefChildren())
+    {
         auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
         eveViewer->GetGLViewer()->SavePictureUsingFBO(
                 savePath + "/event_" + std::to_string(m_eventDisplayCounter) +
@@ -1022,7 +1023,8 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string savePath)
                 );
         ++count;
 
-        if (count >= NUM_OF_VIEWS) {
+        if (count >= NUM_OF_VIEWS)
+        {
             break;
         }
     }
