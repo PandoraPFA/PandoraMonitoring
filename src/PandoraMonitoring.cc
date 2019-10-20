@@ -1006,7 +1006,6 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string savePath)
 
     // Force a redraw of the event, to avoid any issues where Eve has not updated in time.
     gSystem->ProcessEvents();
-    usleep(1000);
 
     int count = 0;
 
