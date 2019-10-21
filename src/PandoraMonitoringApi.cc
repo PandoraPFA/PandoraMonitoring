@@ -144,7 +144,7 @@ void PandoraMonitoringApi::ViewEvent(const pandora::Pandora &pandora)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::SaveAndViewEvent(const pandora::Pandora &pandora, const std::string savePath)
+void PandoraMonitoringApi::SaveAndViewEvent(const pandora::Pandora &pandora, const std::string &savePath)
 {
     PandoraMonitoring::GetInstance(pandora)->SaveAndViewEvent(savePath);
 }

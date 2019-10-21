@@ -970,12 +970,12 @@ TEveElement *PandoraMonitoring::AddLineToVisualization(const CartesianVector *co
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::ViewEvent(const bool needsInitialsation)
+void PandoraMonitoring::ViewEvent(const bool shouldInitializeGui)
 {
     // Initialize the GUI if it needs doing.
     //
     // This allows the save method to avoid initializing twice.
-    if (needsInitialsation)
+    if (shouldInitializeGui)
     {
         this->InitializeEve();
         m_pEveManager->Redraw3D(kTRUE, kTRUE);
@@ -996,7 +996,7 @@ void PandoraMonitoring::ViewEvent(const bool needsInitialsation)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::SaveAndViewEvent(const std::string savePath)
+void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
 {
     // TODO: We should be checking the path exists/check SavePic is capable of
     // dealing with the case it isn't.
@@ -1012,9 +1012,9 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string savePath)
     int count = 0;
 
     // Pull out each display type and save an image of it.
-    for (auto viewer : m_pEveManager->GetViewers()->RefChildren())
+    for (const auto viewer : m_pEveManager->GetViewers()->RefChildren())
     {
-        auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
+        const auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
         eveViewer->GetGLViewer()->SavePictureUsingFBO(
                 savePath + "/event_" + std::to_string(m_eventDisplayCounter) +
                 "_" + DISPLAY_NAMES[count] + ".png",
