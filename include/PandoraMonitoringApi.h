@@ -271,9 +271,9 @@ public:
      *          Whilst paused, save the event displays.
      * 
      *  @param  pandora the calling pandora instance
-     *  @param  savePath The path to save the images into.
+     *  @param  savePath Path to save event display in.
      */
-    static void SaveAndViewEvent(const pandora::Pandora &pandora, const std::string savePath);
+    static void SaveAndViewEvent(const pandora::Pandora &pandora, const std::string &savePath);
 
     /**
      *  @brief  Pause thread until user enters 'return'

@@ -222,13 +222,17 @@ public:
 
     /**
      *  @brief  Show the Eve Event-display and pause.
+     *
+     *  @param  shouldInitializeGui Does the GUI need to be initialized. False if initialized elsewhere.
      */
-    void ViewEvent(const bool needsInitialsation = true);
+    void ViewEvent(const bool shouldInitializeGui = true);
 
     /**
      *  @brief  Save the Eve Event-displays.
+     *
+     *  @param  savePath Path to save event display in.
      */
-    void SaveAndViewEvent(const std::string savePath);
+    void SaveAndViewEvent(const std::string &savePath);
 
     /**
      *  @brief  Pause thread until user enters 'return'
