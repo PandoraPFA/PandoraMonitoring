@@ -970,16 +970,10 @@ TEveElement *PandoraMonitoring::AddLineToVisualization(const CartesianVector *co
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoring::ViewEvent(const bool shouldInitializeGui)
+void PandoraMonitoring::ViewEvent()
 {
-    // Initialize the GUI if it needs doing.
-    //
-    // This allows the save method to avoid initializing twice.
-    if (shouldInitializeGui)
-    {
-        this->InitializeEve();
-        m_pEveManager->Redraw3D(kTRUE, kTRUE);
-    }
+    this->InitializeEve();
+    m_pEveManager->Redraw3D(kTRUE, kTRUE);
 
     this->Pause();
 
@@ -1034,7 +1028,7 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
 
     // Now we've finished the saving, lets actually view the event like normal.
     // We want to skip initialising the GUI again, since its already been done.
-    this->ViewEvent(false);
+    this->ViewEvent();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
