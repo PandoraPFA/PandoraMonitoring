@@ -1004,6 +1004,7 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
     gSystem->ProcessEvents();
 
     int count = 0;
+    const int totalNumberOfViews = 5;
 
     // Pull out each display type and save an image of it.
     // Get the display name from the TEveViewer element, and format it to
@@ -1023,7 +1024,7 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
 
         // This is to stop us saving out every event display.
         // We only want the ones for the current event.
-        if (count >= NUM_OF_VIEWS)
+        if (count >= totalNumberOfViews)
         {
             break;
         }
