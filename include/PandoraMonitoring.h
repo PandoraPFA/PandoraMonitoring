@@ -222,10 +222,8 @@ public:
 
     /**
      *  @brief  Show the Eve Event-display and pause.
-     *
-     *  @param  shouldInitializeGui Does the GUI need to be initialized. False if initialized elsewhere.
      */
-    void ViewEvent(const bool shouldInitializeGui = true);
+    void ViewEvent();
 
     /**
      *  @brief  Save the Eve Event-displays.
