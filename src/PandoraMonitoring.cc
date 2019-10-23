@@ -70,11 +70,13 @@
 
 #include <algorithm>
 #include <cmath>
+#include <errno.h>
 #include <fcntl.h>
 #include <iostream>
 #include <limits>
 #include <map>
 #include <set>
+#include <sys/stat.h>
 #include <unordered_map>
 #include <vector>
 
@@ -990,11 +992,50 @@ void PandoraMonitoring::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+bool isDirExist(const std::string& path)
+{
+    struct stat info;
+
+    if (stat(path.c_str(), &info) != 0)
+        return false;
+
+    return (info.st_mode & S_IFDIR) != 0;
+}
+
+bool makePath(const std::string& path)
+{
+    mode_t mode = 0755;
+    int ret = mkdir(path.c_str(), mode);
+
+    if (ret == 0)
+        return true;
+
+    switch (errno) {
+        case ENOENT:
+            // Parent didn't exist, try to create it
+            {
+                int pos = path.find_last_of('/');
+                if (pos == std::string::npos)
+                    return false;
+                if (!makePath( path.substr(0, pos) ))
+                    return false;
+            }
+            // Now, try to create again
+            return 0 == mkdir(path.c_str(), mode);
+
+        case EEXIST:
+            // Done!
+            return isDirExist(path);
+
+        default:
+            return false;
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
 {
-    // TODO: We should be checking the path exists/check SavePic is capable of
-    // dealing with the case it isn't.
-
     this->InitializeEve();
     // TODO: For whatever reason, the first save has a different camera angle in the 3D view.
     // This is then sorted for the rest of the events.
@@ -1005,6 +1046,13 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
 
     int count = 0;
     const int totalNumberOfViews = 5;
+
+    // Check the path exists / can be made.
+    if (!makePath(savePath))
+    {
+        std::cout << "Unable to validate path exists, skipping saving!" << std::endl;
+        this->ViewEvent();
+    }
 
     // Pull out each display type and save an image of it.
     // Get the display name from the TEveViewer element, and format it to
