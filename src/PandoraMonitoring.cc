@@ -1049,8 +1049,6 @@ bool MakePathIfNeeded(const std::string& path)
 void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
 {
     this->InitializeEve();
-    // TODO: For whatever reason, the first save has a different camera angle in the 3D view.
-    // This is then sorted for the rest of the events.
     m_pEveManager->FullRedraw3D(kTRUE, kTRUE);
 
     // Force a redraw of the event, to avoid any issues where Eve has not updated in time.
@@ -1066,13 +1064,14 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
         this->ViewEvent();
     }
 
-    // Pull out each display type and save an image of it.
-    // Get the display name from the TEveViewer element, and format it to
-    // remove spaces.
+    // Pull out each display type and save an image of it after resetting the
+    // camera. Get the display name from the TEveViewer element, and format it
+    // to remove spaces.
     for (const auto viewer : m_pEveManager->GetViewers()->RefChildren())
     {
         const auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
         const TString displayName = TString(eveViewer->GetName()).ReplaceAll(" ", "_");
+        eveViewer->GetGLViewer()->ResetCameras();
         eveViewer->GetGLViewer()->SavePictureUsingFBO(
                 savePath + "/event_" + std::to_string(m_eventDisplayCounter) +
                 "_" + displayName.Data() + ".png",
