@@ -1090,7 +1090,6 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
     }
 
     // Now we've finished the saving, lets actually view the event like normal.
-    // We want to skip initialising the GUI again, since its already been done.
     this->ViewEvent();
 }
 
