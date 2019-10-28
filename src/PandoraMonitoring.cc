@@ -992,7 +992,7 @@ void PandoraMonitoring::ViewEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool isDirExist(const std::string& path)
+bool CheckPathExists(const std::string& path)
 {
     struct stat info;
 
@@ -1002,14 +1002,26 @@ bool isDirExist(const std::string& path)
     return (info.st_mode & S_IFDIR) != 0;
 }
 
-bool makePath(const std::string& path)
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool MakePathIfNeeded(const std::string& path)
 {
+    // We use mkdir here, not stat to avoid race conditions. If the folder
+    // exist, we will just fail and pick that up in the following switch.
     mode_t mode = 0755;
     int ret = mkdir(path.c_str(), mode);
 
     if (ret == 0)
         return true;
 
+    // Check the error code for making the folder.
+    // There is three cases we care about:
+    //   - The parent doesn't exist, so lets go back one and try and make that
+    //     folder first by recursing.
+    //   - The folder already exists, so we don't need to do anything.
+    //   - Any other error we should just stop. The full list can be find in
+    //     the mkdir man page. This includes stuff like too long a path, disk
+    //     quotas, permission issues and more.
     switch (errno) {
         case ENOENT:
             // Parent didn't exist, try to create it
@@ -1017,7 +1029,7 @@ bool makePath(const std::string& path)
                 int pos = path.find_last_of('/');
                 if (pos == std::string::npos)
                     return false;
-                if (!makePath( path.substr(0, pos) ))
+                if (!MakePathIfNeeded( path.substr(0, pos) ))
                     return false;
             }
             // Now, try to create again
@@ -1025,7 +1037,7 @@ bool makePath(const std::string& path)
 
         case EEXIST:
             // Done!
-            return isDirExist(path);
+            return CheckPathExists(path);
 
         default:
             return false;
@@ -1048,7 +1060,7 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
     const int totalNumberOfViews = 5;
 
     // Check the path exists / can be made.
-    if (!makePath(savePath))
+    if (!MakePathIfNeeded(savePath))
     {
         std::cout << "Unable to validate path exists, skipping saving!" << std::endl;
         this->ViewEvent();
