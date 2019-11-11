@@ -1021,7 +1021,8 @@ bool MakePathIfNeeded(const std::string& path)
                 int pos = path.find_last_of('/');
                 if (pos == std::string::npos)
                     return false;
-                if (!MakePathIfNeeded( path.substr(0, pos) ))
+
+                if (!MakePathIfNeeded(path.substr(0, pos)))
                     return false;
             }
             return (0 == mkdir(path.c_str(), mode));
@@ -1068,9 +1069,7 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
 
         // ATTN: Stop after the correct number of views, to avoid going over the previous event displays.
         if (count >= totalNumberOfViews)
-        {
             break;
-        }
     }
 
     this->ViewEvent();
