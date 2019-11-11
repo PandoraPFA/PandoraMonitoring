@@ -999,7 +999,7 @@ bool CheckPathExists(const std::string& path)
     if (stat(path.c_str(), &info) != 0)
         return false;
 
-    return (info.st_mode & S_IFDIR) != 0;
+    return ((info.st_mode & S_IFDIR) != 0);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
