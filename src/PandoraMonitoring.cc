@@ -1006,25 +1006,17 @@ bool CheckPathExists(const std::string& path)
 
 bool MakePathIfNeeded(const std::string& path)
 {
-    // We use mkdir here, not stat to avoid race conditions. If the folder
-    // exist, we will just fail and pick that up in the following switch.
+    // ATTN: mkdir used here, not stat to avoid race conditions.
     mode_t mode = 0755;
     int ret = mkdir(path.c_str(), mode);
 
     if (ret == 0)
         return true;
 
-    // Check the error code for making the folder.
-    // There is three cases we care about:
-    //   - The parent doesn't exist, so lets go back one and try and make that
-    //     folder first by recursing.
-    //   - The folder already exists, so we don't need to do anything.
-    //   - Any other error we should just stop. The full list can be find in
-    //     the mkdir man page. This includes stuff like too long a path, disk
-    //     quotas, permission issues and more.
-    switch (errno) {
+    switch (errno)
+    {
+        // ATTN: The parent doesn't exist, so try and make that folder first by recursing.
         case ENOENT:
-            // Parent didn't exist, try to create it
             {
                 int pos = path.find_last_of('/');
                 if (pos == std::string::npos)
@@ -1032,13 +1024,14 @@ bool MakePathIfNeeded(const std::string& path)
                 if (!MakePathIfNeeded( path.substr(0, pos) ))
                     return false;
             }
-            // Now, try to create again
-            return 0 == mkdir(path.c_str(), mode);
+            return (0 == mkdir(path.c_str(), mode));
 
+        // ATTN: There is already something there, so check it is a folder.
         case EEXIST:
-            // Done!
             return CheckPathExists(path);
 
+        // ATTN: In any other case, assume folder creation failed.
+        // This includes too long a path, disk quotas and more.
         default:
             return false;
     }
@@ -1051,45 +1044,35 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
     this->InitializeEve();
     m_pEveManager->FullRedraw3D(kTRUE, kTRUE);
 
-    // Force a redraw of the event, to avoid any issues where Eve has not updated in time.
+    // ATTN: Force a redraw of the event, to avoid any issues where Eve has not updated in time.
     gSystem->ProcessEvents();
 
     int count = 0;
     const int totalNumberOfViews = 5;
 
-    // Check the path exists / can be made.
     if (!MakePathIfNeeded(savePath))
     {
         std::cout << "Unable to validate path exists, skipping saving!" << std::endl;
         this->ViewEvent();
     }
 
-    // Pull out each display type and save an image of it after resetting the
-    // camera. Get the display name from the TEveViewer element, and format it
-    // to remove spaces.
     for (const auto viewer : m_pEveManager->GetViewers()->RefChildren())
     {
         const auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
         const TString displayName = TString(eveViewer->GetName()).ReplaceAll(" ", "_");
         eveViewer->GetGLViewer()->ResetCameras();
-        eveViewer->GetGLViewer()->SavePictureUsingFBO(
-                savePath + "/event_" + std::to_string(m_eventDisplayCounter) +
-                "_" + displayName.Data() + ".png",
-                1920,
-                1080
-        );
+        eveViewer->GetGLViewer()->SavePictureUsingFBO(savePath + "/event_" + std::to_string(m_eventDisplayCounter) + "_" + displayName.Data() + ".png",
+                1920, 1080);
 
         ++count;
 
-        // This is to stop us saving out every event display.
-        // We only want the ones for the current event.
+        // ATTN: Stop after the correct number of views, to avoid going over the previous event displays.
         if (count >= totalNumberOfViews)
         {
             break;
         }
     }
 
-    // Now we've finished the saving, lets actually view the event like normal.
     this->ViewEvent();
 }
 
