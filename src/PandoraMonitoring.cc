@@ -70,11 +70,13 @@
 
 #include <algorithm>
 #include <cmath>
+#include <errno.h>
 #include <fcntl.h>
 #include <iostream>
 #include <limits>
 #include <map>
 #include <set>
+#include <sys/stat.h>
 #include <unordered_map>
 #include <vector>
 
@@ -973,7 +975,6 @@ TEveElement *PandoraMonitoring::AddLineToVisualization(const CartesianVector *co
 void PandoraMonitoring::ViewEvent()
 {
     this->InitializeEve();
-
     m_pEveManager->Redraw3D(kTRUE, kTRUE);
 
     this->Pause();
@@ -987,6 +988,91 @@ void PandoraMonitoring::ViewEvent()
 
     m_openEveEvent = false;
     std::cout << "View done" << std::endl;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool CheckPathExists(const std::string& path)
+{
+    struct stat info;
+
+    if (stat(path.c_str(), &info) != 0)
+        return false;
+
+    return ((info.st_mode & S_IFDIR) != 0);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool MakePathIfNeeded(const std::string& path)
+{
+    // ATTN: mkdir used here, not stat to avoid race conditions.
+    mode_t mode = 0755;
+    int ret = mkdir(path.c_str(), mode);
+
+    if (ret == 0)
+        return true;
+
+    switch (errno)
+    {
+        // ATTN: The parent doesn't exist, so try and make that folder first by recursing.
+        case ENOENT:
+            {
+                int pos = path.find_last_of('/');
+                if (pos == std::string::npos)
+                    return false;
+
+                if (!MakePathIfNeeded(path.substr(0, pos)))
+                    return false;
+            }
+            return (0 == mkdir(path.c_str(), mode));
+
+        // ATTN: There is already something there, so check it is a folder.
+        case EEXIST:
+            return CheckPathExists(path);
+
+        // ATTN: In any other case, assume folder creation failed.
+        // This includes too long a path, disk quotas and more.
+        default:
+            return false;
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
+{
+    this->InitializeEve();
+    m_pEveManager->FullRedraw3D(kTRUE, kTRUE);
+
+    // ATTN: Force a redraw of the event, to avoid any issues where Eve has not updated in time.
+    gSystem->ProcessEvents();
+
+    int count = 0;
+    const int totalNumberOfViews = 5;
+
+    if (!MakePathIfNeeded(savePath))
+    {
+        std::cout << "Unable to validate path exists, skipping saving!" << std::endl;
+        this->ViewEvent();
+    }
+
+    for (const auto viewer : m_pEveManager->GetViewers()->RefChildren())
+    {
+        const auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
+        const TString displayName = TString(eveViewer->GetName()).ReplaceAll(" ", "_");
+        eveViewer->GetGLViewer()->ResetCameras();
+        eveViewer->GetGLViewer()->SavePictureUsingFBO(savePath + "/event_" + std::to_string(m_eventDisplayCounter) + "_" + displayName.Data() + ".png",
+                1920, 1080);
+
+        ++count;
+
+        // ATTN: Stop after the correct number of views, to avoid going over the previous event displays.
+        if (count >= totalNumberOfViews)
+            break;
+    }
+
+    this->ViewEvent();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

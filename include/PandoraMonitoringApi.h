@@ -267,6 +267,15 @@ public:
     static void ViewEvent(const pandora::Pandora &pandora);
 
     /**
+     *  @brief  Show the Eve Event-display and pause.
+     *          Whilst paused, save the event displays.
+     * 
+     *  @param  pandora the calling pandora instance
+     *  @param  savePath Path to save event display in.
+     */
+    static void SaveAndViewEvent(const pandora::Pandora &pandora, const std::string &savePath);
+
+    /**
      *  @brief  Pause thread until user enters 'return'
      * 
      *  @param  pandora the calling pandora instance

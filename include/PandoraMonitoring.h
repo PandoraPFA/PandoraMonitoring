@@ -226,6 +226,13 @@ public:
     void ViewEvent();
 
     /**
+     *  @brief  Save the Eve Event-displays.
+     *
+     *  @param  savePath Path to save event display in.
+     */
+    void SaveAndViewEvent(const std::string &savePath);
+
+    /**
      *  @brief  Pause thread until user enters 'return'
      */
     void Pause() const;
@@ -554,7 +561,6 @@ private:
 #define GET_PDG_COLOR_SWITCH(a, b, c)                                       \
     case b : return c;
 
-//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline EColor PandoraMonitoring::GetROOTColor(Color color) const
