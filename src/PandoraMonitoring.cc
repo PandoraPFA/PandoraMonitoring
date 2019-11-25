@@ -1060,6 +1060,10 @@ void PandoraMonitoring::SaveAndViewEvent(const std::string &savePath)
     for (const auto viewer : m_pEveManager->GetViewers()->RefChildren())
     {
         const auto eveViewer = dynamic_cast<TEveViewer*>(viewer);
+
+        if (eveViewer == NULL)
+            throw StatusCodeException(STATUS_CODE_FAILURE);
+
         const TString displayName = TString(eveViewer->GetName()).ReplaceAll(" ", "_");
         eveViewer->GetGLViewer()->ResetCameras();
         eveViewer->GetGLViewer()->SavePictureUsingFBO(savePath + "/event_" + std::to_string(m_eventDisplayCounter) + "_" + displayName.Data() + ".png",
