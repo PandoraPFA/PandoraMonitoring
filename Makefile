@@ -21,7 +21,7 @@ PROJECT_LIBRARY = $(PROJECT_LIBRARY_DIR)/libPandoraMonitoring.so
 
 INCLUDES  = -I$(PROJECT_INCLUDE_DIR)
 INCLUDES += -I$(PANDORA_DIR)/PandoraSDK/include
-INCLUDES += -I$(shell root-config --incdir)
+INCLUDES += -isystem $(shell root-config --incdir)
 
 DEFINES  = -DMONITORING=1
 DEFINES += -DROOT_EVE=1
