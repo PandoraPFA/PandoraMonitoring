@@ -11,8 +11,8 @@ project(PandoraMonitoring)
 
 # project version
 set(${PROJECT_NAME}_VERSION_MAJOR 03)
-set(${PROJECT_NAME}_VERSION_MINOR 04)
-set(${PROJECT_NAME}_VERSION_PATCH 03)
+set(${PROJECT_NAME}_VERSION_MINOR 05)
+set(${PROJECT_NAME}_VERSION_PATCH 00)
 set(${PROJECT_NAME}_VERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
@@ -22,12 +22,12 @@ include(PandoraCMakeSettings)
 # Prefer local include directory to any paths to installed header files
 include_directories(include)
 
-find_package(PandoraSDK 03.02.00 REQUIRED)
+find_package(PandoraSDK 03.04.00 REQUIRED)
 include_directories(${PandoraSDK_INCLUDE_DIRS})
 link_libraries(${PandoraSDK_LIBRARIES})
 add_definitions(${PandoraSDK_DEFINITIONS})
 
-find_package(ROOT 5.26.00 REQUIRED COMPONENTS Eve Geom RGL EG)
+find_package(ROOT 6.18.04 REQUIRED COMPONENTS Eve Geom RGL EG)
 include_directories(SYSTEM ${ROOT_INCLUDE_DIRS})
 link_libraries(${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
 add_definitions(${ROOT_DEFINITIONS})
@@ -35,7 +35,7 @@ add_definitions("-DMONITORING")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # Low level settings - compiler etc
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -pedantic -Wno-long-long -Wno-sign-compare -Wshadow -fno-strict-aliasing -std=c++11 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -pedantic -Wno-long-long -Wno-sign-compare -Wshadow -fno-strict-aliasing -std=c++17 ${CMAKE_CXX_FLAGS}")
 
 include(CheckCXXCompilerFlag)
 unset(COMPILER_SUPPORTS_CXX_FLAGS CACHE)
