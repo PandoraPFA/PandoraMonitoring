@@ -266,7 +266,7 @@ TTreeWrapper::Branch<T>::Branch(TTree *pTree, const std::string &branchName) :
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-TTreeWrapper::Branch<T>::~Branch()
+TTreeWrapper::Branch<T>::~Branch<T>()
 {
 }
 
