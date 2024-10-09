@@ -1895,11 +1895,13 @@ bool PandoraMonitoring::SortConcentricGaps(const ConcentricGap *const pLhs, cons
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, float);
-template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, int);
 template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, double);
+template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, int);
+template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, long);
 
 template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, std::vector<float> *);
-template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, std::vector<int> *);
 template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, std::vector<double> *);
+template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, std::vector<int> *);
+template void PandoraMonitoring::SetTreeVariable(const std::string &, const std::string &, std::vector<long> *);
 
 } // namespace pandora_monitoring

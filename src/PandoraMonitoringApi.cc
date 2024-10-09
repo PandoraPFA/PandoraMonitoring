@@ -174,12 +174,14 @@ void PandoraMonitoringApi::Delete(const pandora::Pandora &pandora)
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, float);
-template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, int);
 template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, double);
+template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, int);
+template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, long);
 
 template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, std::vector<float> *);
-template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, std::vector<int> *);
 template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, std::vector<double> *);
+template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, std::vector<int> *);
+template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, std::vector<long> *);
 
 template void PandoraMonitoringApi::DrawPandoraHistogram(const pandora::Pandora &, const pandora::Histogram &);
 template void PandoraMonitoringApi::DrawPandoraHistogram(const pandora::Pandora &, const pandora::TwoDHistogram &);
