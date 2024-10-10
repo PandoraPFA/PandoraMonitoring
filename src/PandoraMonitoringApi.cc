@@ -6,8 +6,8 @@
  *  $Log: $
  */
 
-#include "PandoraMonitoring.h"
 #include "PandoraMonitoringApi.h"
+#include "PandoraMonitoring.h"
 
 using namespace pandora_monitoring;
 
@@ -40,8 +40,7 @@ void PandoraMonitoringApi::FillTree(const pandora::Pandora &pandora, const std::
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::SaveTree(const pandora::Pandora &pandora, const std::string &treeName, const std::string &fileName,
-    const std::string &fileOptions)
+void PandoraMonitoringApi::SaveTree(const pandora::Pandora &pandora, const std::string &treeName, const std::string &fileName, const std::string &fileOptions)
 {
     PandoraMonitoring::GetInstance(pandora)->SaveTree(treeName, fileName, fileOptions);
 }
@@ -67,8 +66,8 @@ void PandoraMonitoringApi::DrawPandoraHistogram(const pandora::Pandora &pandora,
 void PandoraMonitoringApi::SetEveDisplayParameters(const pandora::Pandora &pandora, const bool showDetectors,
     const DetectorView detectorView, const float transparencyThresholdE, const float energyScaleThresholdE, const float scalingFactor)
 {
-    PandoraMonitoring::GetInstance(pandora)->SetEveDisplayParameters(showDetectors, detectorView, transparencyThresholdE,
-        energyScaleThresholdE, scalingFactor);
+    PandoraMonitoring::GetInstance(pandora)->SetEveDisplayParameters(
+        showDetectors, detectorView, transparencyThresholdE, energyScaleThresholdE, scalingFactor);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -81,16 +80,16 @@ void PandoraMonitoringApi::VisualizeMCParticles(const pandora::Pandora &pandora,
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeTracks(const pandora::Pandora &pandora, const pandora::TrackList *const pTrackList,
-    const std::string &name, const Color color)
+void PandoraMonitoringApi::VisualizeTracks(
+    const pandora::Pandora &pandora, const pandora::TrackList *const pTrackList, const std::string &name, const Color color)
 {
     PandoraMonitoring::GetInstance(pandora)->VisualizeTracks(pTrackList, name, NULL, color);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeCaloHits(const pandora::Pandora &pandora, const pandora::CaloHitList *const pCaloHitList,
-    const std::string &name, const Color color)
+void PandoraMonitoringApi::VisualizeCaloHits(
+    const pandora::Pandora &pandora, const pandora::CaloHitList *const pCaloHitList, const std::string &name, const Color color)
 {
     PandoraMonitoring::GetInstance(pandora)->VisualizeCaloHits(pCaloHitList, name, NULL, color);
 }
@@ -113,8 +112,8 @@ void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::Pandora &
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PandoraMonitoringApi::VisualizeVertices(const pandora::Pandora &pandora, const pandora::VertexList *const pVertexList,
-    const std::string &name, const Color color)
+void PandoraMonitoringApi::VisualizeVertices(
+    const pandora::Pandora &pandora, const pandora::VertexList *const pVertexList, const std::string &name, const Color color)
 {
     PandoraMonitoring::GetInstance(pandora)->VisualizeVertices(pVertexList, name, NULL, color);
 }
@@ -132,7 +131,7 @@ void PandoraMonitoringApi::AddMarkerToVisualization(const pandora::Pandora &pand
 void PandoraMonitoringApi::AddLineToVisualization(const pandora::Pandora &pandora, const pandora::CartesianVector *const pStartPoint,
     const pandora::CartesianVector *const pEndPoint, const std::string &name, const Color color, const unsigned int lineWidth, const unsigned int lineStyle)
 {
-    PandoraMonitoring::GetInstance(pandora)->AddLineToVisualization(pStartPoint,pEndPoint, name, NULL, color, lineWidth, lineStyle);
+    PandoraMonitoring::GetInstance(pandora)->AddLineToVisualization(pStartPoint, pEndPoint, name, NULL, color, lineWidth, lineStyle);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -160,7 +159,7 @@ void PandoraMonitoringApi::Pause(const pandora::Pandora &pandora)
 
 void PandoraMonitoringApi::Create(const pandora::Pandora &pandora)
 {
-    (void) PandoraMonitoring::GetInstance(pandora);
+    (void)PandoraMonitoring::GetInstance(pandora);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -173,15 +172,15 @@ void PandoraMonitoringApi::Delete(const pandora::Pandora &pandora)
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, float);
-template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, double);
-template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, int);
-template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, long);
+template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string &, const std::string &, float);
+template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string &, const std::string &, double);
+template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string &, const std::string &, int);
+template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string &, const std::string &, long);
 
-template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, std::vector<float> *);
-template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, std::vector<double> *);
-template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, std::vector<int> *);
-template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string&, const std::string&, std::vector<long> *);
+template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string &, const std::string &, std::vector<float> *);
+template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string &, const std::string &, std::vector<double> *);
+template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string &, const std::string &, std::vector<int> *);
+template void PandoraMonitoringApi::SetTreeVariable(const pandora::Pandora &, const std::string &, const std::string &, std::vector<long> *);
 
 template void PandoraMonitoringApi::DrawPandoraHistogram(const pandora::Pandora &, const pandora::Histogram &);
 template void PandoraMonitoringApi::DrawPandoraHistogram(const pandora::Pandora &, const pandora::TwoDHistogram &);
