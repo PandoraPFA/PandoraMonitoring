@@ -7,10 +7,10 @@
  */
 
 // ROOT include files
+#include "TBranch.h"
+#include "TROOT.h"
 #include "TSystem.h"
 #include "TTree.h"
-#include "TROOT.h" 
-#include "TBranch.h"
 
 #include "TTreeWrapper.h"
 
@@ -22,44 +22,44 @@
 namespace pandora_monitoring
 {
 
-TTreeWrapper::TTreeWrapper() 
+TTreeWrapper::TTreeWrapper()
 {
     gROOT->ProcessLine("#include <vector>"); // should not be necessary for newer versions of ROOT
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-TTreeWrapper::~TTreeWrapper() 
+TTreeWrapper::~TTreeWrapper()
 {
     Clear();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void TTreeWrapper::Clear() 
+void TTreeWrapper::Clear()
 {
-    for(TreeMap::iterator itTreeMap = m_treeMap.begin(), itTreeMapEnd = m_treeMap.end(); itTreeMap != itTreeMapEnd; ++itTreeMap)
+    for (TreeMap::iterator itTreeMap = m_treeMap.begin(), itTreeMapEnd = m_treeMap.end(); itTreeMap != itTreeMapEnd; ++itTreeMap)
     {
         TTree *tree = itTreeMap->second.first;
         if (tree)
         {
-            delete itTreeMap->second.first;     // delete the TTree
+            delete itTreeMap->second.first; // delete the TTree
             itTreeMap->second.first = NULL;
 
-            for(BranchMap::iterator itBranchMap = itTreeMap->second.second->begin(), itBranchMapEnd = itTreeMap->second.second->end();
-                itBranchMap != itBranchMapEnd; ++itBranchMap)
+            for (BranchMap::iterator itBranchMap = itTreeMap->second.second->begin(), itBranchMapEnd = itTreeMap->second.second->end();
+                 itBranchMap != itBranchMapEnd; ++itBranchMap)
             {
-                delete itBranchMap->second;     // delete the BranchHandlers
+                delete itBranchMap->second; // delete the BranchHandlers
             }
         }
 
-        delete itTreeMap->second.second;        // delete the BranchMap itself
+        delete itTreeMap->second.second; // delete the BranchMap itself
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-template< typename VarType >
+template <typename VarType>
 bool TTreeWrapper::Set(const std::string &treeName, const std::string &branchName, VarType value)
 {
     BranchMap::iterator branchIt;
@@ -68,7 +68,7 @@ bool TTreeWrapper::Set(const std::string &treeName, const std::string &branchNam
     {
         branchIt = AddBranch<VarType>(treeName, branchName);
     }
-    catch(BranchInsertError &excpt)
+    catch (BranchInsertError &excpt)
     {
         throw;
     }
@@ -84,10 +84,10 @@ void TTreeWrapper::Fill(const std::string &treeName)
 {
     TreeMap::iterator treeIt = m_treeMap.find(treeName);
 
-    if(treeIt == m_treeMap.end())
+    if (treeIt == m_treeMap.end())
         throw TreeNotFoundError();
 
-    if(treeIt->second.first == NULL)
+    if (treeIt->second.first == NULL)
         throw TreeNotFoundError();
 
     treeIt->second.first->Fill();
@@ -99,10 +99,10 @@ void TTreeWrapper::Print(const std::string &treeName) const
 {
     TreeMap::const_iterator treeIt = m_treeMap.find(treeName);
 
-    if(treeIt == m_treeMap.end())
+    if (treeIt == m_treeMap.end())
         throw TreeNotFoundError();
 
-    if(treeIt->second.first == NULL)
+    if (treeIt->second.first == NULL)
         throw TreeNotFoundError();
 
     treeIt->second.first->Print();
@@ -114,28 +114,28 @@ void TTreeWrapper::Scan(const std::string &treeName) const
 {
     TreeMap::const_iterator treeIt = m_treeMap.find(treeName);
 
-    if(treeIt == m_treeMap.end())
+    if (treeIt == m_treeMap.end())
         throw TreeNotFoundError();
 
-    if(treeIt->second.first == NULL)
+    if (treeIt->second.first == NULL)
         throw TreeNotFoundError();
 
-     bool isFirst = true;
-     std::string branchNames;
+    bool isFirst = true;
+    std::string branchNames;
 
-     for (BranchMap::iterator itBranchMap = treeIt->second.second->begin(), itBranchMapEnd = treeIt->second.second->begin();
-        itBranchMap != itBranchMapEnd; ++itBranchMap)
-     {
-         if(!isFirst)
-         {
-             branchNames += ":";
-         }
+    for (BranchMap::iterator itBranchMap = treeIt->second.second->begin(), itBranchMapEnd = treeIt->second.second->begin();
+         itBranchMap != itBranchMapEnd; ++itBranchMap)
+    {
+        if (!isFirst)
+        {
+            branchNames += ":";
+        }
 
-         branchNames += itBranchMap->first;
-         isFirst = false;
-     }
+        branchNames += itBranchMap->first;
+        isFirst = false;
+    }
 
-     treeIt->second.first->Scan(branchNames.c_str());
+    treeIt->second.first->Scan(branchNames.c_str());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -144,10 +144,10 @@ TTree *&TTreeWrapper::GetTree(const std::string &treeName)
 {
     TreeMap::iterator treeIt = m_treeMap.find(treeName);
 
-    if(treeIt == m_treeMap.end())
+    if (treeIt == m_treeMap.end())
         throw TreeNotFoundError();
 
-    if(treeIt->second.first == NULL)
+    if (treeIt->second.first == NULL)
         throw TreeNotFoundError();
 
     return treeIt->second.first;
@@ -159,16 +159,16 @@ TTreeWrapper::TreeMap::iterator TTreeWrapper::AddTree(const std::string &treeNam
 {
     TreeMap::iterator treeIt = m_treeMap.find(treeName);
 
-    if(treeIt != m_treeMap.end())
+    if (treeIt != m_treeMap.end())
         return treeIt;
 
-    TTree* tree = new TTree(treeName.c_str(), treeName.c_str());
+    TTree *tree = new TTree(treeName.c_str(), treeName.c_str());
     tree->SetDirectory(0);
 
-    BranchMap* branchMap = new BranchMap();
+    BranchMap *branchMap = new BranchMap();
     std::pair<TreeMap::iterator, bool> itInfo = m_treeMap.insert(TreeMap::value_type(treeName, TreeInfo(tree, branchMap)));
 
-    if(!(itInfo.second))
+    if (!(itInfo.second))
         throw TreeInsertError();
 
     treeIt = itInfo.first;
@@ -178,7 +178,7 @@ TTreeWrapper::TreeMap::iterator TTreeWrapper::AddTree(const std::string &treeNam
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-template< typename VarType >
+template <typename VarType>
 TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch(const std::string &treeName, const std::string &branchName)
 {
     TreeMap::iterator treeIt = m_treeMap.end();
@@ -187,7 +187,7 @@ TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch(const std::string &tre
     {
         treeIt = AddTree(treeName);
     }
-    catch (TreeInsertError& excpt)
+    catch (TreeInsertError &excpt)
     {
         throw;
     }
@@ -203,11 +203,11 @@ TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch(const std::string &tre
     {
         TTree *tree = treeIt->second.first;
 
-        // create a new BranchHandler 
-        BranchHandler* branchHandler = new BranchHandler(tree, branchName);
+        // create a new BranchHandler
+        BranchHandler *branchHandler = new BranchHandler(tree, branchName);
 
         // insert the branchHandler
-        std::pair<BranchMap::iterator,bool> itInfo = treeIt->second.second->insert(BranchMap::value_type(branchName, branchHandler));
+        std::pair<BranchMap::iterator, bool> itInfo = treeIt->second.second->insert(BranchMap::value_type(branchName, branchHandler));
 
         if (!itInfo.second)
             throw BranchInsertError();
@@ -223,22 +223,22 @@ TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch(const std::string &tre
 
 template <typename T>
 TTreeWrapper::Branch<T>::Branch(TTree *pTree, const std::string &branchName) :
-    m_name(branchName), 
-    m_pTree(pTree), 
-    m_pBranch(0) 
+    m_name(branchName),
+    m_pTree(pTree),
+    m_pBranch(0)
 {
-    const char* name = branchName.c_str();
+    const char *name = branchName.c_str();
     std::string typeIdName(typeid(m_variable).name());
 
     if (typeIdName.find("vector") != std::string::npos)
     {
         m_isVector = true;
 
-        m_pBranch = pTree->Branch(name, &m_variable );
+        m_pBranch = pTree->Branch(name, &m_variable);
 
         if (!m_pBranch)
         {
-            std::cout << "TTreeWrapper::Branch<T>::Branch(...) with [ T = " << typeid( T ).name() << " ], m_pBranch = " << m_pBranch
+            std::cout << "TTreeWrapper::Branch<T>::Branch(...) with [ T = " << typeid(T).name() << " ], m_pBranch = " << m_pBranch
                       << " : branch has not been created." << std::endl;
             throw BranchInsertError();
         }
@@ -246,9 +246,9 @@ TTreeWrapper::Branch<T>::Branch(TTree *pTree, const std::string &branchName) :
     else
     {
         m_isVector = false;
-        std::transform(typeIdName.begin(), typeIdName.end(), typeIdName.begin(), (int(*)(int))std::toupper);
+        std::transform(typeIdName.begin(), typeIdName.end(), typeIdName.begin(), (int (*)(int))std::toupper);
 
-        if (typeIdName.size() != 1) // has to be one letter only to be F, D, I, ...
+        if (typeIdName.size() != 1) // has to be one letter only to be F, D, I, L, ...
             throw BadType();
 
         const char firstLetterOfType = typeIdName.at(0);
@@ -256,7 +256,7 @@ TTreeWrapper::Branch<T>::Branch(TTree *pTree, const std::string &branchName) :
 
         if (!m_pBranch)
         {
-            std::cout << "TTreeWrapper::Branch<T>::Branch(...) with [ T = " << typeid( T ).name() << " ], m_pBranch = " << m_pBranch
+            std::cout << "TTreeWrapper::Branch<T>::Branch(...) with [ T = " << typeid(T).name() << " ], m_pBranch = " << m_pBranch
                       << " : branch has not been created." << std::endl;
             throw BranchInsertError();
         }
@@ -277,11 +277,11 @@ void TTreeWrapper::Branch<T>::Set(T variable)
 {
     m_variable = variable;
 
-    if(m_isVector)
+    if (m_isVector)
     {
-        if( !m_pBranch )
+        if (!m_pBranch)
         {
-            std::cout << "TTreeWrapper::Branch<T>::Set( T variable ) with [ T = " << typeid( T ).name() << " ], m_pBranch = " << m_pBranch << std::endl;
+            std::cout << "TTreeWrapper::Branch<T>::Set( T variable ) with [ T = " << typeid(T).name() << " ], m_pBranch = " << m_pBranch << std::endl;
             throw BranchNotFoundError();
         }
         m_pBranch->SetAddress(&m_variable);
@@ -292,13 +292,15 @@ void TTreeWrapper::Branch<T>::Set(T variable)
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TTreeWrapper::BranchHandler::BranchHandler(TTree *pTree, const std::string &branchName) :
-    m_branchType(BRANCH_NO_TYPE_DEFINED), 
-    m_branchFloat (NULL),
+    m_branchType(BRANCH_NO_TYPE_DEFINED),
+    m_branchFloat(NULL),
     m_branchDouble(NULL),
-    m_branchInt   (NULL),
-    m_branchVectorFloat (NULL),
+    m_branchInt(NULL),
+    m_branchLong(NULL),
+    m_branchVectorFloat(NULL),
     m_branchVectorDouble(NULL),
-    m_branchVectorInt   (NULL),
+    m_branchVectorInt(NULL),
+    m_branchVectorLong(NULL),
     m_tree(pTree),
     m_branchName(branchName)
 {
@@ -311,19 +313,21 @@ TTreeWrapper::BranchHandler::~BranchHandler()
     delete m_branchFloat;
     delete m_branchDouble;
     delete m_branchInt;
+    delete m_branchLong;
     delete m_branchVectorFloat;
     delete m_branchVectorDouble;
     delete m_branchVectorInt;
+    delete m_branchVectorLong;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 bool TTreeWrapper::BranchHandler::Set(float value)
 {
-    if(m_branchFloat && m_branchType != BRANCH_FLOAT)
+    if (m_branchFloat && m_branchType != BRANCH_FLOAT)
         return false;
 
-    if(m_branchFloat == NULL) 
+    if (m_branchFloat == NULL)
     {
         m_branchFloat = new Branch<float>(m_tree, m_branchName); ///< create a branch of type float
         m_branchType = BRANCH_FLOAT;
@@ -340,7 +344,7 @@ bool TTreeWrapper::BranchHandler::Set(double value)
     if (m_branchDouble && m_branchType != BRANCH_DOUBLE)
         return false;
 
-    if(m_branchDouble == NULL) 
+    if (m_branchDouble == NULL)
     {
         m_branchDouble = new Branch<double>(m_tree, m_branchName); ///< create a branch of type double
         m_branchType = BRANCH_DOUBLE;
@@ -358,7 +362,7 @@ bool TTreeWrapper::BranchHandler::Set(int value)
     if (m_branchInt && m_branchType != BRANCH_INT)
         return false;
 
-    if (m_branchInt == NULL) 
+    if (m_branchInt == NULL)
     {
         m_branchInt = new Branch<int>(m_tree, m_branchName); ///< create a branch of type int
         m_branchType = BRANCH_INT;
@@ -371,14 +375,32 @@ bool TTreeWrapper::BranchHandler::Set(int value)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool TTreeWrapper::BranchHandler::Set(VectorFloat *ptr)
+bool TTreeWrapper::BranchHandler::Set(long value)
 {
-    if(m_branchVectorFloat && m_branchType != BRANCH_VECTOR_FLOAT)
+    if (m_branchLong && m_branchType != BRANCH_LONG)
         return false;
 
-    if(m_branchVectorFloat == NULL) 
+    if (m_branchLong == NULL)
     {
-        m_branchVectorFloat = new Branch<VectorFloat*>(m_tree, m_branchName); ///< create a branch of type VectorFloat
+        m_branchLong = new Branch<long>(m_tree, m_branchName); ///< create a branch of type long
+        m_branchType = BRANCH_LONG;
+    }
+
+    m_branchLong->Set(value);
+
+    return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool TTreeWrapper::BranchHandler::Set(VectorFloat *ptr)
+{
+    if (m_branchVectorFloat && m_branchType != BRANCH_VECTOR_FLOAT)
+        return false;
+
+    if (m_branchVectorFloat == NULL)
+    {
+        m_branchVectorFloat = new Branch<VectorFloat *>(m_tree, m_branchName); ///< create a branch of type VectorFloat
         m_branchType = BRANCH_VECTOR_FLOAT;
     }
 
@@ -391,12 +413,12 @@ bool TTreeWrapper::BranchHandler::Set(VectorFloat *ptr)
 
 bool TTreeWrapper::BranchHandler::Set(VectorDouble *ptr)
 {
-    if(m_branchVectorDouble && m_branchType != BRANCH_VECTOR_DOUBLE)
+    if (m_branchVectorDouble && m_branchType != BRANCH_VECTOR_DOUBLE)
         return false;
 
-    if(m_branchVectorDouble == NULL) 
+    if (m_branchVectorDouble == NULL)
     {
-        m_branchVectorDouble = new Branch<VectorDouble*>(m_tree, m_branchName); ///< create a branch of type VectorDouble
+        m_branchVectorDouble = new Branch<VectorDouble *>(m_tree, m_branchName); ///< create a branch of type VectorDouble
         m_branchType = BRANCH_VECTOR_DOUBLE;
     }
 
@@ -409,12 +431,12 @@ bool TTreeWrapper::BranchHandler::Set(VectorDouble *ptr)
 
 bool TTreeWrapper::BranchHandler::Set(VectorInt *ptr)
 {
-    if(m_branchVectorInt && m_branchType != BRANCH_VECTOR_INT)
+    if (m_branchVectorInt && m_branchType != BRANCH_VECTOR_INT)
         return false;
 
-    if(m_branchVectorInt == NULL) 
+    if (m_branchVectorInt == NULL)
     {
-        m_branchVectorInt = new Branch<VectorInt*>(m_tree, m_branchName); ///< create a branch of type VectorInt
+        m_branchVectorInt = new Branch<VectorInt *>(m_tree, m_branchName); ///< create a branch of type VectorInt
 
         m_branchType = BRANCH_VECTOR_INT;
     }
@@ -424,19 +446,42 @@ bool TTreeWrapper::BranchHandler::Set(VectorInt *ptr)
     return true;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool TTreeWrapper::BranchHandler::Set(VectorLong *ptr)
+{
+    if (m_branchVectorLong && m_branchType != BRANCH_VECTOR_LONG)
+        return false;
+
+    if (m_branchVectorLong == NULL)
+    {
+        m_branchVectorLong = new Branch<VectorLong *>(m_tree, m_branchName); ///< create a branch of type VectorLong
+
+        m_branchType = BRANCH_VECTOR_LONG;
+    }
+
+    m_branchVectorLong->Set(ptr);
+
+    return true;
+}
+
 // member function template initializations
 template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<float>(const std::string &, const std::string &);
-template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<int>(const std::string &, const std::string &);
 template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<double>(const std::string &, const std::string &);
-template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<VectorFloat*>(const std::string &, const std::string &);
-template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<VectorDouble*>(const std::string &, const std::string &);
-template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<VectorInt*>(const std::string &, const std::string &);
+template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<int>(const std::string &, const std::string &);
+template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<long>(const std::string &, const std::string &);
+template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<VectorFloat *>(const std::string &, const std::string &);
+template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<VectorDouble *>(const std::string &, const std::string &);
+template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<VectorInt *>(const std::string &, const std::string &);
+template TTreeWrapper::BranchMap::iterator TTreeWrapper::AddBranch<VectorLong *>(const std::string &, const std::string &);
 
 template bool TTreeWrapper::Set<float>(const std::string &, const std::string &, float);
-template bool TTreeWrapper::Set<int>(const std::string &, const std::string &, int);
 template bool TTreeWrapper::Set<double>(const std::string &, const std::string &, double);
-template bool TTreeWrapper::Set<VectorFloat*>(const std::string &, const std::string  &, VectorFloat*);
-template bool TTreeWrapper::Set<VectorInt*>(const std::string &, const std::string &, VectorInt*);
-template bool TTreeWrapper::Set<VectorDouble*>(const std::string &, const std::string &, VectorDouble*);
+template bool TTreeWrapper::Set<int>(const std::string &, const std::string &, int);
+template bool TTreeWrapper::Set<long>(const std::string &, const std::string &, long);
+template bool TTreeWrapper::Set<VectorFloat *>(const std::string &, const std::string &, VectorFloat *);
+template bool TTreeWrapper::Set<VectorDouble *>(const std::string &, const std::string &, VectorDouble *);
+template bool TTreeWrapper::Set<VectorInt *>(const std::string &, const std::string &, VectorInt *);
+template bool TTreeWrapper::Set<VectorLong *>(const std::string &, const std::string &, VectorLong *);
 
 } // namespace pandora_monitoring

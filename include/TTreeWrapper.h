@@ -20,39 +20,50 @@ class TBranch;
 namespace pandora_monitoring
 {
 
-typedef std::vector<float>  VectorFloat;
+typedef std::vector<float> VectorFloat;
 typedef std::vector<double> VectorDouble;
-typedef std::vector<int>    VectorInt;
+typedef std::vector<int> VectorInt;
+typedef std::vector<long> VectorLong;
 
-class TTreeWrapper 
+class TTreeWrapper
 {
 public:
     // classes to throw in case of error
-    class TreeInsertError {};
-    class BranchInsertError {};
-    class TreeNotFoundError {};
-    class BranchNotFoundError {};
+    class TreeInsertError
+    {
+    };
+    class BranchInsertError
+    {
+    };
+    class TreeNotFoundError
+    {
+    };
+    class BranchNotFoundError
+    {
+    };
 
     TTreeWrapper();
 
     ~TTreeWrapper();
 
-    template< typename VarType >
+    template <typename VarType>
     bool Set(const std::string &treeName, const std::string &branchName, VarType value);
 
     void Fill(const std::string &treeName);
-    void Print(const std::string &treeName) const ;
-    void Scan(const std::string &treeName) const ;
+    void Print(const std::string &treeName) const;
+    void Scan(const std::string &treeName) const;
 
     TTree *&GetTree(const std::string &treeName);
 
-    void Clear();  ///< clear tree with name 'treeName' in the TTreeWrapper
+    void Clear(); ///< clear tree with name 'treeName' in the TTreeWrapper
 
     template <typename T>
     class Branch
     {
     public:
-        class BadType {};
+        class BadType
+        {
+        };
 
         Branch(TTree *tree, const std::string &branchName);
 
@@ -61,11 +72,11 @@ public:
         void Set(T variable);
 
     private:
-        std::string             m_name;                     ///< 
-        TTree                  *m_pTree;                    ///< 
-        TBranch                *m_pBranch;                  ///< 
-        T                       m_variable;                 ///< 
-        bool                    m_isVector;                 ///<
+        std::string m_name; ///<
+        TTree *m_pTree;     ///<
+        TBranch *m_pBranch; ///<
+        T m_variable;       ///<
+        bool m_isVector;    ///<
     };
 
     class BranchHandler
@@ -77,9 +88,11 @@ public:
         bool Set(float value);
         bool Set(double value);
         bool Set(int value);
+        bool Set(long value);
         bool Set(VectorFloat *ptr);
         bool Set(VectorDouble *ptr);
         bool Set(VectorInt *ptr);
+        bool Set(VectorLong *ptr);
 
     private:
         // possible types
@@ -88,37 +101,41 @@ public:
             BRANCH_FLOAT,
             BRANCH_DOUBLE,
             BRANCH_INT,
+            BRANCH_LONG,
             BRANCH_VECTOR_FLOAT,
             BRANCH_VECTOR_DOUBLE,
             BRANCH_VECTOR_INT,
+            BRANCH_VECTOR_LONG,
             BRANCH_NO_TYPE_DEFINED
         };
 
-        BranchType              m_branchType;               ///<
+        BranchType m_branchType; ///<
 
-        Branch<float>          *m_branchFloat;              ///<
-        Branch<double>         *m_branchDouble;             ///<
-        Branch<int>            *m_branchInt;                ///<
+        Branch<float> *m_branchFloat;   ///<
+        Branch<double> *m_branchDouble; ///<
+        Branch<int> *m_branchInt;       ///<
+        Branch<long> *m_branchLong;     ///<
 
-        Branch<VectorFloat*>   *m_branchVectorFloat;        ///<
-        Branch<VectorDouble*>  *m_branchVectorDouble;       ///<
-        Branch<VectorInt*>     *m_branchVectorInt;          ///<
+        Branch<VectorFloat *> *m_branchVectorFloat;   ///<
+        Branch<VectorDouble *> *m_branchVectorDouble; ///<
+        Branch<VectorInt *> *m_branchVectorInt;       ///<
+        Branch<VectorLong *> *m_branchVectorLong;     ///<
 
-        TTree                  *m_tree;                     ///<
-        std::string             m_branchName;               ///<
+        TTree *m_tree;            ///<
+        std::string m_branchName; ///<
     };
 
 private:
-    typedef std::map<const std::string, BranchHandler*> BranchMap;
-    typedef std::pair<TTree*, BranchMap*> TreeInfo;
+    typedef std::map<const std::string, BranchHandler *> BranchMap;
+    typedef std::pair<TTree *, BranchMap *> TreeInfo;
     typedef std::map<const std::string, TreeInfo> TreeMap;
 
     TreeMap::iterator AddTree(const std::string &treeName);
 
-    template< typename VarType >
+    template <typename VarType>
     BranchMap::iterator AddBranch(const std::string &treeName, const std::string &branchName);
 
-    TreeMap                     m_treeMap;                  ///< holds treenames and ttrees and Branches 
+    TreeMap m_treeMap; ///< holds treenames and ttrees and Branches
 };
 
 } // namespace pandora_monitoring
