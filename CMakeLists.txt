@@ -44,6 +44,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Low level settings - compiler etc
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -pedantic -Wno-long-long -Wno-sign-compare -Wshadow -fno-strict-aliasing ${CMAKE_CXX_FLAGS}")
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "-Wno-dtor-name ${CMAKE_CXX_FLAGS}")
+endif()
+
 include(CheckCXXCompilerFlag)
 unset(COMPILER_SUPPORTS_CXX_FLAGS CACHE)
 CHECK_CXX_COMPILER_FLAG(${CMAKE_CXX_FLAGS} COMPILER_SUPPORTS_CXX_FLAGS)
