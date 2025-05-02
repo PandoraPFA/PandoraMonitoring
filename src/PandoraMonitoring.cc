@@ -369,6 +369,16 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
         sstrName << "MC" << "/PDG=" << particleId << "/p=" << momentum.GetMagnitude() << "/E=" << energy << "/Charge=" << charge
                  << "/r_inner=" << innerRadius << "/r_outer=" << outerRadius;
 
+        // Add info on parent particle
+        if (!pPandoraMCParticle->IsRootParticle() && pPandoraMCParticle->GetParentList().size() == 1)
+        {
+            const MCParticle *const pPandoraParentMCParticle{*(pPandoraMCParticle->GetParentList().begin())};
+            const int parentPDG{pPandoraParentMCParticle->GetParticleId()};
+            const float parentEnergy{pPandoraParentMCParticle->GetEnergy()};
+            sstr << "\nParent PDG=" << parentPDG << "\nParent E=" << parentEnergy;
+            sstrName << "/Parent_PDG=" << parentPDG << "/Parent_E=" << parentEnergy;
+        }
+
         // Create particle path
         TEveTrack *pTEveTrack = new TEveTrack(pTEveRecTrack, pTEveTrackPropagator);
         pTEveTrack->SetName(sstrName.str().c_str());
