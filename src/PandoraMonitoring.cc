@@ -372,7 +372,7 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
         // Add info on parent particle
         if (!pPandoraMCParticle->IsRootParticle() && pPandoraMCParticle->GetParentList().size() == 1)
         {
-            const MCParticle *const pPandoraParentMCParticle{*(pPandoraMCParticle->GetParentList().begin())};
+            const MCParticle *const pPandoraParentMCParticle{pPandoraMCParticle->GetParentList().front()};
             const int parentPDG{pPandoraParentMCParticle->GetParticleId()};
             const float parentEnergy{pPandoraParentMCParticle->GetEnergy()};
             sstr << "\nParent PDG=" << parentPDG << "\nParent E=" << parentEnergy;
