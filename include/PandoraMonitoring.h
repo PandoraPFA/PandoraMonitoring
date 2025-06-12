@@ -103,6 +103,13 @@ public:
     void DrawPandoraHistogram(const T &t, const std::string &options);
 
     /**
+     *  @brief  Set the name of the next TEve display
+     * 
+     *  @param  name the display name for the next Eve
+     */
+    void SetNextEveDisplayName(const std::string &name);
+
+    /**
      *  @brief  Set TEve display parameters
      * 
      *  @param  showDetectors turns the visibility of the detector geometry on or off
@@ -461,6 +468,7 @@ private:
     float                           m_scalingFactor;            ///< TEve works with [cm], Pandora works with [mm]
     bool                            m_openEveEvent;             ///< is set if an Event is open to store objects (hits, clusters,...) in it.
     int                             m_eventDisplayCounter;      ///< counter for the event displays
+    std::string                     m_eventDisplayName;         ///< Display name for the next event display
     double                          m_minXLArTPC;               ///< Minimum x position to which any LAr TPC in the event extends
     double                          m_maxXLArTPC;               ///< Maximum x position to which any LAr TPC in the event extends
     double                          m_minYLArTPC;               ///< Minimum y position to which any LAr TPC in the event extends
