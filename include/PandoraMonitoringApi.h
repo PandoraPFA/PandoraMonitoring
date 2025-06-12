@@ -158,6 +158,14 @@ public:
         const DetectorView detectorView = DETECTOR_VIEW_DEFAULT, const float transparencyThresholdE = -1.f,
         const float energyScaleThresholdE = -1.f, const float scalingFactor = 0.1f);
 
+    /**
+     *  @brief  Set the name of the next TEve display
+     * 
+     *  @param  pandora the calling pandora instance
+     *  @param  name the display name for the next Eve
+     */
+    static void SetNextEveDisplayName(const pandora::Pandora &pandora, const std::string &name);
+
     typedef std::map<int, float> PdgCodeToEnergyMap;
 
     /**

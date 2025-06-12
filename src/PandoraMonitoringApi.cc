@@ -72,6 +72,13 @@ void PandoraMonitoringApi::SetEveDisplayParameters(const pandora::Pandora &pando
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoringApi::SetNextEveDisplayName(const pandora::Pandora &pandora, const std::string &name)
+{
+    PandoraMonitoring::GetInstance(pandora)->SetNextEveDisplayName(name);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoringApi::VisualizeMCParticles(const pandora::Pandora &pandora, const pandora::MCParticleList *const pMCParticleList,
     const std::string &name, const Color color, const PdgCodeToEnergyMap *pParticleSuppressionMap)
 {

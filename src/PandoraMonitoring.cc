@@ -282,6 +282,13 @@ void PandoraMonitoring::SetEveDisplayParameters(const bool showDetectors, const 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoring::SetNextEveDisplayName(const std::string &name)
+{
+    m_eventDisplayName = name;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const pMCParticleList, const std::string &name,
     TEveElement *parent, const Color color, const PandoraMonitoringApi::PdgCodeToEnergyMap *pParticleSuppressionMap)
 {
@@ -1186,6 +1193,7 @@ PandoraMonitoring::PandoraMonitoring(const Pandora &pandora) :
     m_scalingFactor(0.1f),
     m_openEveEvent(false),
     m_eventDisplayCounter(0.f),
+    m_eventDisplayName(""),
     m_minXLArTPC(-std::numeric_limits<float>::max()),
     m_maxXLArTPC(std::numeric_limits<float>::max()),
     m_minYLArTPC(-std::numeric_limits<float>::max()),
@@ -1462,6 +1470,11 @@ void PandoraMonitoring::InitializeEve(Char_t transparency)
     {
         std::stringstream sstr, sstr2;
         sstr << "Event Display " << m_eventDisplayCounter++;
+        if (!m_eventDisplayName.empty())
+        {
+            sstr << " - " << m_eventDisplayName;
+            m_eventDisplayName.clear();
+        }
         m_pEveManager->AddEvent(new TEveEventManager(sstr.str().c_str(), sstr.str().c_str()));
         m_openEveEvent = true;
     }
