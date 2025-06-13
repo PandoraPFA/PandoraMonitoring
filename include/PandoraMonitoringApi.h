@@ -10,7 +10,10 @@
 
 #include "Pandora/PandoraInternal.h"
 
-namespace pandora { class Pandora; }
+namespace pandora
+{
+class Pandora;
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -64,10 +67,10 @@ enum Color
     LIGHTPINK,
     LIGHTORANGE,
     LIGHTYELLOW,
-    AUTO,       // automatic choice of colors
-    AUTOID,     // automatic choice of colors depending on the particle ID
-    AUTOITER,   // automatic choice of colors iterating through colors
-    AUTOENERGY  // continuous color palette indicating hit energies
+    AUTO,      // automatic choice of colors
+    AUTOID,    // automatic choice of colors depending on the particle ID
+    AUTOITER,  // automatic choice of colors iterating through colors
+    AUTOENERGY // continuous color palette indicating hit energies
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -80,7 +83,7 @@ class PandoraMonitoringApi
 public:
     /**
      *  @brief  Set a variable in a tree (create the tree and the branch if not yet existing)
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  treeName name of the tree (is created if it does not exist yet)
      *  @param  variableName name of the branch in the tree (the branch is created if it does not exist yet)
@@ -91,7 +94,7 @@ public:
 
     /**
      *  @brief  Fill the tree with the variables which have been set before with SetTreeVariable
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  treeName name of the tree to be filled
      */
@@ -99,7 +102,7 @@ public:
 
     /**
      *  @brief  Print the tree
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  treeName name of the tree to be printed
      */
@@ -107,7 +110,7 @@ public:
 
     /**
      *  @brief  Scan the tree (print a list of all values of all branches)
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  treeName name of the tree to be scanned
      */
@@ -115,19 +118,18 @@ public:
 
     /**
      *  @brief  Save the tree to a file
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  fileName the file name under which to save the histogram
      *  @param  fileOptions the options associated with opening/recreating a file
-     * 
+     *
      *  @param  treeName name of the tree to be written to a file
      */
-    static void SaveTree(const pandora::Pandora &pandora, const std::string &treeName, const std::string &fileName,
-        const std::string &fileOptions);
+    static void SaveTree(const pandora::Pandora &pandora, const std::string &treeName, const std::string &fileName, const std::string &fileOptions);
 
     /**
      *  @brief  Draw a pandora histogram
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  t the pandora histogram
      */
@@ -136,7 +138,7 @@ public:
 
     /**
      *  @brief  Draw a pandora histogram
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  t the pandora histogram
      *  @param  options the drawing options
@@ -146,7 +148,7 @@ public:
 
     /**
      *  @brief  Set TEve display parameters
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  showDetectors turns the visibility of the detector geometry on or off
      *  @param  detectorView the detector view
@@ -160,7 +162,7 @@ public:
 
     /**
      *  @brief  Set the name of the next TEve display
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  name the display name for the next Eve
      */
@@ -170,7 +172,7 @@ public:
 
     /**
      *  @brief  Add MCParticles to the Eve event-display
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  pMCParticleList list of MC particles to be added to the event display
      *  @param  name of the MC particle list
@@ -182,41 +184,40 @@ public:
 
     /**
      *  @brief  Add Tracks to the Eve event-display
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  pTrackList list of tracks to be added to the event display
      *  @param  name of the track list
      *  @param  color The color the track elements are drawn with
      */
-    static void VisualizeTracks(const pandora::Pandora &pandora, const pandora::TrackList *const pTrackList,
-        const std::string &name, const Color color);
+    static void VisualizeTracks(const pandora::Pandora &pandora, const pandora::TrackList *const pTrackList, const std::string &name, const Color color);
 
     /**
      *  @brief  Add CaloHits to the Eve event-display
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  pCaloHitList list of calohits to be added to the event display
      *  @param  name of the calohit list
      *  @param  color The color the cluster elements are drawn with
-     */  
-    static void VisualizeCaloHits(const pandora::Pandora &pandora, const pandora::CaloHitList *const pCaloHitList,
-        const std::string &name, const Color color);
+     */
+    static void VisualizeCaloHits(
+        const pandora::Pandora &pandora, const pandora::CaloHitList *const pCaloHitList, const std::string &name, const Color color);
 
     /**
      *  @brief  Add Clusters to the Eve event-display
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  pClusterList list of clusters to be added to the event display
      *  @param  name of the cluster list
      *  @param  color The color the cluster elements are drawn with
      *  @param  showAssociatedTracks draw the tracks associated to the cluster
      */
-    static void VisualizeClusters(const pandora::Pandora &pandora, const pandora::ClusterList *const pClusterList,
-        const std::string &name, const Color color, bool showAssociatedTracks = false);
+    static void VisualizeClusters(const pandora::Pandora &pandora, const pandora::ClusterList *const pClusterList, const std::string &name,
+        const Color color, bool showAssociatedTracks = false);
 
     /**
      *  @brief  Add Particle flow objects to the Eve event-display
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  pPfoList list of particle flow objects to be added to the event display
      *  @param  name of the pfo list
@@ -231,18 +232,18 @@ public:
 
     /**
      *  @brief  Add Vertices to the Eve event-display
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  pVertexList list of vertices to be added to the event display
      *  @param  name of the vertex list
      *  @param  color The color the cluster elements are drawn with
      */
-    static void VisualizeVertices(const pandora::Pandora &pandora, const pandora::VertexList *const pVertexList,
-        const std::string &name, const Color color);
+    static void VisualizeVertices(
+        const pandora::Pandora &pandora, const pandora::VertexList *const pVertexList, const std::string &name, const Color color);
 
     /**
      *  @brief  Add marker to visualization
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  pMarkerPoint address of the marker point
      *  @param  name of the marker
@@ -254,7 +255,7 @@ public:
 
     /**
      *  @brief  Add line to visualization
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  pStartPoint address of the line start point
      *  @param  pEndPoint address of the line end point
@@ -269,7 +270,7 @@ public:
 
     /**
      *  @brief  Show the Eve Event-display and pause.
-     * 
+     *
      *  @param  pandora the calling pandora instance
      */
     static void ViewEvent(const pandora::Pandora &pandora);
@@ -277,7 +278,7 @@ public:
     /**
      *  @brief  Show the Eve Event-display and pause.
      *          Whilst paused, save the event displays.
-     * 
+     *
      *  @param  pandora the calling pandora instance
      *  @param  savePath Path to save event display in.
      */
@@ -285,21 +286,21 @@ public:
 
     /**
      *  @brief  Pause thread until user enters 'return'
-     * 
+     *
      *  @param  pandora the calling pandora instance
      */
     static void Pause(const pandora::Pandora &pandora);
 
     /**
      *  @brief  Create monitoring instance, with its associated ROOT TApplication
-     * 
+     *
      *  @param  pandora the calling pandora instance
      */
     static void Create(const pandora::Pandora &pandora);
 
     /**
      *  @brief  Delete monitoring instance, terminating its associated ROOT TApplication (unless it is in use by another instance)
-     * 
+     *
      *  @param  pandora the calling pandora instance
      */
     static void Delete(const pandora::Pandora &pandora);

@@ -1,8 +1,8 @@
 /**
  *  @file   PandoraMonitoring/src/PandoraMonitoring.cc
- * 
+ *
  *  @brief  Implementation of the pandora monitoring class.
- * 
+ *
  *  $Log: $
  */
 
@@ -371,9 +371,11 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
         const float outerRadius(pPandoraMCParticle->GetOuterRadius());
 
         std::stringstream sstr, sstrName;
-        sstr << starter << "MC particle" << "\nPDG=" << particleId << "\np=" << momentum.GetMagnitude() << "\nE=" << energy
-             << "\nCharge=" << charge << "\nr_inner=" << innerRadius << "\nr_outer=" << outerRadius;
-        sstrName << "MC" << "/PDG=" << particleId << "/p=" << momentum.GetMagnitude() << "/E=" << energy << "/Charge=" << charge
+        sstr << starter << "MC particle"
+             << "\nPDG=" << particleId << "\np=" << momentum.GetMagnitude() << "\nE=" << energy << "\nCharge=" << charge
+             << "\nr_inner=" << innerRadius << "\nr_outer=" << outerRadius;
+        sstrName << "MC"
+                 << "/PDG=" << particleId << "/p=" << momentum.GetMagnitude() << "/E=" << energy << "/Charge=" << charge
                  << "/r_inner=" << innerRadius << "/r_outer=" << outerRadius;
 
         // Add info on parent particle
@@ -475,8 +477,10 @@ TEveElement *PandoraMonitoring::VisualizeTracks(const TrackList *const pTrackLis
         const Color trackColor((color < AUTO) ? color : (charge == 0) ? AZURE : (charge > 0) ? RED : GREEN);
 
         std::stringstream sstr, sstrName;
-        sstr << starter << "Track" << "\np=" << momentum.GetMagnitude() << "\nCharge=" << charge << "\nPDG=" << pPandoraTrack->GetParticleId();
-        sstrName << "Track" << "/p=" << momentum.GetMagnitude() << "/Charge=" << charge << "/PDG=" << pPandoraTrack->GetParticleId();
+        sstr << starter << "Track"
+             << "\np=" << momentum.GetMagnitude() << "\nCharge=" << charge << "\nPDG=" << pPandoraTrack->GetParticleId();
+        sstrName << "Track"
+                 << "/p=" << momentum.GetMagnitude() << "/Charge=" << charge << "/PDG=" << pPandoraTrack->GetParticleId();
 
         try
         {
@@ -684,10 +688,10 @@ TEveElement *PandoraMonitoring::VisualizeCaloHits(const CaloHitList *const pCalo
     }
 
     std::stringstream sstr, sstrName;
-    sstr << starter << "CaloHits" << "\nEem=" << energySumElectromagnetic << "\nEhad=" << energySumHadronic << "\nInnerLayer=" << firstLayer
-         << "\nOuterLayer=" << lastLayer;
-    sstrName << "CaloHits" << "/Eem=" << energySumElectromagnetic << "/Ehad=" << energySumHadronic << "/InnerLayer=" << firstLayer
-             << "/OuterLayer=" << lastLayer;
+    sstr << starter << "CaloHits"
+         << "\nEem=" << energySumElectromagnetic << "\nEhad=" << energySumHadronic << "\nInnerLayer=" << firstLayer << "\nOuterLayer=" << lastLayer;
+    sstrName << "CaloHits"
+             << "/Eem=" << energySumElectromagnetic << "/Ehad=" << energySumHadronic << "/InnerLayer=" << firstLayer << "/OuterLayer=" << lastLayer;
 
     for (PandoraMonitoringApi::PdgCodeToEnergyMap::const_iterator iter = pdgCodeToEnergyMap.begin(), iterEnd = pdgCodeToEnergyMap.end();
          iter != iterEnd; ++iter)
@@ -819,8 +823,10 @@ TEveElement *PandoraMonitoring::VisualizeParticleFlowObjects(const PfoList *cons
             continue;
 
         std::stringstream sstr, sstrName;
-        sstr << starter << "PFO" << "\nE=" << pPfo->GetEnergy() << "\nm=" << pPfo->GetMass() << "\nPDG=" << pPfo->GetParticleId();
-        sstrName << "PFO" << "/E=" << pPfo->GetEnergy() << "/m=" << pPfo->GetMass() << "/PDG=" << pPfo->GetParticleId();
+        sstr << starter << "PFO"
+             << "\nE=" << pPfo->GetEnergy() << "\nm=" << pPfo->GetMass() << "\nPDG=" << pPfo->GetParticleId();
+        sstrName << "PFO"
+                 << "/E=" << pPfo->GetEnergy() << "/m=" << pPfo->GetMass() << "/PDG=" << pPfo->GetParticleId();
 
         TEveElement *pPfoElement = new TEveElementList();
         pPfoElement->SetElementNameTitle(sstrName.str().c_str(), sstrName.str().c_str());

@@ -26,7 +26,14 @@ class TGeoShape;
 class TGeoVolume;
 class TGeoMedium;
 
-namespace pandora { class CartesianVector; class LineGap; class BoxGap; class ConcentricGap; class Pandora; }
+namespace pandora
+{
+class CartesianVector;
+class LineGap;
+class BoxGap;
+class ConcentricGap;
+class Pandora;
+} // namespace pandora
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -41,21 +48,21 @@ class PandoraMonitoring
 public:
     /**
      *  @brief  Get the relevant pandora monitoring instance
-     * 
+     *
      *  @param  pandora the calling pandora instance
      */
     static PandoraMonitoring *GetInstance(const pandora::Pandora &pandora);
 
     /**
      *  @brief Delete instance of PandoraMonitoring
-     * 
+     *
      *  @param  pandora the calling pandora instance
      */
     static void DeleteInstance(const pandora::Pandora &pandora);
 
     /**
      *  @brief  Set a variable in a tree (create the tree and the branch if not yet existing)
-     * 
+     *
      *  @param  treeName name of the tree (is created if it does not exist yet)
      *  @param  variableName name of the branch in the tree (the branch is created if it does not exist yet)
      *  @param  t sets value of the variable (permitted types are float/double/int and std::vector<float>*,std::vector<double>*,std::vector<int>*
@@ -65,21 +72,21 @@ public:
 
     /**
      *  @brief  Fill the tree with the variables which have been set before with SetTreeVariable
-     * 
+     *
      *  @param  treeName name of the tree to be filled
      */
     void FillTree(const std::string &treeName);
 
     /**
      *  @brief  Print the tree
-     * 
+     *
      *  @param  treeName name of the tree to be printed
      */
     void PrintTree(const std::string &treeName);
 
     /**
      *  @brief  Scan the tree (print the values of all branches)
-     * 
+     *
      *  @param  treeName name of the tree to be scanned
      */
     void ScanTree(const std::string &treeName);
@@ -88,14 +95,14 @@ public:
      *  @brief  Save the tree to a file
      *  @param  fileName the file name under which to save the histogram
      *  @param  fileOptions the options associated with opening/recreating a file
-     * 
+     *
      *  @param  treeName name of the tree to be written to a file
      */
     void SaveTree(const std::string &treeName, const std::string &fileName, const std::string &fileOptions);
 
     /**
      *  @brief  Draw a pandora histogram
-     * 
+     *
      *  @param  name the name associated with the histogram
      *  @param  options the drawing options
      */
@@ -104,14 +111,14 @@ public:
 
     /**
      *  @brief  Set the name of the next TEve display
-     * 
+     *
      *  @param  name the display name for the next Eve
      */
     void SetNextEveDisplayName(const std::string &name);
 
     /**
      *  @brief  Set TEve display parameters
-     * 
+     *
      *  @param  showDetectors turns the visibility of the detector geometry on or off
      *  @param  detectorView the detector view
      *  @param  transparencyThresholdE cell energy for which transparency is saturated (0%, fully opaque)
@@ -123,7 +130,7 @@ public:
 
     /**
      *  @brief  Add MC particles to the Eve event-display
-     * 
+     *
      *  @param  pMCParticleList list of tracks to be added to the event display
      *  @param  name of the MC particle list
      *  @param  parent pointer to the parent TEveElement. If NULL, the track will be parent element
@@ -137,7 +144,7 @@ public:
 
     /**
      *  @brief  Add Tracks to the Eve event-display
-     * 
+     *
      *  @param  pTrackList list of tracks to be added to the event display
      *  @param  name of the track list
      *  @param  parent pointer to the parent TEveElement. If NULL, the track will be parent element
@@ -145,12 +152,11 @@ public:
      *
      *  @return pointer to created TEveElement
      */
-    TEveElement *VisualizeTracks(const pandora::TrackList *const pTrackList, const std::string &name, TEveElement *parent,
-        const Color color);
+    TEveElement *VisualizeTracks(const pandora::TrackList *const pTrackList, const std::string &name, TEveElement *parent, const Color color);
 
     /**
      *  @brief  Add CaloHits to the Eve event-display
-     * 
+     *
      *  @param  pCaloHitList list of calohits to be added to the event display
      *  @param  parent name of the calohitlist
      *  @param  parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
@@ -158,12 +164,11 @@ public:
      *
      *  @return pointer to created TEveElement
      */
-    TEveElement *VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, const std::string &name, TEveElement *parent,
-        const Color color);
+    TEveElement *VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, const std::string &name, TEveElement *parent, const Color color);
 
     /**
      *  @brief  Add Clusters to the Eve event-display
-     * 
+     *
      *  @param  pClusterList list of clusters to be added to the event display
      *  @param  name of the cluster list
      *  @param  parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
@@ -177,7 +182,7 @@ public:
 
     /**
      *  @brief  Add Particle flow objects to the Eve event-display
-     * 
+     *
      *  @param  pPfoList list of particle flow objects to be added to the event display
      *  @param  name of the pfo list
      *  @param  parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
@@ -191,7 +196,7 @@ public:
 
     /**
      *  @brief  Add vertices to the Eve event-display
-     * 
+     *
      *  @param  pVertexList list of vertices to be added to the event display
      *  @param  parent name of the vertexlist
      *  @param  parent pointer to the parent TEveElement. If NULL, the vertex will be parent element
@@ -199,12 +204,11 @@ public:
      *
      *  @return pointer to created TEveElement
      */
-    TEveElement *VisualizeVertices(const pandora::VertexList *const pVertexList, const std::string &name, TEveElement *parent,
-        const Color color);
+    TEveElement *VisualizeVertices(const pandora::VertexList *const pVertexList, const std::string &name, TEveElement *parent, const Color color);
 
     /**
      *  @brief  Add marker to visualization
-     * 
+     *
      *  @param  pMarkerPoint address of the marker point
      *  @param  name of the marker
      *  @param  parent pointer to the parent TEveElement. If NULL, the marker will be parent element
@@ -216,7 +220,7 @@ public:
 
     /**
      *  @brief  Add line to visualization
-     * 
+     *
      *  @param  pStartPoint, pEndPoint address start and end of line
      *  @param  name of the line
      *  @param  parent pointer to the parent TEveElement. If NULL, the marker will be parent element
@@ -246,7 +250,7 @@ public:
 
     /**
      *  @brief  Sort clusters by descending hadronic energy
-     * 
+     *
      *  @param  pLhs address of first cluster
      *  @param  pRhs address of second cluster
      */
@@ -254,7 +258,7 @@ public:
 
     /**
      *  @brief  Sort MCParticles by descending energy
-     * 
+     *
      *  @param  pLhs address of first MCParticle
      *  @param  pRhs address of second MCParticle
      */
@@ -262,15 +266,15 @@ public:
 
     /**
      *  @brief  Sort tracks by descending momentum
-     * 
+     *
      *  @param  pLhs address of first track
      *  @param  pRhs address of second track
      */
     static bool SortTracksByMomentum(const pandora::Track *const pLhs, const pandora::Track *const pRhs);
 
     /**
-     *  @brief  Sort pfos by descending energy 
-     * 
+     *  @brief  Sort pfos by descending energy
+     *
      *  @param  pLhs address of first pfo
      *  @param  pRhs address of second pfo
      */
@@ -279,7 +283,7 @@ public:
 private:
     /**
      *  @brief  Default constructor
-     * 
+     *
      *  @param  pandora the associated pandora instance
      */
     PandoraMonitoring(const pandora::Pandora &pandora);
@@ -291,17 +295,17 @@ private:
 
     /**
      *  @brief  Computes the corners of a box in 3D
-     * 
+     *
      *  @param  pCaloHit address of the calo hit
      *  @param  corners will be filled with the x,y and z-coordinates of all 8 corners of the box
      */
     void MakeCaloHitCell(const pandora::CaloHit *const pCaloHit, float corners[24]);
 
-    typedef std::vector< std::pair<double, double> > DoublePairVector;
+    typedef std::vector<std::pair<double, double>> DoublePairVector;
 
     /**
      *  @brief  Compute the polygon corners for the detector outline
-     * 
+     *
      *  @param  symmetryOrder is the number of polygon corners
      *  @param  closestDistanceToIp is the distance to the closest points on the polygon
      *  @param  phi0 reference angle where to start the polygon
@@ -312,7 +316,7 @@ private:
     /**
      *  @brief  Creates a "tube" volume with the given symmetry inside and outside. If a symmetryOrder <= 2 is chosen, a circle is
      *          used instead of a polygon
-     * 
+     *
      *  @param  name of the volume
      *  @param  innerSymmetryOrder symmetry order of the inner polygon (circle)
      *  @param  outerSymmetryOrder symmetry order of the outer polygon (circle)
@@ -329,7 +333,7 @@ private:
     /**
      *  @brief  Creates a extruded polygonal (or cylindrical) shape with the given symmetry. If a symmetryOrder <= 2 is chosen, a
      *          circle is used instead of a polygon
-     * 
+     *
      *  @param  symmetryOrder symmetry order of the polygon (circle if <=2)
      *  @param  closestDistanceToIp closest distance between IP and polygon (circle radius)
      *  @param  phi starting angle of the polygon
@@ -346,21 +350,21 @@ private:
 
     /**
      *  @brief  Transform a Pandora monitoring API color enum into a ROOT color enum
-     * 
+     *
      *  @param  color in Pandora monitoring API enum
      */
     EColor GetROOTColor(Color color) const;
 
     /**
      *  @brief  Get a color for a PDG code
-     * 
+     *
      *  @param  particleId pdgCode of the particle
      */
     Color GetColorForPdgCode(int particleId) const;
 
     /**
      *  @brief  Initialize eve elements
-     * 
+     *
      *  @param  transparency the transparency
      */
     void InitializeEve(Char_t transparency = 70);
@@ -373,8 +377,8 @@ private:
     /**
      *  @brief  Add event and geometry scences to a specifed view and specify camera and axis type for view
      *
-     *  @param  pTEveViewer viewer 
-     *  @param  pTEveEventScene event scene 
+     *  @param  pTEveViewer viewer
+     *  @param  pTEveEventScene event scene
      *  @param  pTEveGeometryScene geometry scene
      *  @param  camera orthogonal/perspective view choice
      *  @param  axisType for view
@@ -383,7 +387,7 @@ private:
 
     /**
      *  @brief  Initialize subdetector eve elements
-     * 
+     *
      *  @param  pMainDetectorVolume address of the main detector volume
      *  @param  pSubDetectorMedium address of the medium to be used for the subdetectors
      *  @param  transparency the transparency
@@ -392,7 +396,7 @@ private:
 
     /**
      *  @brief  Initialize subdetector eve elements
-     * 
+     *
      *  @param  pMainDetectorVolume address of the main detector volume
      *  @param  pSubDetectorMedium address of the medium to be used for the subdetectors
      *  @param  transparency the transparency
@@ -401,7 +405,7 @@ private:
 
     /**
      *  @brief  Initialize detector gap eve elements
-     * 
+     *
      *  @param  pMainDetectorVolume address of the main detector volume
      *  @param  pSubDetectorMedium address of the medium to be used for the gaps
      *  @param  transparency the transparency
@@ -413,7 +417,7 @@ private:
      *
      *  @param  pLhs first object for comparison
      *  @param  pRhs second object for comparison
-     * 
+     *
      *  @return boolean
      */
     static bool SortLineGaps(const pandora::LineGap *const pLhs, const pandora::LineGap *const pRhs);
@@ -423,7 +427,7 @@ private:
      *
      *  @param  pLhs first object for comparison
      *  @param  pRhs second object for comparison
-     * 
+     *
      *  @return boolean
      */
     static bool SortBoxGaps(const pandora::BoxGap *const pLhs, const pandora::BoxGap *const pRhs);
@@ -433,57 +437,58 @@ private:
      *
      *  @param  pLhs first object for comparison
      *  @param  pRhs second object for comparison
-     * 
+     *
      *  @return boolean
      */
     static bool SortConcentricGaps(const pandora::ConcentricGap *const pLhs, const pandora::ConcentricGap *const pRhs);
 
-    typedef std::vector<const pandora::LineGap*> LineGapVector;
-    typedef std::vector<const pandora::BoxGap*> BoxGapVector;
-    typedef std::vector<const pandora::ConcentricGap*> ConcentricGapVector;
+    typedef std::vector<const pandora::LineGap *> LineGapVector;
+    typedef std::vector<const pandora::BoxGap *> BoxGapVector;
+    typedef std::vector<const pandora::ConcentricGap *> ConcentricGapVector;
 
-    typedef std::unordered_map<const pandora::Pandora*, PandoraMonitoring*> MonitoringInstanceMap;
-    static MonitoringInstanceMap    m_monitoringInstanceMap;    ///< The monitoring instance map
+    typedef std::unordered_map<const pandora::Pandora *, PandoraMonitoring *> MonitoringInstanceMap;
+    static MonitoringInstanceMap m_monitoringInstanceMap; ///< The monitoring instance map
 
-    const pandora::Pandora *const   m_pPandora;                 ///< The associated pandora instance
-    TApplication                   *m_pApplication;             ///< The root application
-    TEveManager                    *m_pEveManager;              ///< The eve manager
-    TTreeWrapper                   *m_pTreeWrapper;             ///< wrapper around TTree functionality
+    const pandora::Pandora *const m_pPandora; ///< The associated pandora instance
+    TApplication *m_pApplication;             ///< The root application
+    TEveManager *m_pEveManager;               ///< The eve manager
+    TTreeWrapper *m_pTreeWrapper;             ///< wrapper around TTree functionality
 
-    TEveViewer                     *m_p3DView;                  ///< Viewer for the 3D view
-    TEveViewer                     *m_p2DUView;                 ///< Viewer for the U 2D view
-    TEveViewer                     *m_p2DVView;                 ///< Viewer for the V 2D view
-    TEveViewer                     *m_p2DWView;                 ///< Viewer for the W 2D view
+    TEveViewer *m_p3DView;  ///< Viewer for the 3D view
+    TEveViewer *m_p2DUView; ///< Viewer for the U 2D view
+    TEveViewer *m_p2DVView; ///< Viewer for the V 2D view
+    TEveViewer *m_p2DWView; ///< Viewer for the W 2D view
 
-    TEveScene                      *m_p3DEventScene;            ///< Scene containing the 3D event
-    TEveScene                      *m_p2DUEventScene;           ///< Scene containing the U 2D event
-    TEveScene                      *m_p2DVEventScene;           ///< Scene containing the V 2D event
-    TEveScene                      *m_p2DWEventScene;           ///< Scene containing the W 2D event
+    TEveScene *m_p3DEventScene;  ///< Scene containing the 3D event
+    TEveScene *m_p2DUEventScene; ///< Scene containing the U 2D event
+    TEveScene *m_p2DVEventScene; ///< Scene containing the V 2D event
+    TEveScene *m_p2DWEventScene; ///< Scene containing the W 2D event
 
-    TEveScene                      *m_p3DGeometryScene;         ///< Scene containing the 3D geometry
-    TEveScene                      *m_p2DUGeometryScene;        ///< Scene containing the U 2D geometry
-    TEveScene                      *m_p2DVGeometryScene;        ///< Scene containing the V 2D geometry
-    TEveScene                      *m_p2DWGeometryScene;        ///< Scene containing the W 2D geometry
+    TEveScene *m_p3DGeometryScene;  ///< Scene containing the 3D geometry
+    TEveScene *m_p2DUGeometryScene; ///< Scene containing the U 2D geometry
+    TEveScene *m_p2DVGeometryScene; ///< Scene containing the V 2D geometry
+    TEveScene *m_p2DWGeometryScene; ///< Scene containing the W 2D geometry
 
-    float                           m_scalingFactor;            ///< TEve works with [cm], Pandora works with [mm]
-    bool                            m_openEveEvent;             ///< is set if an Event is open to store objects (hits, clusters,...) in it.
-    int                             m_eventDisplayCounter;      ///< counter for the event displays
-    std::string                     m_eventDisplayName;         ///< Display name for the next event display
-    double                          m_minXLArTPC;               ///< Minimum x position to which any LAr TPC in the event extends
-    double                          m_maxXLArTPC;               ///< Maximum x position to which any LAr TPC in the event extends
-    double                          m_minYLArTPC;               ///< Minimum y position to which any LAr TPC in the event extends
-    double                          m_maxYLArTPC;               ///< Maximum y position to which any LAr TPC in the event extends
-    double                          m_minZLArTPC;               ///< Minimum z position to which any LAr TPC in the event extends
-    double                          m_maxZLArTPC;               ///< Maximum z position to which any LAr TPC in the event extends
-    float                           m_transparencyThresholdE;   ///< Cell energy for which transparency is saturated (0%, fully opaque)
-    float                           m_energyScaleThresholdE;    ///< Cell energy for which color is at top end of continous color palette
-    bool                            m_showDetectors;            ///< Turns the visibility of the detector geometry on or off
-    DetectorView                    m_detectorView;             ///< The detector view
+    float m_scalingFactor;          ///< TEve works with [cm], Pandora works with [mm]
+    bool m_openEveEvent;            ///< is set if an Event is open to store objects (hits, clusters,...) in it.
+    int m_eventDisplayCounter;      ///< counter for the event displays
+    std::string m_eventDisplayName; ///< Display name for the next event display
+    double m_minXLArTPC;            ///< Minimum x position to which any LAr TPC in the event extends
+    double m_maxXLArTPC;            ///< Maximum x position to which any LAr TPC in the event extends
+    double m_minYLArTPC;            ///< Minimum y position to which any LAr TPC in the event extends
+    double m_maxYLArTPC;            ///< Maximum y position to which any LAr TPC in the event extends
+    double m_minZLArTPC;            ///< Minimum z position to which any LAr TPC in the event extends
+    double m_maxZLArTPC;            ///< Maximum z position to which any LAr TPC in the event extends
+    float m_transparencyThresholdE; ///< Cell energy for which transparency is saturated (0%, fully opaque)
+    float m_energyScaleThresholdE;  ///< Cell energy for which color is at top end of continous color palette
+    bool m_showDetectors;           ///< Turns the visibility of the detector geometry on or off
+    DetectorView m_detectorView;    ///< The detector view
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+// clang-format off
 // Specify (color, ROOT-color)
 #define COLOR_TABLE(d)                                                      \
     d(WHITE,           kWhite)                                              \
@@ -568,6 +573,7 @@ private:
  */
 #define GET_PDG_COLOR_SWITCH(a, b, c)                                       \
     case b : return c;
+// clang-format on
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -576,7 +582,8 @@ inline EColor PandoraMonitoring::GetROOTColor(Color color) const
     switch (color)
     {
         COLOR_TABLE(GET_ROOT_COLOR)
-        default : return kGray;
+        default:
+            return kGray;
     }
 }
 
@@ -587,7 +594,8 @@ inline Color PandoraMonitoring::GetColorForPdgCode(int particleId) const
     switch (particleId)
     {
         PARTICLE_DATA_COLOR_TABLE(GET_PDG_COLOR_SWITCH)
-        default : return GRAY;
+        default:
+            return GRAY;
     }
 }
 
