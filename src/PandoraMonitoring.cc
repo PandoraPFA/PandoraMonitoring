@@ -770,15 +770,15 @@ TEveElement *PandoraMonitoring::VisualizeClusters(
             continue;
 
         std::stringstream sstr;
-        sstr << starter << "Cluster\nEem(corr)=" << pCluster->GetElectromagneticEnergy() << "\nEhad(corr)=" << pCluster->GetHadronicEnergy()
-             << "\nNHits=" << pCluster->GetNCaloHits();
+        sstr << starter << "Cluster\nEem(corr)=" << pCluster->GetElectromagneticEnergy() << "\nEhad(corr)=" << pCluster->GetHadronicEnergy() <<
+            "\nNHits=" << pCluster->GetNCaloHits();
 
         try
         {
             // inner & outer hit types are not mandatory for pandora::Cluster constructors
             // and may throw STATUS_CODE_NOT_INITIALIZED if they're not set by the other pandora algorithms
-            sstr << "\nInnerHitType=" << this->GetHitTypeString(pCluster->GetInnerLayerHitType())
-                 << "\nOuterHitType=" << this->GetHitTypeString(pCluster->GetOuterLayerHitType());
+            sstr << "\nInnerHitType=" << this->GetHitTypeString(pCluster->GetInnerLayerHitType()) << "\nOuterHitType=" <<
+                this->GetHitTypeString(pCluster->GetOuterLayerHitType());
         }
         catch (StatusCodeException &)
         {
